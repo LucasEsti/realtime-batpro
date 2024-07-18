@@ -1,0 +1,17 @@
+{ 
+    "autoload": {
+        "psr-4": {
+            "MyApp\\": "src"
+                }
+        },
+        
+        "require": {
+            "phpmailer/phpmailer": "^6.2",
+            "cboden/ratchet": "^0.4.4",
+        "guzzlehttp/guzzle": "^7.8",
+        "firebase/php-jwt": "^6.10",
+        "react/event-loop": "^1.1",
+        "react/http": "^1.10",
+        "react/socket": "^1.15"
+        }
+}

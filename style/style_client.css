@@ -1,0 +1,18 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+.message {
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+}
+
+
+/* Style CSS pour les conteneurs de message */
+.message {
+    padding: 5px; /* Ajouter un peu de rembourrage pour l'apparence */
+    border-radius: 5px; /* Ajouter des coins arrondis */
+    background-color: #f0f0f0; /* Couleur de fond des messages */
+}
