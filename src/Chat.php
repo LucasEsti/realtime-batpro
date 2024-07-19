@@ -215,7 +215,10 @@ class MessageServer implements WebSocketMessageComponentInterface {
             $clientConnection = $this->getClientConnection($message['clientId']);
             if ($clientConnection !== null) {
                 $fileName = basename($message['fileName']);
-                $filePath = 'http://localhost/chat/wp-content/uploads/' . $fileName; // URL accessible depuis le client
+                
+                $upload_dir = wp_upload_dir();
+                $filePath = $upload_dir['baseurl'] . '/' . $fileName;
+//                $filePath = 'http://localhost/chat/wp-content/uploads/' . $fileName; // URL accessible depuis le client
                 
                 //le répertoire "uploads" existe et est accessible
                 $fullFilePath = 'C:/wamp64/www/chat/wp-content/uploads/' . $fileName;

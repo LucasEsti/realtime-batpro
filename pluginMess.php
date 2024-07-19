@@ -105,7 +105,7 @@ add_shortcode('admin_css_link', 'generate_admin_css_link');
 // Fonction pour générer le code HTML du lien vers le fichier CSS du client
 function generate_client_css_link() {
     // Chemin vers votre fichier CSS du client
-    $css_file = plugin_dir_url(__FILE__) . 'http://localhost/BatP/wp-content/plugins/Message/style/style_client.css';
+    $css_file = plugin_dir_url(__FILE__) . 'style/style_client.css';
     
     // Balise HTML pour inclure le fichier CSS
     return '<link rel="stylesheet" type="text/css" href="' . $css_file . '">';
