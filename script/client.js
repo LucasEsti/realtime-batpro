@@ -1,27 +1,27 @@
-// G√©n√©rer un identifiant unique pour le client
+// GÈnÈrer un identifiant unique pour le client
 const clientId = localStorage.getItem('clientId') || uuid.v4();
 localStorage.setItem('clientId', clientId); // Stocker l'identifiant dans le stockage local
 
 // Connecter au serveur WebSocket en envoyant l'identifiant unique
-const socket = new WebSocket('ws://localhost:8084?clientId=' + clientId);
+const socket = new WebSocket('wss://somalaval-ai.xnr.afb.mybluehost.me/wp-content/plugins/Message/server?clientId=' + clientId);
 
 socket.addEventListener('open', (event) => {
     console.log('WebSocket connection opened:', event);
 });
 
 
-// √âcouter les messages du serveur WebSocket
+// …couter les messages du serveur WebSocket
 socket.addEventListener('message', (event) => {
     const data = JSON.parse(event.data);
     const adminMessage = data.adminMessage;
     const messageType = data.type;
     const messageContent = data.content;
-    const filePath = data.filePath; // Ajout√© pour les fichiers
-    const fileName = data.fileName; // Ajout√© pour les fichiers
+    const filePath = data.filePath; // AjoutÈ pour les fichiers
+    const fileName = data.fileName; // AjoutÈ pour les fichiers
 
     const messageLog = document.getElementById('messageLog');
 
-    // V√©rifier si le message est un fichier et provient de l'administrateur
+    // VÈrifier si le message est un fichier et provient de l'administrateur
     if (messageType === 'file' && adminMessage) {
         const fileLink = document.createElement('a');
         fileLink.href = filePath;
@@ -29,7 +29,7 @@ socket.addEventListener('message', (event) => {
         fileLink.download = fileName;
         fileLink.target = '_blank'; // Ouvre le lien dans un nouvel onglet
 
-        // Cr√©er un div pour contenir le lien de t√©l√©chargement
+        // CrÈer un div pour contenir le lien de tÈlÈchargement
         const fileDiv = document.createElement('div');
         fileDiv.classList.add('message');
         fileDiv.setAttribute('data-source', 'client');
@@ -39,24 +39,24 @@ socket.addEventListener('message', (event) => {
         messageLog.appendChild(fileDiv);
     }
 
-    // V√©rifier le type du message pour les images
+    // VÈrifier le type du message pour les images
     else if (messageType === 'image') {
-        console.log("Received image content:", messageContent); // V√©rifiez le contenu de l'image dans la console
-        // Cr√©er un nouvel √©l√©ment img
+        console.log("Received image content:", messageContent); // VÈrifiez le contenu de l'image dans la console
+        // CrÈer un nouvel ÈlÈment img
         const imgElement = document.createElement('img');
-        // D√©finir l'attribut src avec les donn√©es de l'image base64
+        // DÈfinir l'attribut src avec les donnÈes de l'image base64
         imgElement.src = 'data:image/jpg;base64,' + messageContent;
-        // Ajouter l'√©l√©ment img au messageLog
+        // Ajouter l'ÈlÈment img au messageLog
         messageLog.appendChild(imgElement);
     }
 
-    // V√©rifier et afficher les messages de l'administrateur ou du client
+    // VÈrifier et afficher les messages de l'administrateur ou du client
     if (adminMessage) {
-        if (messageContent !== undefined) { // V√©rifie si messageContent n'est pas undefined
+        if (messageContent !== undefined) { // VÈrifie si messageContent n'est pas undefined
             messageLog.innerHTML += `<div data-source="client">${messageContent}</div>`;
         }
     } else {
-        if (messageContent !== undefined) { // V√©rifie si messageContent n'est pas undefined
+        if (messageContent !== undefined) { // VÈrifie si messageContent n'est pas undefined
             messageLog.innerHTML += `<div data-source="admin">${messageContent}</div>`;
         }
     }
@@ -64,14 +64,14 @@ socket.addEventListener('message', (event) => {
 
 
 socket.addEventListener('close', (event) => {
-    console.log('WebSocket connection ferm√©', event);
+    console.log('WebSocket connection fermÈ', event);
 });
 
 socket.addEventListener('error', (event) => {
     console.error('WebSocket error', event);
 });
 
-// Fonction pour r√©cup√©rer les messages sauvegard√©s dans le stockage local
+// Fonction pour rÈcupÈrer les messages sauvegardÈs dans le stockage local
 function getSavedMessages() {
     return JSON.parse(localStorage.getItem('savedMessages')) || [];
 }
@@ -84,23 +84,23 @@ function saveMessages(messages) {
 window.addEventListener('load', () => {
     const savedMessages = getSavedMessages();
     const messageLog = document.getElementById('messageLog');
-    messageLog.innerHTML = savedMessages.join(''); // Ajouter les messages sauvegard√©s au messageLog
+    messageLog.innerHTML = savedMessages.join(''); // Ajouter les messages sauvegardÈs au messageLog
 
-    // Restaurer le nom du client s'il est sauvegard√©
+    // Restaurer le nom du client s'il est sauvegardÈ
     userName = localStorage.getItem('userName');
 
-    // V√©rifier si la langue choisie par l'utilisateur est d√©j√† sauvegard√©e
+    // VÈrifier si la langue choisie par l'utilisateur est dÈj‡ sauvegardÈe
     const savedLanguage = localStorage.getItem('language');
     if (savedLanguage) {
-        // Si une langue est d√©j√† sauvegard√©e, passer directement √† l'√©tape suivante du chatbot
+        // Si une langue est dÈj‡ sauvegardÈe, passer directement ‡ l'Ètape suivante du chatbot
         chatbotState = ChatbotStates.AWAITING_ANSWER;
     } else {
-        // Si aucune langue n'est sauvegard√©e, demander au client de choisir une langue
+        // Si aucune langue n'est sauvegardÈe, demander au client de choisir une langue
         initialResponse();
     }
 });
 
-// √âtats possibles du chatbot
+// …tats possibles du chatbot
 const ChatbotStates = {
     INITIAL: 'INITIAL',
     AWAITING_LANGUAGE: 'AWAITING_LANGUAGE',
@@ -111,10 +111,10 @@ const ChatbotStates = {
     ADMIN_INTERACTION: 'ADMIN_INTERACTION'
 };
 
-// Variable pour suivre l'√©tat actuel du chatbot
+// Variable pour suivre l'Ètat actuel du chatbot
 let chatbotState = ChatbotStates.INITIAL;
 
-// Fonction pour g√©rer la r√©ponse du chatbot en fonction de l'√©tat actuel
+// Fonction pour gÈrer la rÈponse du chatbot en fonction de l'Ètat actuel
 function chatbotResponse(userMessage) {
     console.log(chatbotState);
     let response;
@@ -134,26 +134,26 @@ function chatbotResponse(userMessage) {
         case ChatbotStates.AWAITING_ANSWER:
             response = awaitingAnswerResponse(userMessage);
             break;
-        // Ajoutez d'autres √©tats au besoin
+        // Ajoutez d'autres Ètats au besoin
         // default:
-        //     response = "Je suis d√©sol√©, je ne comprends pas. Pouvez-vous reformuler ?";
+        //     response = "Je suis dÈsolÈ, je ne comprends pas. Pouvez-vous reformuler ?";
     }
     return response;
 }
 
-// Fonction pour g√©rer la r√©ponse initiale du chatbot
+// Fonction pour gÈrer la rÈponse initiale du chatbot
 function initialResponse(userMessage) {
-    chatbotState = ChatbotStates.AWAITING_LANGUAGE; // Mettre √† jour l'√©tat
+    chatbotState = ChatbotStates.AWAITING_LANGUAGE; // Mettre ‡ jour l'Ètat
     return "Veuillez choisir une langue : <br>" +
         "<button id='malagasyButton' onclick='sendMessage(\"Malagasy\", this)'>Malagasy</button>" +
-        "<button id='francaisButton' onclick='sendMessage(\"Fran√ßais\", this)'>Fran√ßais</button>";
+        "<button id='francaisButton' onclick='sendMessage(\"FranÁais\", this)'>FranÁais</button>";
 }
 
-// Fonction pour g√©rer la r√©ponse lors du choix de la langue
+// Fonction pour gÈrer la rÈponse lors du choix de la langue
 function awaitingLanguageResponse(userMessage) {
     const lowerCaseMessage = userMessage.toLowerCase();
-    if (lowerCaseMessage === "fran√ßais" ) {
-        // Si l'utilisateur a choisi une langue, passer √† l'√©tape de saisie de l'adresse e-mail
+    if (lowerCaseMessage === "franÁais" ) {
+        // Si l'utilisateur a choisi une langue, passer ‡ l'Ètape de saisie de l'adresse e-mail
         chatbotState = ChatbotStates.AWAITING_PRO_OR_PART_NAME;
         localStorage.setItem('language', 'fr'); //Sauvegarde de la langue choisi
         return "Veuillez choisir : <br>" +
@@ -167,31 +167,31 @@ function awaitingLanguageResponse(userMessage) {
             "<button id='niveau1' onclick='sendMessage(\"Olon-tsotra\", this)'>Olon-tsotra</button>";
     }
     else {
-        // Si l'utilisateur n'a pas choisi une langue valide, demander √† nouveau
+        // Si l'utilisateur n'a pas choisi une langue valide, demander ‡ nouveau
         return "Veuillez choisir une language: <br>" +
             "<button id='malagasyButton' onclick='sendMessage(\"Malagasy\", this)'>Malagasy</button>" +
-            "<button id='francaisButton' onclick='sendMessage(\"Fran√ßais\", this)'>Fran√ßais</button>";
+            "<button id='francaisButton' onclick='sendMessage(\"FranÁais\", this)'>FranÁais</button>";
     }
 }
 
-// Fonction pour v√©rifier l'adresse e-mail ou le num√©ro de t√©l√©phone
+// Fonction pour vÈrifier l'adresse e-mail ou le numÈro de tÈlÈphone
 function isValidEmailOrPhone(input) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^\+?[0-9\s\-]{10,}$/;
     return emailRegex.test(input) || phoneRegex.test(input);
 }
 
-//Fonction pour valider le nom (soci√©t√© || !soci√©t√©)
+//Fonction pour valider le nom (sociÈtÈ || !sociÈtÈ)
 function validateName(name) {
-    // V√©rifie si le nom est vide
+    // VÈrifie si le nom est vide
     if (!name || name.trim() === '') {
         return false;
     }
-    // Si toutes les validations sont pass√©es, retourne true
+    // Si toutes les validations sont passÈes, retourne true
     return true;
 }
 
-// Fonction pour g√©rer la r√©ponse lors de la saisie du nom ou nom de l'entreprise
+// Fonction pour gÈrer la rÈponse lors de la saisie du nom ou nom de l'entreprise
 function awaitingProOrPartNameResponse(userMessage) {
     const lowerCaseMessage = userMessage.toLowerCase();
     const language = localStorage.getItem('language');
@@ -213,7 +213,7 @@ function awaitingProOrPartNameResponse(userMessage) {
             return "Ampidiro ny anaranao :";
         }
     } else {
-        // Si l'utilisateur n'a pas choisi une option valide, demander √† nouveau
+        // Si l'utilisateur n'a pas choisi une option valide, demander ‡ nouveau
         if (language === 'fr') {
             return "Veuillez choisir une option valide : <br>" +
                 "<button id='niveau1' onclick='sendMessage(\"Professionnel\", this)'>Professionnel</button>" +
@@ -226,18 +226,18 @@ function awaitingProOrPartNameResponse(userMessage) {
     }
 }
 
-// Fonction pour g√©rer la r√©ponse apr√®s la saisie du nom ou nom de l'entreprise
+// Fonction pour gÈrer la rÈponse aprËs la saisie du nom ou nom de l'entreprise
 function handleProOrPartNameSubmission() {
     const language = localStorage.getItem('language');
     if (language === 'fr') {
         chatbotState = ChatbotStates.AWAITING_ANSWER;
-        return "Vos coordonn√©es sont bien re√ßues. <br><br>" +
+        return "Vos coordonnÈes sont bien reÁues. <br><br>" +
             "Veuillez choisir ce qui vous convient : <br>" +
             "<button id='niveau1' onclick='sendMessage(\"Je cherche un produit\", this)'>Je cherche un produit</button>" +
             "<button id='niveau1' onclick='sendMessage(\"Demander des renseignements\", this)'>Demander des renseignements</button>" +
             "<button id='niveau1' onclick='sendMessage(\"Demander un devis\", this)'>Demander un devis</button>" +
-            "<button id='niveau1' onclick='sendMessage(\"D√©tails sur un produit\", this)'>D√©tails sur un produit</button>" +
-            "<button id='niveau1' onclick='sendMessage(\"Service apr√®s vente\", this)'>Service apr√®s vente</button>" +
+            "<button id='niveau1' onclick='sendMessage(\"DÈtails sur un produit\", this)'>DÈtails sur un produit</button>" +
+            "<button id='niveau1' onclick='sendMessage(\"Service aprËs vente\", this)'>Service aprËs vente</button>" +
             "<button id='boutonAutre' onclick='sendMessage(\"Autres\", this)'>Autres</button>";
     } else {
         chatbotState = ChatbotStates.AWAITING_ANSWER;
@@ -252,7 +252,7 @@ function handleProOrPartNameSubmission() {
     }
 }
 
-// Messages pr√©d√©finis pour les demandes de lien ou de photo
+// Messages prÈdÈfinis pour les demandes de lien ou de photo
 const requestLinkOrPhotoMessageFr = "Veuillez envoyer le lien ou la photo du produit";
 const requestLinkOrPhotoMessageMg = "Mba alefaso ny rohy na sarin'ilay entana azafady";
 const requestAutreAideFr = "Bienvenue au service commercial de BATPRO. Comment pouvons-nous vous aider ?";
@@ -268,29 +268,29 @@ let detailsProd = false;
 let detailYesNo = false;
 
 function awaitingAnswerResponse(userMessage) {
-    // Convertir le message en minuscules pour une correspondance insensible √† la casse
+    // Convertir le message en minuscules pour une correspondance insensible ‡ la casse
     const lowerCaseMessage = userMessage.toLowerCase();
-    // Pour r√©cup√©rer la langue choisie par le client
+    // Pour rÈcupÈrer la langue choisie par le client
     const language = localStorage.getItem('language');
     let response = '';
     let responseSent = false;
 
-    // V√©rifier si une r√©ponse n'a pas d√©j√† √©t√© envoy√©e
+    // VÈrifier si une rÈponse n'a pas dÈj‡ ÈtÈ envoyÈe
     if (!responseSent) {
         // Si le chatbot attend un devis
         if (awaitingDevis) {
-            response = (language === 'fr') ? "En combien de quantit√© ?" : "Firy isa ?";
+            response = (language === 'fr') ? "En combien de quantitÈ ?" : "Firy isa ?";
             awaitingDevis = false;
             responseSent = true;
         } else if (awaitingLinkOrPhoto) {
-            response = (language === 'fr') ? "Afin de vous offrir un suivi personnalis√©, veuillez fournir votre contact (WhatsApp, email ou t√©l√©phone). Un responsable vous contactera dans les 15 minutes" : 
+            response = (language === 'fr') ? "Afin de vous offrir un suivi personnalisÈ, veuillez fournir votre contact (WhatsApp, email ou tÈlÈphone). Un responsable vous contactera dans les 15 minutes" : 
                 "Mba ahafahanay manara-maso anao manokana dia ataovy eto ny laharana finday na adresy mailaka anao. Hisy tompon'andraikitra hiantso anao afaka 15 minitra";
             awaitingLinkOrPhoto = false;
             responseSent = true;
         } else if (awaitingPayement) {
             response = (language === 'fr') ? "Quel est votre mode de paiement? <br><br>" +
-                "<button id='niveau1' onclick='sendMessage(\"Esp√®ce\", this)'>Esp√®ce</button>" +
-                "<button id='niveau1' onclick='sendMessage(\"Ch√®que\", this)'>Ch√®que</button>" +
+                "<button id='niveau1' onclick='sendMessage(\"EspËce\", this)'>EspËce</button>" +
+                "<button id='niveau1' onclick='sendMessage(\"ChËque\", this)'>ChËque</button>" +
                 "<button id='niveau1' onclick='sendMessage(\"Virement\", this)'>Virement</button>" +
                 "<button id='niveau1' onclick='sendMessage(\"Autres\", this)'>Autres</button>"
                 : "Inona no fomba fandoavanao vola? <br><br>" +
@@ -301,7 +301,7 @@ function awaitingAnswerResponse(userMessage) {
             awaitingPayement = false;
             responseSent = true;
         } else if (lieuLivraison) {
-            response = (language === 'fr') ? "Veuillez indiquer la date et le lieu de livraison souhait√©s" :
+            response = (language === 'fr') ? "Veuillez indiquer la date et le lieu de livraison souhaitÈs" :
                 "Daty sy toerana hanaterana azy azafady";
             lieuLivraison = false;
             responseSent = true;
@@ -318,7 +318,7 @@ function awaitingAnswerResponse(userMessage) {
             if (lowerCaseMessage === "oui" || lowerCaseMessage === "eny") {
                 response = (language === 'fr') ? "En quoi d'autre puis-je vous aider ?" : "Inona no mety mbola azo hanampiana anao?";
             } else if (lowerCaseMessage === "non" || lowerCaseMessage === "tsia") {
-                response = (language === 'fr') ? "Notre service commercial vous enverra un devis par e-mail sous peu. Merci de nous avoir contact√©. A bient√¥t !"
+                response = (language === 'fr') ? "Notre service commercial vous enverra un devis par e-mail sous peu. Merci de nous avoir contactÈ. A bientÙt !"
                     : "Alefan'ny sampana ara-barotra aminao amin'ny alalan'ny adresy mailaka ny vinavina. Misaotra anao nifandray taminay. Amin'ny manaraka indray !";
             }
             awaitingYesNoResponse = false;
@@ -347,40 +347,40 @@ function awaitingAnswerResponse(userMessage) {
         else if (lowerCaseMessage === "je cherche un produit" || lowerCaseMessage === "hitady entana") {
             response = (language === 'fr') ? "Quels produits?<br>" +
                 "<button id='outillageBouton' onclick='sendMessage(\"Outillage\", this)'>Outillage</button>" +
-                "<button id='m√©tallurgieBouton' onclick='sendMessage(\"M√©tallurgie\", this)'>M√©tallurgie</button>" +
-                "<button id='peintureBouton' onclick='sendMessage(\"Peinture & √©tanch√©it√©\", this)'>Peinture & √©tanch√©it√©</button>" +
-                "<button id='s√©curit√©Bouton' onclick='sendMessage(\"S√©curit√© incendie\", this)'>S√©curit√© incendie</button>" +
-                "<button id='travauxBouton' onclick='sendMessage(\"Travaux publics & g√©nie civil\", this)'>Travaux publics & g√©nie civil</button>" +
-                "<button id='√©quipementBouton' onclick='sendMessage(\"√âquipement √©lectrique & soudage\", this)'>√âquipement √©lectrique & soudage </button>"
+                "<button id='mÈtallurgieBouton' onclick='sendMessage(\"MÈtallurgie\", this)'>MÈtallurgie</button>" +
+                "<button id='peintureBouton' onclick='sendMessage(\"Peinture & ÈtanchÈitÈ\", this)'>Peinture & ÈtanchÈitÈ</button>" +
+                "<button id='sÈcuritÈBouton' onclick='sendMessage(\"SÈcuritÈ incendie\", this)'>SÈcuritÈ incendie</button>" +
+                "<button id='travauxBouton' onclick='sendMessage(\"Travaux publics & gÈnie civil\", this)'>Travaux publics & gÈnie civil</button>" +
+                "<button id='ÈquipementBouton' onclick='sendMessage(\"…quipement Èlectrique & soudage\", this)'>…quipement Èlectrique & soudage </button>"
                 : "Ireto avy ny entana afaka hanampiana anao :<br>" +
                 "<button id='outillageBouton' onclick='sendMessage(\"Fitaovana\", this)'>Fitaovana</button>" +
-                "<button id='m√©tallurgieBouton' onclick='sendMessage(\"Metaly\", this)'>Metaly</button>" +
-                "<button id='peintureBouton' onclick='sendMessage(\"Peinture & √©tanch√©it√©\", this)'>Loko sy √©tanch√©it√©</button>" +
-                "<button id='s√©curit√©Bouton' onclick='sendMessage(\"Fiarovana amin'ny afo\", this)'>Fiarovana amin'ny afo</button>" +
+                "<button id='mÈtallurgieBouton' onclick='sendMessage(\"Metaly\", this)'>Metaly</button>" +
+                "<button id='peintureBouton' onclick='sendMessage(\"Peinture & ÈtanchÈitÈ\", this)'>Loko sy ÈtanchÈitÈ</button>" +
+                "<button id='sÈcuritÈBouton' onclick='sendMessage(\"Fiarovana amin'ny afo\", this)'>Fiarovana amin'ny afo</button>" +
                 "<button id='travauxBouton' onclick='sendMessage(\"Asa vaventy & injeniera sivily\", this)'>Asa vaventy & injeniera sivily</button>" +
-                "<button id='√©quipementBouton' onclick='sendMessage(\"Fitaovana elektrika sy soudage\", this)'>Fitaovana elektrika sy soudage </button>";
+                "<button id='ÈquipementBouton' onclick='sendMessage(\"Fitaovana elektrika sy soudage\", this)'>Fitaovana elektrika sy soudage </button>";
             responseSent = true;
         } else if (lowerCaseMessage === "outillage" || lowerCaseMessage === "fitaovana") {
             response = (language === 'fr') ? requestLinkOrPhotoMessageFr : requestLinkOrPhotoMessageMg;
             awaitingLinkOrPhoto = true;
             responseSent = true;
-        } else if (lowerCaseMessage === "m√©tallurgie" || lowerCaseMessage === "metaly") {
+        } else if (lowerCaseMessage === "mÈtallurgie" || lowerCaseMessage === "metaly") {
             response = (language === 'fr') ? requestLinkOrPhotoMessageFr : requestLinkOrPhotoMessageMg;
             awaitingLinkOrPhoto = true;
             responseSent = true;
-        } else if (lowerCaseMessage === "peinture & √©tanch√©it√©" || lowerCaseMessage === "loko sy √©tanch√©it√©") {
+        } else if (lowerCaseMessage === "peinture & ÈtanchÈitÈ" || lowerCaseMessage === "loko sy ÈtanchÈitÈ") {
             response = (language === 'fr') ? requestLinkOrPhotoMessageFr : requestLinkOrPhotoMessageMg;
             awaitingLinkOrPhoto = true;
             responseSent = true;
-        } else if (lowerCaseMessage === "s√©curit√© incendie" || lowerCaseMessage === "fiarovana amin'ny afo") {
+        } else if (lowerCaseMessage === "sÈcuritÈ incendie" || lowerCaseMessage === "fiarovana amin'ny afo") {
             response = (language === 'fr') ? requestLinkOrPhotoMessageFr : requestLinkOrPhotoMessageMg;
             awaitingLinkOrPhoto = true;
             responseSent = true;
-        } else if (lowerCaseMessage === "travaux publics & g√©nie civil" || lowerCaseMessage === "asa vaventy & injeniera sivily") {
+        } else if (lowerCaseMessage === "travaux publics & gÈnie civil" || lowerCaseMessage === "asa vaventy & injeniera sivily") {
             response = (language === 'fr') ? requestLinkOrPhotoMessageFr : requestLinkOrPhotoMessageMg;
             awaitingLinkOrPhoto = true;
             responseSent = true;
-        } else if (lowerCaseMessage === "√©quipement √©lectrique & soudage" || lowerCaseMessage === "fitaovana elektrika sy soudage") {
+        } else if (lowerCaseMessage === "Èquipement Èlectrique & soudage" || lowerCaseMessage === "fitaovana elektrika sy soudage") {
             response = (language === 'fr') ? requestLinkOrPhotoMessageFr : requestLinkOrPhotoMessageMg;
             awaitingLinkOrPhoto = true;
             responseSent = true;
@@ -409,26 +409,26 @@ function awaitingAnswerResponse(userMessage) {
         } else if (lowerCaseMessage === "sav" || lowerCaseMessage === "sav") {
             response = (language === 'fr') ? requestLinkOrPhotoMessageFr : requestLinkOrPhotoMessageMg;
             awaitingLinkOrPhoto = true;
-            responseSent = true; // Marquer que la r√©ponse a √©t√© envoy√©e
+            responseSent = true; // Marquer que la rÈponse a ÈtÈ envoyÈe
         }  else if (lowerCaseMessage === "partenariat" || lowerCaseMessage === "fiaraha-miasa") {
             response = (language === 'fr') ? requestLinkOrPhotoMessageFr : requestLinkOrPhotoMessageMg;
             awaitingLinkOrPhoto = true;
-            responseSent = true; // Marquer que la r√©ponse a √©t√© envoy√©e
+            responseSent = true; // Marquer que la rÈponse a ÈtÈ envoyÈe
         } else if (lowerCaseMessage === "fournisseurs" || lowerCaseMessage === "mpamatsy") {
             response = (language === 'fr') ? requestLinkOrPhotoMessageFr : requestLinkOrPhotoMessageMg;
             awaitingLinkOrPhoto = true;
-            responseSent = true; // Marquer que la r√©ponse a √©t√© envoy√©e
+            responseSent = true; // Marquer que la rÈponse a ÈtÈ envoyÈe
         } else if (lowerCaseMessage === "recrutement" || lowerCaseMessage === "hitady asa") {
             response = (language === 'fr') ? requestLinkOrPhotoMessageFr : requestLinkOrPhotoMessageMg;
             awaitingLinkOrPhoto = true;
-            responseSent = true; // Marquer que la r√©ponse a √©t√© envoy√©e
+            responseSent = true; // Marquer que la rÈponse a ÈtÈ envoyÈe
         } else if (lowerCaseMessage === "contacter magasins" || lowerCaseMessage === "fifandraisana") {
             response = (language === 'fr') ? requestLinkOrPhotoMessageFr : requestLinkOrPhotoMessageMg;
             awaitingLinkOrPhoto = true;
-            responseSent = true; // Marquer que la r√©ponse a √©t√© envoy√©e
+            responseSent = true; // Marquer que la rÈponse a ÈtÈ envoyÈe
         } else if (lowerCaseMessage === "autres" || lowerCaseMessage === "hafa") {
             response = requestAutreAide;
-            responseSent = true; // Marquer que la r√©ponse a √©t√© envoy√©e
+            responseSent = true; // Marquer que la rÈponse a ÈtÈ envoyÈe
         }
     }
 
@@ -437,28 +437,28 @@ function awaitingAnswerResponse(userMessage) {
         response = (language === 'fr') ? requestLinkOrPhotoMessageFr : requestLinkOrPhotoMessageMg;
         awaitingDevis = true;
         awaitingPayement = true;
-        responseSent = true; // Marquer que la r√©ponse a √©t√© envoy√©e
+        responseSent = true; // Marquer que la rÈponse a ÈtÈ envoyÈe
         lieuLivraison = true;
         autreInfo = true;
         awaitingYesNoResponse = true;
     }
 
     //4
-    if (lowerCaseMessage === "d√©tails sur un produit" || lowerCaseMessage === "antsipirian'ny entana") {
+    if (lowerCaseMessage === "dÈtails sur un produit" || lowerCaseMessage === "antsipirian'ny entana") {
         response = (language === 'fr') ? requestLinkOrPhotoMessageFr : requestLinkOrPhotoMessageMg;
         detailsProd = true;
         detailYesNo= true;
-        responseSent = true; // Marquer que la r√©ponse a √©t√© envoy√©e
+        responseSent = true; // Marquer que la rÈponse a ÈtÈ envoyÈe
     }
 
     //5 
-    if (lowerCaseMessage === "service apr√®s vente" || lowerCaseMessage === "tolotra vita varotra") {
+    if (lowerCaseMessage === "service aprËs vente" || lowerCaseMessage === "tolotra vita varotra") {
         response = (language === 'fr') ? "" +
-            "<button id='savBouton' onclick='sendMessage(\"R√©clamation\", this)'>R√©clamation</button>" +
-            "<button id='partenariatBouton' onclick='sendMessage(\"R√©parer un produit\", this)'>R√©parer un produit</button>" +
-            "<button id='fournisseursBouton' onclick='sendMessage(\"Chercher des pi√®ces d√©tach√©es\", this)'>Chercher des pi√®ces d√©tach√©es</button>" +
+            "<button id='savBouton' onclick='sendMessage(\"RÈclamation\", this)'>RÈclamation</button>" +
+            "<button id='partenariatBouton' onclick='sendMessage(\"RÈparer un produit\", this)'>RÈparer un produit</button>" +
+            "<button id='fournisseursBouton' onclick='sendMessage(\"Chercher des piËces dÈtachÈes\", this)'>Chercher des piËces dÈtachÈes</button>" +
             "<button id='recrutementBouton' onclick='sendMessage(\"Garantie\", this)'>Garantie</button>" +
-            "<button id='contacterBouton' onclick='sendMessage(\"R√©cup√©rer un produit\", this)'>R√©cup√©rer un produit</button>" +
+            "<button id='contacterBouton' onclick='sendMessage(\"RÈcupÈrer un produit\", this)'>RÈcupÈrer un produit</button>" +
             "<button id='boutonAutre' onclick='sendMessage(\"Autres\", this)'>Autres</button>" 
             : "" +
             "<button id='savBouton' onclick='sendMessage(\"Fanitsiana\", this)'>Fanitsiana</button><br>" +
@@ -475,43 +475,43 @@ function awaitingAnswerResponse(userMessage) {
         response = (language === 'fr') ? requestAutreAideFr : requestAutreAideMg;
         responseSent = true;
     }
-    // Afficher la r√©ponse
+    // Afficher la rÈponse
     return response;
 }
 
 
-// Fonction pour envoyer le message √† l'admin
+// Fonction pour envoyer le message ‡ l'admin
 function sendMessage(message, button) {
     const userName = localStorage.getItem('userName');
     sendMessageToAdmin(message, userName);
-    button.disabled = true; // D√©sactiver le bouton apr√®s avoir envoy√© le message
+    button.disabled = true; // DÈsactiver le bouton aprËs avoir envoyÈ le message
 }
 
-// Fonction pour afficher √©galement le message du client dans la zone de discussion
+// Fonction pour afficher Ègalement le message du client dans la zone de discussion
 function sendMessageToAdmin(userMessage, name) {
     const data = {
         toAdmin: true,
         clientName: name,
-        content: userMessage // Envoyer le message de l'utilisateur √† l'administrateur
+        content: userMessage // Envoyer le message de l'utilisateur ‡ l'administrateur
     };
-    // Envoyer le message du client √† l'admin
+    // Envoyer le message du client ‡ l'admin
     socket.send(JSON.stringify(data));
-    // Obtenir la r√©ponse du chatbot en fonction du message de l'utilisateur
+    // Obtenir la rÈponse du chatbot en fonction du message de l'utilisateur
     const response = chatbotResponse(userMessage);
     // Afficher le message de l'utilisateur dans la zone de discussion
     const messageLog = document.getElementById('messageLog');
     messageLog.innerHTML += `<div data-source="admin">${userMessage}</div>`;
-    // Mettre √† jour le nom du client sur le titre h1
+    // Mettre ‡ jour le nom du client sur le titre h1
     document.getElementById('clientName').innerText = name;
-    // Si une r√©ponse du chatbot est disponible, l'ajouter au journal des messages
+    // Si une rÈponse du chatbot est disponible, l'ajouter au journal des messages
     if (response) {
-        // Cr√©er un objet de donn√©es pour la r√©ponse du chatbot
+        // CrÈer un objet de donnÈes pour la rÈponse du chatbot
         const responseData = {
             adminMessage: true,
             clientId: clientId,
-            content: response // Envoyer la r√©ponse du chatbot √† l'administrateur
+            content: response // Envoyer la rÈponse du chatbot ‡ l'administrateur
         };
-        // Envoyer la r√©ponse du chatbot au serveur
+        // Envoyer la rÈponse du chatbot au serveur
         socket.send(JSON.stringify(responseData));
     }
 }
@@ -544,18 +544,18 @@ function sendImage() {
         reader.readAsDataURL(file);
     }
 }
-// R√©cup√®re l'identifiant du client √† partir du DOM.
+// RÈcupËre l'identifiant du client ‡ partir du DOM.
 function getClientId() {
-    // Vous pouvez r√©cup√©rer cette valeur √† partir du DOM
+    // Vous pouvez rÈcupÈrer cette valeur ‡ partir du DOM
     const clientIdElement = document.getElementById('clientID');
     if (clientIdElement) {
-        return clientIdElement.textContent; // Renvoie le texte contenu dans l'√©l√©ment
+        return clientIdElement.textContent; // Renvoie le texte contenu dans l'ÈlÈment
     } else {
-        return ''; // Renvoie une cha√Æne vide si l'√©l√©ment n'est pas trouv√©
+        return ''; // Renvoie une chaÓne vide si l'ÈlÈment n'est pas trouvÈ
     }
 }
 
-// √âv√©nements pour le changement de fichier pour l'input d'image
+// …vÈnements pour le changement de fichier pour l'input d'image
 document.getElementById('ImageInput').addEventListener('change', (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -563,25 +563,25 @@ document.getElementById('ImageInput').addEventListener('change', (event) => {
     }
 });
 
-// Affichage du contenu du fichier s√©lectionn√© dans l'input de message
+// Affichage du contenu du fichier sÈlectionnÈ dans l'input de message
 function displayContent(file) {
     const messageInput = document.getElementById('messageInput');
     const reader = new FileReader();
     if (file.type.includes('image')) {
         reader.onload = function (e) {
-            messageInput.value = `<img src="${e.target.result}" alt="Image s√©lectionn√©e">`;
+            messageInput.value = `<img src="${e.target.result}" alt="Image sÈlectionnÈe">`;
         };
         reader.readAsDataURL(file);
     }
 }
 
-// R√©initialisation de l'input de message apr√®s l'envoi du message
+// RÈinitialisation de l'input de message aprËs l'envoi du message
 function resetMessageInput() {
     const messageInput = document.getElementById('messageInput');
     messageInput.value = '';
 }
 
-// D√©finition d'une fonction pour envoyer le message √† partir de l'entr√©e de message
+// DÈfinition d'une fonction pour envoyer le message ‡ partir de l'entrÈe de message
 function sendMessageFromInput() {
     const userMessage = messageInput.value.trim();
     if (userMessage) {
@@ -593,14 +593,14 @@ function sendMessageFromInput() {
 const messageInput = document.getElementById('messageInput');
 const sendMessageButton = document.getElementById('sendMessageButton');
 
-// Ajoutez un √©couteur d'√©v√©nements pour le clic sur le bouton d'envoi de messages
+// Ajoutez un Ècouteur d'ÈvÈnements pour le clic sur le bouton d'envoi de messages
 sendMessageButton.addEventListener('click', () => {
     sendMessageFromInput();
 });
 
-// Ajoutez un √©couteur d'√©v√©nements pour la pression de la touche Entr√©e dans l'entr√©e de message
+// Ajoutez un Ècouteur d'ÈvÈnements pour la pression de la touche EntrÈe dans l'entrÈe de message
 messageInput.addEventListener('keypress', (event) => {
-    // V√©rifiez si la touche press√©e est la touche Entr√©e (keyCode 13)
+    // VÈrifiez si la touche pressÈe est la touche EntrÈe (keyCode 13)
     if (event.keyCode === 13) {
         sendMessageFromInput();
     }

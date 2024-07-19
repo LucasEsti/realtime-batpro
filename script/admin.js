@@ -1,4 +1,4 @@
-const socket = new WebSocket('ws://localhost:8084');
+const socket = new WebSocket('wss://somalaval-ai.xnr.afb.mybluehost.me/wp-content/plugins/Message/server');
 
 socket.addEventListener('open', (event) => {
     console.log('WebSocket connection ouverte:', event);
