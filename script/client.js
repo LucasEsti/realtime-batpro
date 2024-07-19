@@ -3,7 +3,7 @@ const clientId = localStorage.getItem('clientId') || uuid.v4();
 localStorage.setItem('clientId', clientId); // Stocker l'identifiant dans le stockage local
 
 // Connecter au serveur WebSocket en envoyant l'identifiant unique
-const socket = new WebSocket('wss://somalaval-ai.xnr.afb.mybluehost.me/wp-content/plugins/Message/server?clientId=' + clientId);
+const socket = new WebSocket('wss://somalaval-ai.xnr.afb.mybluehost.me/wp-content/plugins/realtime-batpro/server?clientId=' + clientId);
 
 socket.addEventListener('open', (event) => {
     console.log('WebSocket connection opened:', event);

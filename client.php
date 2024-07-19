@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="<?php echo site_url('wp-content/plugins/Message/style/style_client.css'); ?>">
+    <link rel="stylesheet" href="<?php echo site_url('wp-content/plugins/realtime-batpro/style/style_client.css'); ?>">
     <title>LiveChat</title>
     <style>
         @keyframes scroll {
@@ -204,12 +204,12 @@
     <!-- Bulle de discussion -->
     <div class="bubble" id="bubble">
         <!-- Icône de la bulle de discussion -->
-        <img src="<?php echo site_url('/wp-content/plugins/Message/image/74-749108_download-png-ico-icns-facebook-messenger-round-icon-removebg-preview.png'); ?>" alt="Chat Bubble Icon">
+        <img src="<?php echo site_url('/wp-content/plugins/realtime-batpro/image/74-749108_download-png-ico-icns-facebook-messenger-round-icon-removebg-preview.png'); ?>" alt="Chat Bubble Icon">
     </div>
     <!-- Conteneur de chat -->
     <div class="container" id="container" style="display: none;">
         <div class="chat-header">
-        <img id="logo" src="<?php echo site_url('/wp-content/plugins/Message/image/logo-BATPRO_200x200pxl-removebg-preview.png'); ?>" alt="Rechercher">
+        <img id="logo" src="<?php echo site_url('/wp-content/plugins/realtime-batpro/image/logo-BATPRO_200x200pxl-removebg-preview.png'); ?>" alt="Rechercher">
             <h1 id="clientName"></h1>
         </div>
         <div class="message-log" id="messageLog">
@@ -218,7 +218,7 @@
         <div class="input-container">
             <input type="text" id="messageInput" placeholder="Entrez votre message...">
             <label for="ImageInput" class="image-icon">
-                <img src="<?php echo site_url('/wp-content/plugins/Message/image/image.png'); ?>" alt="Image">
+                <img src="<?php echo site_url('/wp-content/plugins/realtime-batpro/image/image.png'); ?>" alt="Image">
             </label>
             <input type="file" id="ImageInput" accept="image/*">
             <button id="sendMessageButton">Envoyer</button>

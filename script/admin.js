@@ -1,4 +1,4 @@
-const socket = new WebSocket('wss://somalaval-ai.xnr.afb.mybluehost.me/wp-content/plugins/Message/server');
+const socket = new WebSocket('wss://somalaval-ai.xnr.afb.mybluehost.me/wp-content/plugins/realtime-batpro/server');
 
 socket.addEventListener('open', (event) => {
     console.log('WebSocket connection ouverte:', event);
