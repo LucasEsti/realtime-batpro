@@ -255,7 +255,7 @@
 </head>
 <body>
     <div class="titre">
-    <img id="logo" src="<?php echo site_url('/wp-content/plugins/realtime-batpro/image/logo-BATPRO_200x200pxl-removebg-preview.png'); ?>" alt="Rechercher">
+    <img id="logo" src="<?php echo home_url('/wp-content/plugins/realtime-batpro/image/logo-BATPRO_200x200pxl-removebg-preview.png'); ?>" alt="Rechercher">
         <h2>Discussion avec les clients</h2>
     </div>
     
