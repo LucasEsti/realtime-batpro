@@ -19,9 +19,9 @@ class MessageServer implements WebSocketMessageComponentInterface {
     
     public function __construct() {
         // Connexion à la base de données
-        $dsn = 'mysql:host=localhost;dbname=bd_chatlive;charset=utf8';
-        $username = 'root';
-        $password = '';
+        $dsn = 'mysql:host=localhost;dbname=xnrafbmy_wp_obh0g;charset=utf8';
+        $username = 'xnrafbmy_wp_puq9i';
+        $password = 'lq79&Ypc_ni4Go!r';
         $this->pdo = new \PDO($dsn, $username, $password);
 
         $this->clients = new \SplObjectStorage();
