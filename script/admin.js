@@ -39,7 +39,12 @@ socket.addEventListener('message', (event) => {
     // Marquer les messages comme non lus lorsque de nouveaux messages arrivent
     markMessagesAsUnread(clientId);
     // Toujours marquer le dernier message comme non lu
-    existingItem.classList.add('unread');
+    if (existingItem) {
+        existingItem.classList.add('unread');
+    } else {
+        console.error('Element not found');
+}
+    
 });
 // Sélection de l'input de recherche
 const searchInput = document.getElementById('searchInput');
