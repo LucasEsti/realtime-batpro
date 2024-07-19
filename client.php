@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="<?php echo site_url('/chat/wp-content/plugins/Message/style/style_client.css'); ?>">
+    <link rel="stylesheet" href="<?php echo site_url('wp-content/plugins/Message/style/style_client.css'); ?>">
     <title>LiveChat</title>
     <style>
         @keyframes scroll {
