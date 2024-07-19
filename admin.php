@@ -1,8 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link rel="stylesheet" href="<?php echo home_url('wp-content/plugins/realtime-batpro/style/style_admin.css'); ?>">
     <style>
         h2 {
@@ -251,9 +247,6 @@
         }
         
     </style>
-    <title>LiveChat</title>
-</head>
-<body>
     <div class="titre">
     <img id="logo" src="<?php echo home_url('/wp-content/plugins/realtime-batpro/image/logo-BATPRO_200x200pxl-removebg-preview.png'); ?>" alt="Rechercher">
         <h2>Discussion avec les clients</h2>
@@ -343,5 +336,3 @@
             }
         });
     </script>
-</body>
-</html>
