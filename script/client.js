@@ -145,7 +145,7 @@ const botTrad = {
     fr: {
         "initial" : "Veuillez choisir une language: <br>" +
             "<button id='malagasyButton' onclick='sendMessage(\"Malagasy\", this)'>Malagasy</button>" +
-            "<button id='francaisButton' onclick='sendMessage(\"Fran�ais\", this)'>Fran�ais</button>",
+            "<button id='francaisButton' onclick='sendMessage(\"Français\", this)'>Français</button>",
         "situation": "Veuillez choisir : <br>" +
             "<button id='niveau1' onclick='sendMessage(\"Professionnel\", this)'>Professionnel</button>" +
             "<button id='niveau1' onclick='sendMessage(\"Particulier\", this)'>Particulier</button>",
@@ -156,8 +156,8 @@ const botTrad = {
             "<button id='niveau1' onclick='sendMessage(\"Je cherche un produit\", this)'>Je cherche un produit</button>" +
             "<button id='niveau1' onclick='sendMessage(\"Demander des renseignements\", this)'>Demander des renseignements</button>" +
             "<button id='niveau1' onclick='sendMessage(\"Demander un devis\", this)'>Demander un devis</button>" +
-            "<button id='niveau1' onclick='sendMessage(\"D�tails sur un produit\", this)'>D�tails sur un produit</button>" +
-            "<button id='niveau1' onclick='sendMessage(\"Service apr�s vente\", this)'>Service apr�s vente</button>" +
+            "<button id='niveau1' onclick='sendMessage(\"détails sur un produit\", this)'>détails sur un produit</button>" +
+            "<button id='niveau1' onclick='sendMessage(\"Service après vente\", this)'>Service après vente</button>" +
             "<button id='boutonAutre' onclick='sendMessage(\"Autres\", this)'>Autres</button>",
         "quantite": "En combien de quantité ?", 
         "fin": "Afin de vous offrir un suivi personnalisé, veuillez fournir votre contact (WhatsApp, email ou t�l�phone). Un responsable vous contactera dans les 15 minutes",
@@ -178,11 +178,11 @@ const botTrad = {
         "informations": "Quelles informations voudriez-vous avoir ?",
         "produits": "Quels produits?<br>" +
                 "<button id='outillageBouton' onclick='sendMessage(\"Outillage\", this)'>Outillage</button>" +
-                "<button id='m�tallurgieBouton' onclick='sendMessage(\"M�tallurgie\", this)'>M�tallurgie</button>" +
-                "<button id='peintureBouton' onclick='sendMessage(\"Peinture & �tanch�it�\", this)'>Peinture & �tanch�it�</button>" +
-                "<button id='s�curit�Bouton' onclick='sendMessage(\"S�curit� incendie\", this)'>S�curit� incendie</button>" +
-                "<button id='travauxBouton' onclick='sendMessage(\"Travaux publics & g�nie civil\", this)'>Travaux publics & g�nie civil</button>" +
-                "<button id='�quipementBouton' onclick='sendMessage(\"�quipement �lectrique & soudage\", this)'>�quipement �lectrique & soudage </button>",
+                "<button id='métallurgieBouton' onclick='sendMessage(\"métallurgie\", this)'>Métallurgie</button>" +
+                "<button id='peintureBouton' onclick='sendMessage(\"Peinture & étanchéité\", this)'>Peinture & étanchéité</button>" +
+                "<button id='sécuritéBouton' onclick='sendMessage(\"sécurité incendie\", this)'>sécurité incendie</button>" +
+                "<button id='travauxBouton' onclick='sendMessage(\"Travaux publics & génie civil\", this)'>Travaux publics & génie civil</button>" +
+                "<button id='équipementBouton' onclick='sendMessage(\"équipement électrique & soudage\", this)'>équipement électrique & soudage </button>",
         "renseignements": "Quels renseignements?<br>"+
                 "<button id='savBouton' onclick='sendMessage(\"SAV\", this)'>SAV</button>" +
                 "<button id='partenariatBouton' onclick='sendMessage(\"Partenariat\", this)'>Partenariat</button>" +
@@ -233,9 +233,9 @@ const botTrad = {
         "informations": "Inona ny fanampim-panazavana mbola tinao ho fantatra ?",
         "produits": "Ireto avy ny entana afaka hanampiana anao :<br>" +
                 "<button id='outillageBouton' onclick='sendMessage(\"Fitaovana\", this)'>Fitaovana</button>" +
-                "<button id='m�tallurgieBouton' onclick='sendMessage(\"Metaly\", this)'>Metaly</button>" +
-                "<button id='peintureBouton' onclick='sendMessage(\"Peinture & �tanch�it�\", this)'>Loko sy �tanch�it�</button>" +
-                "<button id='s�curit�Bouton' onclick='sendMessage(\"Fiarovana amin'ny afo\", this)'>Fiarovana amin'ny afo</button>" +
+                "<button id='métallurgieBouton' onclick='sendMessage(\"Metaly\", this)'>Metaly</button>" +
+                "<button id='peintureBouton' onclick='sendMessage(\"Peinture & étanchéité\", this)'>Loko sy étanchéité</button>" +
+                "<button id='sécuritéBouton' onclick='sendMessage(\"Fiarovana amin'ny afo\", this)'>Fiarovana amin'ny afo</button>" +
                 "<button id='travauxBouton' onclick='sendMessage(\"Asa vaventy & injeniera sivily\", this)'>Asa vaventy & injeniera sivily</button>" +
                 "<button id='�quipementBouton' onclick='sendMessage(\"Fitaovana elektrika sy soudage\", this)'>Fitaovana elektrika sy soudage </button>",
         "renseignements": "Inona no hilanao fanazavana?<br>"+
@@ -256,6 +256,49 @@ const botTrad = {
         "bienvenu": "Tongasoa eto amin'ny sampana varotry ny BATPRO. Inona no azo hanampiana anao ?",
     }
 };
+const nextStep = {
+    "je cherche un produit": "produits",
+    "hitady entana": "produits",
+    
+    "outillage": "link",
+    "fitaovana": "link", 
+    "métallurgie": "link",
+    "metaly": "link",
+    "peinture & étanchéité": "link",
+    "loko sy étanchéité": "link",
+    "sécurité incendie": "link",
+    "fiarovana amin'ny afo": "link",
+    "travaux publics & génie civil": "link",
+    "asa vaventy & injeniera sivily": "link",
+    "équipement électrique & soudage": "link",
+    "fitaovana elektrika sy soudage": "link",
+    
+    
+    "autres": "bienvenu",
+    "hafa": "bienvenu",
+    
+    "demander des renseignements": "renseignements",
+    "hanontany fanazavana": "renseignements",
+    "sav": "link",
+    "partenariat": "link",
+    "fiaraha-miasa": "link",
+    "fournisseurs": "link",
+    "mpamatsy": "link",
+    "recrutement": "link",
+    "hitady asa": "link",
+    "contacter magasins": "link",
+    "fifandraisana": "link",
+    
+    "demander un devis": "link",
+    "hanontany vinavina": "link",
+    "détails sur un produit": "link",
+    "antsipirian'ny entana": "link",
+    "service après vente": "sav",
+    "tolotra vita varotra": "sav",
+};
+
+const linkOrPhotoMessages = ["outillage", "fitaovana", "métallurgie", "metaly", "équipement électrique & soudage", "fitaovana elektrika sy soudage"];
+const yesNoResponseMessages = ["autres", "hafa"];
 
 
 function traduire(mot, langue) {
@@ -273,7 +316,7 @@ function initialResponse(userMessage) {
 // Fonction pour g�rer la r�ponse lors du choix de la langue
 function awaitingLanguageResponse(userMessage) {
     const lowerCaseMessage = userMessage.toLowerCase();
-    if (lowerCaseMessage === "fran�ais" ) {
+    if (lowerCaseMessage === "Français" ) {
         // Si l'utilisateur a choisi une langue, passer � l'�tape de saisie de l'adresse e-mail
         chatbotState = ChatbotStates.AWAITING_PRO_OR_PART_NAME;
         localStorage.setItem('language', 'fr'); //Sauvegarde de la langue choisi
@@ -316,41 +359,24 @@ function awaitingProOrPartNameResponse(userMessage) {
     if (lowerCaseMessage === "professionnel" || lowerCaseMessage === "mpiasa") {
         chatbotState = ChatbotStates.AWAITING_PROORPART_SUBMISSION;
         localStorage.setItem('userType', 'pro');
-        if (language === 'fr') {
-            return traduire("entreprise", "fr");
-        } else {
-            return traduire("entreprise", "mg");
-        }
+        return traduire("entreprise", language);
     } else if (lowerCaseMessage === "particulier" || lowerCaseMessage === "olon-tsotra") {
         chatbotState = ChatbotStates.AWAITING_PROORPART_SUBMISSION;
         localStorage.setItem('userType', 'particulier');
-        if (language === 'fr') {
-            return traduire("nom", "fr");
-        } else {
-            return traduire("nom", "mg");
-        }
+        return traduire("nom", language);
     } else {
+        return traduire("situation", language);
         // Si l'utilisateur n'a pas choisi une option valide, demander � nouveau
-        if (language === 'fr') {
-            return traduire("situation", "fr");
-        } else {
-            return traduire("situation", "mg");
-        }
     }
 }
 
 
 
-// Fonction pour g�rer la r�ponse apr�s la saisie du nom ou nom de l'entreprise
+// Fonction pour g�rer la r�ponse après la saisie du nom ou nom de l'entreprise
 function handleProOrPartNameSubmission() {
     const language = localStorage.getItem('language');
-    if (language === 'fr') {
-        chatbotState = ChatbotStates.AWAITING_ANSWER;
-        return traduire("recherche", "fr");
-    } else {
-        chatbotState = ChatbotStates.AWAITING_ANSWER;
-        return traduire("recherche", "mg");
-    }
+    chatbotState = ChatbotStates.AWAITING_ANSWER;
+    return traduire("recherche", language);
 }
 
 let awaitingDevis = false;
@@ -386,7 +412,7 @@ function awaitingAnswerResponse(userMessage) {
             awaitingPayement = false;
             responseSent = true;
         } else if (lieuLivraison) {
-            rresponse = traduire("livraison", language);
+            response = traduire("livraison", language);
             lieuLivraison = false;
             responseSent = true;
         } else if (autreInfo) {
@@ -416,65 +442,18 @@ function awaitingAnswerResponse(userMessage) {
         }
 
         //1
-        else if (lowerCaseMessage === "je cherche un produit" || lowerCaseMessage === "hitady entana") {
-            response = traduire("produits", language);
+        else {
+            response = traduire(nextStep[lowerCaseMessage], language);
             responseSent = true;
-        } else if (lowerCaseMessage === "outillage" || lowerCaseMessage === "fitaovana") {
-            response = traduire("link", language);
-            awaitingLinkOrPhoto = true;
-            responseSent = true;
-        } else if (lowerCaseMessage === "m�tallurgie" || lowerCaseMessage === "metaly") {
-            response = traduire("link", language);
-            awaitingLinkOrPhoto = true;
-            responseSent = true;
-        } else if (lowerCaseMessage === "peinture & �tanch�it�" || lowerCaseMessage === "loko sy �tanch�it�") {
-            response = traduire("link", language);
-            responseSent = true;
-        } else if (lowerCaseMessage === "s�curit� incendie" || lowerCaseMessage === "fiarovana amin'ny afo") {
-            response = traduire("link", language);
-            awaitingLinkOrPhoto = true;
-            responseSent = true;
-        } else if (lowerCaseMessage === "travaux publics & g�nie civil" || lowerCaseMessage === "asa vaventy & injeniera sivily") {
-            response = traduire("link", language);
-            awaitingLinkOrPhoto = true;
-            responseSent = true;
-        } else if (lowerCaseMessage === "�quipement �lectrique & soudage" || lowerCaseMessage === "fitaovana elektrika sy soudage") {
-            response = traduire("link", language);
-            awaitingLinkOrPhoto = true;
-            responseSent = true;
-        } else if (lowerCaseMessage === "autre" || lowerCaseMessage === "hafa") {
-            response = traduire("bienvenu", language);
-            awaitingYesNoResponse = true;
-            responseSent = true;
-        }
-
-        //2 
-        else if (lowerCaseMessage === "demander des renseignements" || lowerCaseMessage === "hanontany fanazavana") {
-            response = traduire("renseignements", language);
-        } else if (lowerCaseMessage === "sav" || lowerCaseMessage === "sav") {
-            response = traduire("link", language);
-            awaitingLinkOrPhoto = true;
-            responseSent = true; // Marquer que la r�ponse a �t� envoy�e
-        }  else if (lowerCaseMessage === "partenariat" || lowerCaseMessage === "fiaraha-miasa") {
-            response = traduire("link", language);
-            awaitingLinkOrPhoto = true;
-            responseSent = true; // Marquer que la r�ponse a �t� envoy�e
-        } else if (lowerCaseMessage === "fournisseurs" || lowerCaseMessage === "mpamatsy") {
-            response = traduire("link", language);
-            awaitingLinkOrPhoto = true;
-            responseSent = true; // Marquer que la r�ponse a �t� envoy�e
-        } else if (lowerCaseMessage === "recrutement" || lowerCaseMessage === "hitady asa") {
-            response = traduire("link", language);
-            awaitingLinkOrPhoto = true;
-            responseSent = true; // Marquer que la r�ponse a �t� envoy�e
-        } else if (lowerCaseMessage === "contacter magasins" || lowerCaseMessage === "fifandraisana") {
-            response = traduire("link", language);
-            awaitingLinkOrPhoto = true;
-            responseSent = true; // Marquer que la r�ponse a �t� envoy�e
-        } else if (lowerCaseMessage === "autres" || lowerCaseMessage === "hafa") {
-            response = requestAutreAide;
-            responseSent = true; // Marquer que la r�ponse a �t� envoy�e
-        }
+            
+            if (linkOrPhotoMessages.includes(lowerCaseMessage)) {
+                awaitingLinkOrPhoto = true;
+            } else if (yesNoResponseMessages.includes(lowerCaseMessage)) {
+                awaitingYesNoResponse = true;
+            } else if (lowerCaseMessage === "autres" || lowerCaseMessage === "hafa") {
+                response = "requestAutreAide";
+            }
+        } 
     }
 
     //3
@@ -489,7 +468,7 @@ function awaitingAnswerResponse(userMessage) {
     }
 
     //4
-    if (lowerCaseMessage === "d�tails sur un produit" || lowerCaseMessage === "antsipirian'ny entana") {
+    if (lowerCaseMessage === "détails sur un produit" || lowerCaseMessage === "antsipirian'ny entana") {
         response = traduire("link", language);
         detailsProd = true;
         detailYesNo= true;
@@ -497,7 +476,7 @@ function awaitingAnswerResponse(userMessage) {
     }
 
     //5 
-    if (lowerCaseMessage === "service apr�s vente" || lowerCaseMessage === "tolotra vita varotra") {
+    if (lowerCaseMessage === "service après vente" || lowerCaseMessage === "tolotra vita varotra") {
         response = traduire("sav", language);
         responseSent = true;
     }
@@ -516,7 +495,7 @@ function awaitingAnswerResponse(userMessage) {
 function sendMessage(message, button) {
     const userName = localStorage.getItem('userName');
     sendMessageToAdmin(message, userName);
-    button.disabled = true; // D�sactiver le bouton apr�s avoir envoy� le message
+    button.disabled = true; // D�sactiver le bouton après avoir envoy� le message
 }
 
 // Fonction pour afficher �galement le message du client dans la zone de discussion
@@ -607,7 +586,7 @@ function displayContent(file) {
     }
 }
 
-// R�initialisation de l'input de message apr�s l'envoi du message
+// R�initialisation de l'input de message après l'envoi du message
 function resetMessageInput() {
     const messageInput = document.getElementById('messageInput');
     messageInput.value = '';
