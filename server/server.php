@@ -7,12 +7,12 @@
     use Ratchet\Http\HttpServer;
     use Ratchet\WebSocket\WsServer;
     use MyApp\MessageServer;
-
+    use MyApp\ChatBot;
 
     $server = IoServer::factory(
         new HttpServer(
             new WsServer(
-                new MessageServer()
+                new ChatBot()
             )
         ),
         8080
