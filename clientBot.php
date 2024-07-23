@@ -40,6 +40,9 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
         }
         
         var conn = new WebSocket('ws://localhost:8080');
+        
+        
+        
         var chat = document.getElementById('chat');
         var choicesDiv = document.getElementById('choices');
         var responseInput = document.getElementById('response');
@@ -50,7 +53,12 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
         var sendFileButton = document.getElementById('sendFileButton');
         var currentQuestionId = null;
         const imageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        
 
+        conn.onopen = function() {
+            console.log('WebSocket connection opened');
+        };
+        
         conn.onmessage = function(e) {
             var data = JSON.parse(e.data);
             if (data.question) {

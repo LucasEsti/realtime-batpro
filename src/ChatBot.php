@@ -83,7 +83,6 @@ class ChatBot implements MessageComponentInterface {
                             "type" => $fileType
                         ],    
                     ]);
-                    var_dump($rep);
             $from->send($rep);
         } else {
             $from->send(json_encode(['message' => 'Données invalides.']));
