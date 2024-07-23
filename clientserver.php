@@ -37,12 +37,6 @@
                 messageDiv.textContent = "Your client ID is " + clientId;
                 chatBox.appendChild(messageDiv);
             } else if (data.type === 'message') {
-                var messageContainer = document.getElementById('messageContainer');
-                var messageDiv = document.createElement('div');
-                messageDiv.textContent = data.message;
-                messageContainer.appendChild(messageDiv);
-                messageContainer.scrollTop = messageContainer.scrollHeight;
-                
                 var chatMessage = document.createElement('div');
                 chatMessage.textContent = data.message;
                 chatBox.appendChild(chatMessage);

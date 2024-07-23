@@ -10,6 +10,12 @@
             padding: 10px;
             margin-bottom: 10px;
         }
+        .clientMessages {
+            margin-bottom: 20px;
+        }
+        .adminMessage {
+            color: blue;
+        }
     </style>
 </head>
 <body>
@@ -25,11 +31,22 @@
             var data = JSON.parse(event.data);
             console.log(data);
             if (data.type === 'message') {
-                
                 var messageContainer = document.getElementById('messageContainer');
+                var clientDiv = document.getElementById('client-' + data.from);
+
+                if (!clientDiv) {
+                    clientDiv = document.createElement('div');
+                    clientDiv.id = 'client-' + data.from;
+                    clientDiv.className = 'clientMessages';
+                    var clientTitle = document.createElement('h3');
+                    clientTitle.textContent = 'Client ' + data.from;
+                    clientDiv.appendChild(clientTitle);
+                    messageContainer.appendChild(clientDiv);
+                }
+
                 var messageDiv = document.createElement('div');
-                messageDiv.textContent = 'Client (' + data.from + '): ' + data.message;
-                messageContainer.appendChild(messageDiv);
+                messageDiv.textContent = 'Client: ' + data.message;
+                clientDiv.appendChild(messageDiv);
                 messageContainer.scrollTop = messageContainer.scrollHeight;
             }
         };
@@ -39,6 +56,26 @@
             var clientId = document.getElementById('clientId').value;
             if (message && clientId) {
                 ws.send(JSON.stringify({ type: 'admin', message: message, clientId: clientId }));
+
+                var messageContainer = document.getElementById('messageContainer');
+                var clientDiv = document.getElementById('client-' + clientId);
+
+                if (!clientDiv) {
+                    clientDiv = document.createElement('div');
+                    clientDiv.id = 'client-' + clientId;
+                    clientDiv.className = 'clientMessages';
+                    var clientTitle = document.createElement('h3');
+                    clientTitle.textContent = 'Client ' + clientId;
+                    clientDiv.appendChild(clientTitle);
+                    messageContainer.appendChild(clientDiv);
+                }
+
+                var adminMessageDiv = document.createElement('div');
+                adminMessageDiv.textContent = 'Admin: ' + message;
+                adminMessageDiv.className = 'adminMessage';
+                clientDiv.appendChild(adminMessageDiv);
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+
                 document.getElementById('message').value = '';
             }
         }
