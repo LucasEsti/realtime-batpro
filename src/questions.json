@@ -1,0 +1,49 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "Quelle est votre langue préférée?",
+      "choices": {
+        "1": "Français",
+        "2": "Anglais",
+        "3": "Espagnol"
+      },
+      "next_question": {
+        "1": 2,
+        "2": 2,
+        "3": 2
+      }
+    },
+    {
+      "id": 2,
+      "question": "Quel est votre nom?",
+      "choices": {},
+      "next_question": {
+        "1": 3,
+        "2": 3,
+        "3": 3
+      }
+    },
+    {
+      "id": 3,
+      "question": "Quel est votre email?",
+      "choices": {},
+      "next_question": {
+        "1": 4,
+        "2": 4,
+        "3": 4
+      }
+    },
+    {
+      "id": 4,
+      "question": "Quel est votre plat préféré?",
+      "choices": {
+        "1": "Pizza",
+        "2": "Sushi",
+        "3": "Pâtes"
+      },
+      "next_question": {}
+    }
+  ]
+}
+
