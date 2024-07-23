@@ -11,6 +11,7 @@ use Ratchet\ConnectionInterface;
 class ChatServer implements MessageComponentInterface {
     protected $clients;
     protected $admin;
+    protected $listClients;
 
     public function __construct() {
         $this->clients = new \SplObjectStorage;
@@ -34,27 +35,21 @@ class ChatServer implements MessageComponentInterface {
         $conn->send(json_encode(['type' => 'id', 'id' => $clientId]));
         
         $conn->clientId = $clientId;
+        $this->listClients[$clientId] = $conn;
     }
 
     public function onMessage(ConnectionInterface $from, $msg) {
         $data = json_decode($msg, true);
-        var_dump("ato");
-        var_dump($data);
         if (isset($data['type'])) {
-            var_dump("type");
             if ($data['type'] === 'admin') {
                 // Si le message vient de l'admin, envoyez-le au client spécifié
                 if ($from === $this->admin && isset($data['clientId'])) {
-                    foreach ($this->clients as $client) {
-                        if ($client->clientId === $data['clientId']) {
-                            $client->send(json_encode(['type' => 'message', 'message' => $data['message']]));
-                            break;
-                        }
-                    }
+                    $cli = $this->listClients[$data['clientId']];
+                    $cli->send(json_encode(['type' => 'message', 'message' => $data['message']]));
+                    
                 }
                 }else {
                 // Si le message vient d'un client, envoyez-le à l'admin
-                var_dump("client");
                 if ($this->admin !== null) {
                     $this->admin->send(json_encode(['type' => 'message', 'message' => $data['message'], 'from' => $from->clientId]));
                 }
@@ -65,6 +60,7 @@ class ChatServer implements MessageComponentInterface {
     public function onClose(ConnectionInterface $conn) {
         // Déconnecter le client
         $this->clients->detach($conn);
+        unset($this->listClients[$conn->clientId]);
         
         // Vérifier si l'administrateur s'est déconnecté
         if ($conn === $this->admin) {
