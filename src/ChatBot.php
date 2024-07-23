@@ -22,6 +22,7 @@ class ChatBot implements MessageComponentInterface {
         $this->clients->attach($conn);
         echo "New connection! ({$conn->resourceId})\n";
         $this->sendQuestion($conn, 1); // Start with the first question
+        
     }
 
     public function onMessage(ConnectionInterface $from, $msg) {
@@ -60,12 +61,30 @@ class ChatBot implements MessageComponentInterface {
                 $from->send(json_encode(['message' => 'Question non trouvée.']));
             }
         } else if (isset($data['simple_message'])) {
-            // Handle simple message after questionnaire completion
             if (isset($this->userStates[$userId]) && $this->userStates[$userId]['completed'] === ['completed']) {
                 $from->send(json_encode(['message' => 'Message reçu: ' . $data['simple_message']]));
             } else {
                 $from->send(json_encode(['message' => 'Envoyez un message après avoir complété le questionnaire.']));
             }
+        } else if (isset($data['file'])) {
+            // Handle file upload
+            $fileData = base64_decode($data['file']['data']);
+            $filePath = __DIR__ . '/../uploads/' . $data['file']['name'];
+
+            // Make sure the upload directory exists
+            if (!is_dir(dirname($filePath))) {
+                mkdir(dirname($filePath), 0777, true);
+            }
+
+            file_put_contents($filePath, $fileData);
+            $fileType = mime_content_type($filePath);
+            $rep = json_encode(['message' => [
+                            "file-name" => $data['file']['name'],
+                            "type" => $fileType
+                        ],    
+                    ]);
+                    var_dump($rep);
+            $from->send($rep);
         } else {
             $from->send(json_encode(['message' => 'Données invalides.']));
         }
