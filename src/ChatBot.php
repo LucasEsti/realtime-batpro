@@ -9,40 +9,62 @@ class ChatBot implements MessageComponentInterface {
     protected $clients;
     protected $questions;
     protected $userData;
+    protected $userStates;
 
     public function __construct() {
         $this->clients = new \SplObjectStorage;
         $this->questions = json_decode(file_get_contents(dirname(__DIR__) . '/src/questions.json'), true)['questions'];
         $this->userData = [];
+        $this->userStates = [];
     }
 
     public function onOpen(ConnectionInterface $conn) {
         $this->clients->attach($conn);
         echo "New connection! ({$conn->resourceId})\n";
-        $this->sendQuestion($conn, 1);
+        $this->sendQuestion($conn, 1); // Start with the first question
     }
 
     public function onMessage(ConnectionInterface $from, $msg) {
         $data = json_decode($msg, true);
+        $userId = $from->resourceId;
 
         if (isset($data['question_id']) && isset($data['response'])) {
-            $currentQuestion = $this->getQuestionById($data['question_id']);
+            if (!isset($this->userStates[$userId])) {
+                $this->userStates[$userId] = [
+                    'current_question' => 1,
+                    'completed' => []
+                ];
+            }
+
+            $currentQuestionId = $this->userStates[$userId]['current_question'];
+            $currentQuestion = $this->getQuestionById($currentQuestionId);
+
             if ($currentQuestion) {
                 if (empty($currentQuestion['choices'])) {
-                    $this->saveUserData($from->resourceId, $data['question_id'], $data['response']);
+                    $this->saveUserData($userId, $currentQuestionId, $data['response']);
                     $nextQuestionId = array_values($currentQuestion['next_question'])[0] ?? null;
                 } else {
                     $nextQuestionId = $currentQuestion['next_question'][$data['response']] ?? null;
                 }
 
-                if ($nextQuestionId) {
-                    $this->sendQuestion($from, $nextQuestionId);
+                if ($nextQuestionId === null || in_array($nextQuestionId, $this->userStates[$userId]['completed'])) {
+                    $this->userStates[$userId]['completed'][] = $currentQuestionId;
+                    $from->send(json_encode(['message' => 'Merci pour vos réponses! Vous pouvez maintenant poser des questions supplémentaires.']));
+                    $this->userStates[$userId]['completed'] = ['completed']; // Mark the questionnaire as completed
                 } else {
-                    $from->send(json_encode(['message' => 'Merci pour vos réponses!']));
-                    var_dump($this->userData);
+                    $this->userStates[$userId]['completed'][] = $currentQuestionId;
+                    $this->userStates[$userId]['current_question'] = $nextQuestionId;
+                    $this->sendQuestion($from, $nextQuestionId);
                 }
             } else {
                 $from->send(json_encode(['message' => 'Question non trouvée.']));
+            }
+        } else if (isset($data['simple_message'])) {
+            // Handle simple message after questionnaire completion
+            if (isset($this->userStates[$userId]) && $this->userStates[$userId]['completed'] === ['completed']) {
+                $from->send(json_encode(['message' => 'Message reçu: ' . $data['simple_message']]));
+            } else {
+                $from->send(json_encode(['message' => 'Envoyez un message après avoir complété le questionnaire.']));
             }
         } else {
             $from->send(json_encode(['message' => 'Données invalides.']));
