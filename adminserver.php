@@ -23,7 +23,7 @@
 
         ws.onmessage = function(event) {
             var data = JSON.parse(event.data);
-            console.log(data.type);
+            console.log(data);
             if (data.type === 'message') {
                 
                 var messageContainer = document.getElementById('messageContainer');

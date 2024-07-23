@@ -24,42 +24,25 @@
 
     <script>
         var ws = new WebSocket('ws://localhost:8080?type=client');
-        
-        ws.onmessage = function(event) {
-            var messageContainer = document.getElementById('messageContainer');
-            var messageDiv = document.createElement('div');
-            messageDiv.textContent = event.data;
-            messageContainer.appendChild(messageDiv);
-            
-            // Optionally, scroll to the bottom of the container
-            messageContainer.scrollTop = messageContainer.scrollHeight;
-        };
-
-        function sendMessage() {
-            var message = document.getElementById('message').value;
-            ws.send(message);
-            document.getElementById('message').value = '';
-        }
-    </script>
-    
-    <script>
-        var ws = new WebSocket('ws://localhost:8080?type=client');
         var clientId = null;
-
+        
         ws.onmessage = function(event) {
             var data = JSON.parse(event.data);
 
             if (data.type === 'id') {
                 clientId = data.id;
+                var messageDiv = document.createElement('div');
+                messageDiv.textContent = event.data;
             } else if (data.type === 'message') {
                 var messageContainer = document.getElementById('messageContainer');
                 var messageDiv = document.createElement('div');
-                messageDiv.textContent = 'Admin: ' + data.message;
+                messageDiv.textContent = event.data;
                 messageContainer.appendChild(messageDiv);
                 messageContainer.scrollTop = messageContainer.scrollHeight;
             }
         };
 
+        
         function sendMessage() {
             var message = document.getElementById('message').value;
             if (clientId) {
@@ -67,6 +50,8 @@
                 document.getElementById('message').value = '';
             }
         }
+        
     </script>
+    
 </body>
 </html>
