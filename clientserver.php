@@ -41,17 +41,11 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
         <input type="text" id="response" placeholder="Entrez votre réponse" class="hidden" />
         <button id="sendButton" onclick="sendResponse()" class="hidden">Envoyer</button>
         <input type="text" id="simpleMessage" placeholder="Entrez un message simple" class="hidden" />
-        <button id="sendSimpleMessageButton" onclick="sendSimpleMessage()" class="hidden">Envoyer Message Simple</button>
         <input type="file" id="fileInput" class="hidden" />
-        <button id="sendFileButton" onclick="sendFile()" class="hidden">Envoyer Fichier</button>
+        <button id="sendSimpleMessageButton" onclick="sendMessage()" class="hidden">Envoyer Message</button>
+        
+        <!--<button id="sendFileButton" onclick="sendFile()" class="hidden">Envoyer Fichier</button>-->
     </div>
-<!--    <div id="messageContainer"></div>
-    <input type="text" id="message" placeholder="Type your message..."/>
-    <button onclick="sendMessage()">Send</button>-->
-    
-    
-    
-
     <script>
         var conn = new WebSocket('ws://localhost:8080?type=client');
         var clientId = null;
@@ -70,7 +64,7 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
         var simpleMessageInput = document.getElementById('simpleMessage');
         var sendSimpleMessageButton = document.getElementById('sendSimpleMessageButton');
         var fileInput = document.getElementById('fileInput');
-        var sendFileButton = document.getElementById('sendFileButton');
+//        var sendFileButton = document.getElementById('sendFileButton');
         var currentQuestionId = null;
         const imageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         
@@ -132,7 +126,7 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
                     simpleMessageInput.classList.add('hidden');
                     sendSimpleMessageButton.classList.add('hidden');
                     fileInput.classList.add('hidden');
-                    sendFileButton.classList.add('hidden');
+//                    sendFileButton.classList.add('hidden');
                 } else {
                     console.log('not choices');
                     responseInput.classList.remove('hidden');
@@ -140,7 +134,7 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
                     simpleMessageInput.classList.add('hidden');
                     sendSimpleMessageButton.classList.add('hidden');
                     fileInput.classList.add('hidden');
-                    sendFileButton.classList.add('hidden');
+//                    sendFileButton.classList.add('hidden');
                 }
             } else if (data.message) {
                 
@@ -158,7 +152,7 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
                         simpleMessageInput.classList.remove('hidden');
                         sendSimpleMessageButton.classList.remove('hidden');
                         fileInput.classList.remove('hidden');
-                        sendFileButton.classList.remove('hidden');
+//                        sendFileButton.classList.remove('hidden');
                         choicesDiv.innerHTML = ''; // Clear choices div when done
                         responseInput.classList.add('hidden');
                         sendButton.classList.add('hidden');
@@ -170,27 +164,25 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
         };
 
         function sendMessage() {
-            var message = document.getElementById('message').value;
-            var chatBox = document.getElementById('chatBox');
-            
-            if (clientId) {
-                conn.send(JSON.stringify({ type: 'client', message: message, clientId: clientId }));
-                
-                var sentMessage = document.createElement('div');
-                sentMessage.textContent = "You: " + message;
-                chatBox.appendChild(sentMessage);
-                chatBox.scrollTop = chatBox.scrollHeight;
-                
-                document.getElementById('message').value = '';
-            }
-        }
-        
-        function sendSimpleMessage() {
             var message2 = simpleMessageInput.value;
+            var file = fileInput.files[0];
             if (message2) {
                 conn.send(JSON.stringify({ simple_message: message2 }));
                 simpleMessageInput.value = '';
             }
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var base64File = e.target.result.split(',')[1];
+                    conn.send(JSON.stringify({ file: { name: file.name, data: base64File } }));
+                };
+                reader.readAsDataURL(file);
+                fileInput.value = ''; // Clear the file input
+            }
+        }
+        
+        function sendSimpleMessage() {
+            
         }
         
         
@@ -211,16 +203,7 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
         
 
         function sendFile() {
-            var file = fileInput.files[0];
-            if (file) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    var base64File = e.target.result.split(',')[1];
-                    conn.send(JSON.stringify({ file: { name: file.name, data: base64File } }));
-                };
-                reader.readAsDataURL(file);
-                fileInput.value = ''; // Clear the file input
-            }
+            
         }
         
     </script>
