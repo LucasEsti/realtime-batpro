@@ -43,7 +43,9 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
         <input type="text" id="simpleMessage" placeholder="Entrez un message simple" class="hidden" />
         <input type="file" id="fileInput" class="hidden" />
         <button id="sendSimpleMessageButton" onclick="sendMessage()" class="hidden">Envoyer Message</button>
-        
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+
         <!--<button id="sendFileButton" onclick="sendFile()" class="hidden">Envoyer Fichier</button>-->
     </div>
     <script>
@@ -76,12 +78,13 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
             var data = JSON.parse(e.data);
             
 //            var chatBox = document.getElementById('chatBox');
-//            if (data.type === 'id') {
-//                clientId = data.id;
-//                var messageDiv = document.createElement('div');
-//                messageDiv.textContent = "Your client ID is " + clientId;
-//                chatBox.appendChild(messageDiv);
-//            } else if (data.type === 'message') {
+            if (data.type === 'id') {
+                clientId = data.id;
+                $.cookie('clientId', clientId, { expires: 7, path: '/' });
+//                $.cookie('clientId');
+
+            } 
+//            else if (data.type === 'message') {
 //                var chatMessage = document.createElement('div');
 //                chatMessage.textContent = data.message;
 //                chatBox.appendChild(chatMessage);
