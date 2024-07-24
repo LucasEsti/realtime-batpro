@@ -4,14 +4,16 @@
     <title>Admin Chat</title>
     <style>
         #messageContainer {
-            height: 200px;
+            height: 400px;
             overflow-y: scroll;
             border: 1px solid #ccc;
             padding: 10px;
             margin-bottom: 10px;
         }
-        .clientMessages {
+        .clientSection {
             margin-bottom: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
         }
         .adminMessage {
             color: blue;
@@ -20,9 +22,6 @@
 </head>
 <body>
     <div id="messageContainer"></div>
-    <input type="text" id="message" placeholder="Type your message..."/>
-    <input type="text" id="clientId" placeholder="Client ID"/>
-    <button onclick="sendMessage()">Send</button>
 
     <script>
         var ws = new WebSocket('ws://localhost:8080?type=admin');
@@ -37,46 +36,55 @@
                 if (!clientDiv) {
                     clientDiv = document.createElement('div');
                     clientDiv.id = 'client-' + data.from;
-                    clientDiv.className = 'clientMessages';
+                    clientDiv.className = 'clientSection';
+                    
                     var clientTitle = document.createElement('h3');
                     clientTitle.textContent = 'Client ' + data.from;
                     clientDiv.appendChild(clientTitle);
+
+                    var messageDisplay = document.createElement('div');
+                    messageDisplay.id = 'messages-' + data.from;
+                    clientDiv.appendChild(messageDisplay);
+
+                    var messageInput = document.createElement('input');
+                    messageInput.type = 'text';
+                    messageInput.placeholder = 'Type your message...';
+                    messageInput.id = 'input-' + data.from;
+                    clientDiv.appendChild(messageInput);
+
+                    var sendButton = document.createElement('button');
+                    sendButton.textContent = 'Send';
+                    sendButton.onclick = (function(clientId) {
+                        return function() {
+                            sendMessage(clientId);
+                        };
+                    })(data.from);
+                    clientDiv.appendChild(sendButton);
+
                     messageContainer.appendChild(clientDiv);
                 }
 
+                var messageDisplay = document.getElementById('messages-' + data.from);
                 var messageDiv = document.createElement('div');
                 messageDiv.textContent = 'Client: ' + data.message;
-                clientDiv.appendChild(messageDiv);
+                messageDisplay.appendChild(messageDiv);
                 messageContainer.scrollTop = messageContainer.scrollHeight;
             }
         };
 
-        function sendMessage() {
-            var message = document.getElementById('message').value;
-            var clientId = document.getElementById('clientId').value;
+        function sendMessage(clientId) {
+            var messageInput = document.getElementById('input-' + clientId);
+            var message = messageInput.value;
             if (message && clientId) {
                 ws.send(JSON.stringify({ type: 'admin', message: message, clientId: clientId }));
 
-                var messageContainer = document.getElementById('messageContainer');
-                var clientDiv = document.getElementById('client-' + clientId);
-
-                if (!clientDiv) {
-                    clientDiv = document.createElement('div');
-                    clientDiv.id = 'client-' + clientId;
-                    clientDiv.className = 'clientMessages';
-                    var clientTitle = document.createElement('h3');
-                    clientTitle.textContent = 'Client ' + clientId;
-                    clientDiv.appendChild(clientTitle);
-                    messageContainer.appendChild(clientDiv);
-                }
-
+                var messageDisplay = document.getElementById('messages-' + clientId);
                 var adminMessageDiv = document.createElement('div');
                 adminMessageDiv.textContent = 'Admin: ' + message;
                 adminMessageDiv.className = 'adminMessage';
-                clientDiv.appendChild(adminMessageDiv);
-                messageContainer.scrollTop = messageContainer.scrollHeight;
+                messageDisplay.appendChild(adminMessageDiv);
 
-                document.getElementById('message').value = '';
+                messageInput.value = '';
             }
         }
     </script>

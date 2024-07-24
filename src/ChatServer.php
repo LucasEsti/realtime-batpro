@@ -29,7 +29,6 @@ class ChatServer implements MessageComponentInterface {
         if (isset($params['type']) && $params['type'] === 'admin') {
             $this->admin = $conn;
         }
-        
         // Envoyer un identifiant unique au client
         $clientId = uniqid();
         $conn->send(json_encode(['type' => 'id', 'id' => $clientId]));
@@ -48,7 +47,7 @@ class ChatServer implements MessageComponentInterface {
                     $cli->send(json_encode(['type' => 'message', 'message' => $data['message']]));
                     
                 }
-                }else {
+            } else {
                 // Si le message vient d'un client, envoyez-le à l'admin
                 if ($this->admin !== null) {
                     $this->admin->send(json_encode(['type' => 'message', 'message' => $data['message'], 'from' => $from->clientId]));
