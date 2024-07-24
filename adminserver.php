@@ -69,6 +69,12 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
                     messageInput.placeholder = 'Type your message...';
                     messageInput.id = 'input-' + data.from;
                     clientDiv.appendChild(messageInput);
+                    
+                    var fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.id = 'file-' + data.from;
+                    clientDiv.appendChild(fileInput);
+                    
 
                     var sendButton = document.createElement('button');
                     sendButton.textContent = 'Send';
@@ -136,6 +142,8 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
 
         function sendMessage(clientId) {
             var messageInput = document.getElementById('input-' + clientId);
+            var fileInput = document.getElementById('file-' + clientId);
+            var file = fileInput.files[0];
             var message = messageInput.value;
             if (message && clientId) {
                 ws.send(JSON.stringify({ type: 'admin', message: message, clientId: clientId }));
@@ -147,6 +155,15 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
                 messageDisplay.appendChild(adminMessageDiv);
 
                 messageInput.value = '';
+            } 
+            if (file && clientId) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var base64File = e.target.result.split(',')[1];
+                    ws.send(JSON.stringify({ file: { name: file.name, data: base64File }, clientId: clientId }));
+                };
+                reader.readAsDataURL(file);
+                fileInput.value = ''; // Clear the file input
             }
         }
     </script>

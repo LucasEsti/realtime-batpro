@@ -123,6 +123,7 @@ class ChatServer implements MessageComponentInterface {
             }
         } else if (isset($data['file'])) {
             // Handle file upload
+            var_dump("file");
             $fileData = base64_decode($data['file']['data']);
             $filePath = __DIR__ . '/../uploads/' . $data['file']['name'];
 
@@ -133,7 +134,24 @@ class ChatServer implements MessageComponentInterface {
 
             file_put_contents($filePath, $fileData);
             $fileType = mime_content_type($filePath);
-            $rep = json_encode([
+            
+            if ($data['clientId']) {
+                /// file avy any @ admin
+                $client = $this->listClients[$data['clientId']];
+                $rep = json_encode([
+                                'type' => 'message',
+                                'message' => [
+                                    "file-name" => $data['file']['name'],
+                                    "type" => $fileType, 
+                                ],    
+                                'from' => $client->clientId
+                            ]);
+                $client->send($rep);
+                if ($this->admin !== null) {
+                    $this->admin->send($rep);
+                }
+            } else {
+                $rep = json_encode([
                                 'type' => 'message',
                                 'message' => [
                                     "file-name" => $data['file']['name'],
@@ -141,10 +159,12 @@ class ChatServer implements MessageComponentInterface {
                                 ],    
                                 'from' => $from->clientId
                             ]);
-            $from->send($rep);
-            if ($this->admin !== null) {
-                $this->admin->send($rep);
+                $from->send($rep);
+                if ($this->admin !== null) {
+                    $this->admin->send($rep);
+                }
             }
+            
         } else {
             $from->send(json_encode(['message' => 'Données invalides.']));
         }
