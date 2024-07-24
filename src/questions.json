@@ -5,13 +5,11 @@
       "question": "Bienvenu, Quelle est votre langue préférée?",
       "choices": {
         "1": "Français",
-        "2": "Anglais",
-        "3": "Espagnol"
+        "2": "Malagasy"
       },
       "next_question": {
         "1": 2,
-        "2": 2,
-        "3": 2
+        "2": 2
       }
     },
     {
