@@ -1,3 +1,15 @@
+<?php
+// Déterminez le schéma (http/https) et le nom d'hôte
+$scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'];
+
+// Déterminez le chemin de base de votre application
+$scriptName = dirname($_SERVER['SCRIPT_NAME']);
+
+// Définir l'URL de base
+$uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
+
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -25,10 +37,16 @@
 
     <script>
         var ws = new WebSocket('ws://localhost:8080?type=admin');
-
+        function isObject(value) {
+            return value !== null && typeof value === 'object' && value.constructor === Object;
+        }
+        const uploadsUrl = '<?php echo $uploadsUrl; ?>';
+        const imageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        
         ws.onmessage = function(event) {
             var data = JSON.parse(event.data);
             console.log(data);
+            
             if (data.type === 'message') {
                 var messageContainer = document.getElementById('messageContainer');
                 var clientDiv = document.getElementById('client-' + data.from);
@@ -63,13 +81,57 @@
 
                     messageContainer.appendChild(clientDiv);
                 }
-
+                
                 var messageDisplay = document.getElementById('messages-' + data.from);
                 var messageDiv = document.createElement('div');
-                messageDiv.textContent = 'Client: ' + data.message;
-                messageDisplay.appendChild(messageDiv);
-                messageContainer.scrollTop = messageContainer.scrollHeight;
-            }
+                
+                if (data.questionOld) {
+                    console.log('response');
+                    messageDiv = document.createElement('div');
+                    messageDiv.textContent = data.questionOld.question;
+                    messageDisplay.appendChild(messageDiv);
+                    if (Object.keys(data.choicesOld).length > 0) {
+                        console.log('choicesOld');
+                        for (var choice in data.choicesOld) {
+                            messageDiv = document.createElement('div');
+                            messageDiv.textContent = data.choicesOld[choice];
+                            messageDisplay.appendChild(messageDiv);
+                        }
+                    } 
+                    messageDiv = document.createElement('div');
+                    messageDiv.textContent = "reponse :" + data.reponseQuestion;
+                    messageDisplay.appendChild(messageDiv);
+                } else if (data.message) {
+                    console.log("data.message");
+                    console.log(data.message);
+                    if (isObject(data.message)) {
+                        console.log(data.message["type"]);
+                        if (imageTypes.includes(data.message["type"])) {
+                            messageDiv = document.createElement('img');
+                            messageDiv.src = uploadsUrl + data.message["file-name"];
+                            messageDiv.className = "img-fluid";
+                            messageDisplay.appendChild(messageDiv);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
+                        } else {
+                            messageDiv = document.createElement('a');
+                            messageDiv.href = uploadsUrl + data.message["file-name"];
+                            messageDiv.textContent = data.message["file-name"];
+                            
+                            messageDisplay.appendChild(messageDiv);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
+                        }
+                    } else {
+                        console.log("message simple");
+                        messageDiv = document.createElement('div');
+                        messageDiv.textContent = 'Client: ' + data.message;
+                        
+                        messageDisplay.appendChild(messageDiv);
+                        messageContainer.scrollTop = messageContainer.scrollHeight;
+                    }
+                } 
+                console.log("-------------");
+
+            } 
         };
 
         function sendMessage(clientId) {

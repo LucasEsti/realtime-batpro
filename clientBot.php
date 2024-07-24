@@ -33,14 +33,14 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
     <button id="sendFileButton" onclick="sendFile()" class="hidden">Envoyer Fichier</button>
 
     <script>
+        
+        
+        var conn = new WebSocket('ws://localhost:8080');
         // Définir l'URL des uploads depuis PHP
         const uploadsUrl = '<?php echo $uploadsUrl; ?>';
         function isObject(value) {
             return value !== null && typeof value === 'object' && value.constructor === Object;
         }
-        
-        var conn = new WebSocket('ws://localhost:8080');
-        
         
         
         var chat = document.getElementById('chat');
