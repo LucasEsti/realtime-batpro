@@ -93,16 +93,13 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
                 var messageDiv = document.createElement('div');
                 
                 if (data.questionOld) {
-                    console.log('response');
                     if (data.questionOld.id == 2) {
-                        console.log('response nom');
                         $(".clientSection h3").text("Client " + data.reponseQuestion);
                     }
                     messageDiv = document.createElement('div');
                     messageDiv.textContent = data.questionOld.question;
                     messageDisplay.appendChild(messageDiv);
                     if (Object.keys(data.choicesOld).length > 0) {
-                        console.log('choicesOld');
                         for (var choice in data.choicesOld) {
                             messageDiv = document.createElement('div');
                             messageDiv.textContent = data.choicesOld[choice];

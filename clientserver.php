@@ -92,10 +92,7 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
 //            }
             
             if (data.questionOld) {
-                console.log('response');
-                console.log(data);
                 if (Object.keys(data.choicesOld).length > 0) {
-                    console.log('choicesOld');
                     for (var choice in data.choicesOld) {
                         var chatMessage = document.createElement('div');
                         chatMessage.textContent = data.choicesOld[choice];

@@ -68,3 +68,23 @@ wscat -c wss://somalaval-ai.xnr.afb.mybluehost.me/wp-content/plugins/realtime-ba
 
 admin_9wmjaorl
 xfSe44e%VB@JF824
+
+-- Création de la table Message
+CREATE TABLE Message (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idClient VARCHAR(255) NOT NULL,
+    isAdmin BOOLEAN NOT NULL,
+    isReadClient BOOLEAN NOT NULL,
+    isReadAdmin BOOLEAN NOT NULL
+);
+
+-- Création de la table Contenu
+CREATE TABLE Contenu (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    message TEXT,
+    filePath VARCHAR(255),  -- Chemin du fichier
+    fileType VARCHAR(255),
+    idMessage INT,
+    FOREIGN KEY (idMessage) REFERENCES Message(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
