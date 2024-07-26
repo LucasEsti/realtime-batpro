@@ -44,57 +44,110 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
         const uploadsUrl = '<?php echo $uploadsUrl; ?>';
         const imageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         
+        ws.onopen = function() {
+            console.log('WebSocket connection opened');
+        };
+        
+        function createMessageSection(idClient, nom) {
+            var from = idClient;
+            var messageContainer = document.getElementById('messageContainer');
+            var clientDiv = document.getElementById('client-' + from);
+            if (!clientDiv) {
+                  clientDiv = document.createElement('div');
+                  clientDiv.id = 'client-' + from;
+                  clientDiv.className = 'clientSection';
+                  
+                  let name = from;
+                  if (nom != "") {
+                      name = nom;
+                  }
+                  var clientTitle = document.createElement('h3');
+                  clientTitle.textContent = 'Client ' + name;
+                  clientDiv.appendChild(clientTitle);
+
+                  var messageDisplay = document.createElement('div');
+                  messageDisplay.id = 'messages-' + from;
+                  clientDiv.appendChild(messageDisplay);
+
+                  var messageInput = document.createElement('input');
+                  messageInput.type = 'text';
+                  messageInput.placeholder = 'Type your message...';
+                  messageInput.id = 'input-' + from;
+                  clientDiv.appendChild(messageInput);
+
+                  var fileInput = document.createElement('input');
+                  fileInput.type = 'file';
+                  fileInput.id = 'file-' + from;
+                  clientDiv.appendChild(fileInput);
+
+
+                  var sendButton = document.createElement('button');
+                  sendButton.textContent = 'Send';
+                  sendButton.onclick = (function(clientId) {
+                      return function() {
+                          sendMessage(clientId);
+                      };
+                  })(from);
+                  clientDiv.appendChild(sendButton);
+
+                  messageContainer.appendChild(clientDiv);
+              }
+        }
+        
         ws.onmessage = function(event) {
             var data = JSON.parse(event.data);
             console.log(data);
             
+            if (data.type === 'listMessages') {
+                messages = data.message;
+                for (const key in messages) {
+                    console.log("data------");
+                    if (messages.hasOwnProperty(key)) { 
+                        messages[key].forEach(message => {
+//                              console.log(`ID: ${message.idClient}, Content: ${message.message}`);
+                                var messageContainer = document.getElementById('messageContainer');
+                                createMessageSection(message.idClient, message.nom);
+                                var messageDisplay = document.getElementById('messages-' + message.idClient);
+                                if (message.filePath) {
+                                      if (imageTypes.includes(message.fileType)) {
+                                          messageDiv = document.createElement('img');
+                                          messageDiv.src = uploadsUrl + message.filePath;
+                                          messageDiv.className = "img-fluid";
+                                          messageDisplay.appendChild(messageDiv);
+                                          messageContainer.scrollTop = messageContainer.scrollHeight;
+                                      } else {
+                                          messageDiv = document.createElement('a');
+                                          messageDiv.href = uploadsUrl + message.filePath;
+                                          messageDiv.textContent = message.filePath;
+
+                                          messageDisplay.appendChild(messageDiv);
+                                          messageContainer.scrollTop = messageContainer.scrollHeight;
+                                      }
+                                  } 
+                                  if (message.message) {
+                                      console.log("message simple");
+                                      messageDiv = document.createElement('div');
+                                      messageDiv.textContent = 'Client: ' + message.message;
+
+                                      messageDisplay.appendChild(messageDiv);
+                                      messageContainer.scrollTop = messageContainer.scrollHeight;
+                                  }
+                        });
+                    }
+                  }
+            }
+            
             if (data.type === 'message') {
                 var messageContainer = document.getElementById('messageContainer');
-                var clientDiv = document.getElementById('client-' + data.from);
-
-                if (!clientDiv) {
-                    clientDiv = document.createElement('div');
-                    clientDiv.id = 'client-' + data.from;
-                    clientDiv.className = 'clientSection';
-                    
-                    var clientTitle = document.createElement('h3');
-                    clientTitle.textContent = 'Client ' + data.from;
-                    clientDiv.appendChild(clientTitle);
-
-                    var messageDisplay = document.createElement('div');
-                    messageDisplay.id = 'messages-' + data.from;
-                    clientDiv.appendChild(messageDisplay);
-
-                    var messageInput = document.createElement('input');
-                    messageInput.type = 'text';
-                    messageInput.placeholder = 'Type your message...';
-                    messageInput.id = 'input-' + data.from;
-                    clientDiv.appendChild(messageInput);
-                    
-                    var fileInput = document.createElement('input');
-                    fileInput.type = 'file';
-                    fileInput.id = 'file-' + data.from;
-                    clientDiv.appendChild(fileInput);
-                    
-
-                    var sendButton = document.createElement('button');
-                    sendButton.textContent = 'Send';
-                    sendButton.onclick = (function(clientId) {
-                        return function() {
-                            sendMessage(clientId);
-                        };
-                    })(data.from);
-                    clientDiv.appendChild(sendButton);
-
-                    messageContainer.appendChild(clientDiv);
-                }
+                
+                createMessageSection(data.from);
                 
                 var messageDisplay = document.getElementById('messages-' + data.from);
                 var messageDiv = document.createElement('div');
                 
                 if (data.questionOld) {
                     if (data.questionOld.id == 2) {
-                        $(".clientSection h3").text("Client " + data.reponseQuestion);
+                        $("#client-" + data.from + " h3" ).text("Client " + data.reponseQuestion);
                     }
                     messageDiv = document.createElement('div');
                     messageDiv.textContent = data.questionOld.question;

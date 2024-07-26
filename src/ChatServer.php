@@ -31,24 +31,28 @@ class ChatServer implements MessageComponentInterface {
         $username = 'root';
         $password = '';
         $this->pdo = new \PDO($dsn, $username, $password);
-        
+        $test = $this->getListMessagesClients();
     }
     
     protected function getListMessagesClients() {
         $sql = "
             SELECT 
                 m.idClient, 
-                c.message, 
+                c.message,
+                c.filePath,
+                c.fileType,
                 m.dateEnvoi,
                 c.isAdmin,
                 m.isReadAdmin,
-                m.isReadClient
+                m.isReadClient,
+                m.nom,
+                m.mail
             FROM 
                 Message m
             JOIN 
                 Contenu c ON m.id = c.idMessage
             ORDER BY 
-                m.dateEnvoi DESC, m.idClient;
+                m.dateEnvoi DESC, c.id ASC;
         ";
 
         $stmt = $this->pdo->prepare($sql);
@@ -56,7 +60,6 @@ class ChatServer implements MessageComponentInterface {
 
         // Récupérer les résultats
         $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
         $listMessageClients = [];
         foreach ($result as $row) {
             $listMessageClients[$row['idClient']][] = $row;
@@ -72,7 +75,9 @@ class ChatServer implements MessageComponentInterface {
                 m.dateEnvoi,
                 c.isAdmin,
                 m.isReadAdmin,
-                m.isReadClient
+                m.isReadClient,
+                m.nom,
+                m.mail
             FROM 
                 Message m
             JOIN 
@@ -80,7 +85,7 @@ class ChatServer implements MessageComponentInterface {
             WHERE
                 m.idClient = :idClient
             ORDER BY 
-                m.dateEnvoi DESC, m.idClient;
+                m.dateEnvoi DESC, c.id ASC;
         ";
 
         $stmt = $this->pdo->prepare($sql);
@@ -106,12 +111,6 @@ class ChatServer implements MessageComponentInterface {
             
         }
         
-        // Insérer des informations dans la table Contenu
-        $stmt = $this->pdo->prepare("INSERT INTO Contenu (message, filePath, fileType, isAdmin, lastQuestion) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$message, $file, $fileType, $isAdmin, $lastQuestion]);
-        
-        // Récupérer l'ID du message inséré
-//        $idMessage = $this->pdo->lastInsertId();
         
         $isReadClient = true;
         $isReadAdmin = false;
@@ -120,21 +119,28 @@ class ChatServer implements MessageComponentInterface {
             $isReadAdmin = true;
         }
         // Correctly prepare and execute the SELECT query
-        $checkStmt = $this->pdo->prepare("SELECT COUNT(*) FROM Message WHERE idClient = ?");
+        $checkStmt = $this->pdo->prepare("SELECT * FROM Message WHERE idClient = ?");
         $checkStmt->execute([$idClient]);
-        $exists = $checkStmt->fetchColumn();
+        $exists = $checkStmt->fetch(\PDO::FETCH_ASSOC);
+        $idMessage = 0;
 
-
-        // If the idClient does not exist, perform the INSERT
-        if ($exists == 0) {
+//        // If the idClient does not exist, perform the INSERT
+        if ($exists == null) {
             $insertStmt = $this->pdo->prepare("INSERT INTO Message (idClient, isReadClient, isReadAdmin) VALUES (?, ?, ?)");
             $insertStmt->execute([$idClient, $isReadClient, $isReadAdmin]);
+            // Récupérer l'ID du message inséré
+            $idMessage = $this->pdo->lastInsertId();
         } else {
             $stmt = $this->pdo->prepare("UPDATE Message SET isReadClient = ?, isReadAdmin = ? WHERE idClient = ?");
             // Execute the statement with the bound values
             $stmt->execute([$isReadClient, $isReadAdmin, $idClient]);
+            $idMessage = $exists["id"];
         }
         
+        
+        // Insérer des informations dans la table Contenu
+        $stmt = $this->pdo->prepare("INSERT INTO Contenu (message, filePath, fileType, idMessage, isAdmin, lastQuestion) VALUES (?, ?, ?, ?,?, ?)");
+        $stmt->execute([$message, $file, $fileType, $idMessage, $isAdmin, $lastQuestion]);
         
     }
 
@@ -148,6 +154,7 @@ class ChatServer implements MessageComponentInterface {
         
         if (isset($params['type']) && $params['type'] === 'admin') {
             $this->admin = $conn;
+            $this->admin->send(json_encode(['type' => 'listMessages', 'message' => $this->getListMessagesClients(), "questions" => $this->questions]));
         } else {
             $this->sendQuestion($conn, 1); // Start with the first question
             // Envoyer un identifiant unique au client
@@ -164,9 +171,7 @@ class ChatServer implements MessageComponentInterface {
     public function onMessage(ConnectionInterface $from, $msg) {
         $data = json_decode($msg, true);
         if (isset($data['type'])) {
-            var_dump("data type");
             if ($data['type'] === 'admin') {
-                var_dump("admin");
                 // Si le message vient de l'admin, envoyez-le au client spécifié
                 if ($from === $this->admin && isset($data['clientId'])) {
                     $cli = $this->listClients[$data['clientId']];
@@ -175,7 +180,6 @@ class ChatServer implements MessageComponentInterface {
                     
                 }
             } else {
-                var_dump("not admin");
                 // Si le message vient d'un client, envoyez-le à l'admin
                 
                 if ($this->admin !== null) {
@@ -198,18 +202,14 @@ class ChatServer implements MessageComponentInterface {
             $currentQuestion = $this->getQuestionById($currentQuestionId);
 
             if ($currentQuestion) {
-                var_dump("currentQuestion");
                 if (empty($currentQuestion['choices'])) {
-                    var_dump("empty currentQuestion");
-                    $this->saveUserData($userId, $currentQuestionId, $data['response']);
+                    $this->saveUserData($from->clientId, $userId, $currentQuestionId, $data['response']);
                     $nextQuestionId = array_values($currentQuestion['next_question'])[0] ?? null;
                 } else {
-                    var_dump("not empty currentQuestion");
                     $nextQuestionId = $currentQuestion['next_question'][$data['response']] ?? null;
                 }
 
                 if ($nextQuestionId === null || in_array($nextQuestionId, $this->userStates[$userId]['completed'])) {
-                    var_dump("question suppelementaire");
                     $this->sendOldQuestion($from, $currentQuestionId, $data['response']);
                     $this->userStates[$userId]['completed'][] = $currentQuestionId;
                     $repAdmin = 'Merci pour vos réponses! Vous pouvez maintenant poser des questions supplémentaires.';
@@ -225,14 +225,12 @@ class ChatServer implements MessageComponentInterface {
                 } else {
                     $this->userStates[$userId]['completed'][] = $currentQuestionId;
                     $this->userStates[$userId]['current_question'] = $nextQuestionId;
-                    var_dump("send question: current_question: " . $currentQuestionId . "reponse: " . $data['response']);
                     //send question sans possibilité de click à l'admin et au client
                     $this->sendOldQuestion($from, $currentQuestionId, $data['response']);
                     
                     $this->sendQuestion($from, $nextQuestionId);
                 }
             } else {
-                var_dump("Question non trouvée.");
                 $from->send(json_encode(['message' => 'Question non trouvée.']));
             }
         } else if (isset($data['simple_message'])) {
@@ -251,7 +249,6 @@ class ChatServer implements MessageComponentInterface {
             }
         } else if (isset($data['file'])) {
             // Handle file upload
-            var_dump("file");
             $fileData = base64_decode($data['file']['data']);
             $filePath = __DIR__ . '/../uploads/' . $data['file']['name'];
 
@@ -338,7 +335,6 @@ class ChatServer implements MessageComponentInterface {
     
     protected function sendQuestion(ConnectionInterface $conn, $questionId) {
         $question = $this->getQuestionById($questionId);
-        var_dump($question);
         if ($question) {
             $conn->send(json_encode(['question_id' => $questionId, 'question' => $question['question'], 'choices' => $question['choices']]));
         } else {
@@ -368,11 +364,26 @@ class ChatServer implements MessageComponentInterface {
         }
         return null;
     }
+    
+    protected function getQuestionLibelle($id) {
+        foreach ($this->questions as $question) {
+            if ($question['id'] == $id) {
+                return $question['libelle'];
+            }
+        }
+        return null;
+    }
 
-    protected function saveUserData($resourceId, $questionId, $response) {
+    protected function saveUserData($idClient, $resourceId, $questionId, $response) {
+        $libelle = $this->getQuestionLibelle($questionId);
+        
         if (!isset($this->userData[$resourceId])) {
             $this->userData[$resourceId] = [];
         }
+        
+        $stmt = $this->pdo->prepare("UPDATE Message SET " . $libelle . " = ? WHERE idClient = ?");
+        $stmt->execute([$response, $idClient]);
+        
         $this->userData[$resourceId][$questionId] = $response;
     }
 }
