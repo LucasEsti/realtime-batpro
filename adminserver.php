@@ -101,24 +101,36 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
             if (data.type === 'listMessages') {
                 messages = data.message;
                 for (const key in messages) {
-                    console.log("data------");
                     if (messages.hasOwnProperty(key)) { 
                         messages[key].forEach(message => {
 //                              console.log(`ID: ${message.idClient}, Content: ${message.message}`);
                                 var messageContainer = document.getElementById('messageContainer');
                                 createMessageSection(message.idClient, message.nom);
+                                let textAdmin = 'Client: ';
+                                if (message.isAdmin == true) {
+                                     textAdmin = 'Admin: ';
+                                }
                                 var messageDisplay = document.getElementById('messages-' + message.idClient);
                                 if (message.filePath) {
                                       if (imageTypes.includes(message.fileType)) {
                                           messageDiv = document.createElement('img');
                                           messageDiv.src = uploadsUrl + message.filePath;
                                           messageDiv.className = "img-fluid";
+                                          
+                                          let messageDiv2 = document.createElement('div');
+                                            messageDiv2.textContent = textAdmin;
+                                            messageDisplay.appendChild(messageDiv2);
+                                          
                                           messageDisplay.appendChild(messageDiv);
                                           messageContainer.scrollTop = messageContainer.scrollHeight;
                                       } else {
                                           messageDiv = document.createElement('a');
                                           messageDiv.href = uploadsUrl + message.filePath;
                                           messageDiv.textContent = message.filePath;
+                                          
+                                          let messageDiv2 = document.createElement('div');
+                                            messageDiv2.textContent = textAdmin;
+                                            messageDisplay.appendChild(messageDiv2);
 
                                           messageDisplay.appendChild(messageDiv);
                                           messageContainer.scrollTop = messageContainer.scrollHeight;
@@ -127,7 +139,7 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
                                   if (message.message) {
                                       console.log("message simple");
                                       messageDiv = document.createElement('div');
-                                      messageDiv.textContent = 'Client: ' + message.message;
+                                      messageDiv.textContent = textAdmin + 'Client: ' + message.message;
 
                                       messageDisplay.appendChild(messageDiv);
                                       messageContainer.scrollTop = messageContainer.scrollHeight;

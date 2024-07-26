@@ -154,10 +154,13 @@ class ChatServer implements MessageComponentInterface {
         
         if (isset($params['type']) && $params['type'] === 'admin') {
             $this->admin = $conn;
-            $this->admin->send(json_encode(['type' => 'listMessages', 'message' => $this->getListMessagesClients(), "questions" => $this->questions]));
+            $this->admin->send(json_encode(['type' => 'listMessages', 'message' => $this->getListMessagesClients()]));
         } else {
             //check if client exist before and send the last question if exist
             #test id 66a3a83c35ccc
+            $id = "66a3a83c35ccc";
+            $conn->send(json_encode(['type' => 'listMessages', 'messageClient' => $this->getMessageByClient($id)]));
+            
             
             $this->sendQuestion($conn, 1); // Start with the first question
             // Envoyer un identifiant unique au client

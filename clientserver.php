@@ -84,12 +84,19 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
 //                $.cookie('clientId');
 
             } 
-//            else if (data.type === 'message') {
-//                var chatMessage = document.createElement('div');
-//                chatMessage.textContent = data.message;
-//                chatBox.appendChild(chatMessage);
-//                chatBox.scrollTop = chatBox.scrollHeight;
-//            }
+            
+            if (data.type === 'listMessages') {
+                if (Object.keys(data.choicesOld).length > 0) {
+                    for (var choice in data.choicesOld) {
+                        var chatMessage = document.createElement('div');
+                        chatMessage.textContent = data.choicesOld[choice];
+                        chat.appendChild(chatMessage);
+                    }
+                } 
+                var chatMessage = document.createElement('div');
+                chatMessage.textContent = "reponse :" + data.reponseQuestion;
+                chat.appendChild(chatMessage);
+            }
             
             if (data.questionOld) {
                 if (Object.keys(data.choicesOld).length > 0) {
@@ -179,10 +186,6 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
                 reader.readAsDataURL(file);
                 fileInput.value = ''; // Clear the file input
             }
-        }
-        
-        function sendSimpleMessage() {
-            
         }
         
         
