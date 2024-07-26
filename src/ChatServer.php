@@ -32,42 +32,67 @@ class ChatServer implements MessageComponentInterface {
         $password = '';
         $this->pdo = new \PDO($dsn, $username, $password);
         
-//        $sql = "
-//            SELECT 
-//                m.idClient, 
-//                c.message, 
-//                m.dateEnvoi
-//            FROM 
-//                Message m
-//            JOIN 
-//                Contenu c ON m.id = c.idMessage
-//            ORDER BY 
-//                m.dateEnvoi DESC, m.idClient;
-//        ";
-//
-//        $stmt = $this->pdo->prepare($sql);
-//        $stmt->execute();
-//
-//        // Récupérer les résultats
-//        $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-//
-//        // Afficher les résultats
-//        $currentClient = null;
-        var_dump($result);
-//        foreach ($result as $row) {
-//            if ($row['idClient'] !== $currentClient) {
-//                if ($currentClient !== null) {
-//                    echo "<br>"; // Séparateur entre les clients
-//                }
-//                echo "Client ID: " . $row['idClient'] . "<br>";
-//                $currentClient = $row['idClient'];
-//            }
-//            echo "Date: " . $row['dateEnvoi'] . "<br>";
-//            echo "Message: " . $row['message'] . "<br><br>";
-//        }
     }
     
-    protected function insertMessage($idClient, $isAdmin, $message, $file = null, $fileType = null) {
+    protected function getListMessagesClients() {
+        $sql = "
+            SELECT 
+                m.idClient, 
+                c.message, 
+                m.dateEnvoi,
+                c.isAdmin,
+                m.isReadAdmin,
+                m.isReadClient
+            FROM 
+                Message m
+            JOIN 
+                Contenu c ON m.id = c.idMessage
+            ORDER BY 
+                m.dateEnvoi DESC, m.idClient;
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+
+        // Récupérer les résultats
+        $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $listMessageClients = [];
+        foreach ($result as $row) {
+            $listMessageClients[$row['idClient']][] = $row;
+        }
+        return $listMessageClients;
+    }
+    
+    protected function getMessageByClient($idClient) {
+        $sql = "
+            SELECT 
+                m.idClient, 
+                c.message, 
+                m.dateEnvoi,
+                c.isAdmin,
+                m.isReadAdmin,
+                m.isReadClient
+            FROM 
+                Message m
+            JOIN 
+                Contenu c ON m.id = c.idMessage
+            WHERE
+                m.idClient = :idClient
+            ORDER BY 
+                m.dateEnvoi DESC, m.idClient;
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':idClient', $idClient, \PDO::PARAM_STR);
+        $stmt->execute();
+
+        $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return $result;
+    }
+
+
+    protected function insertMessage($idClient, $isAdmin, $message, $lastQuestion = null, $file = null, $fileType = null) {
         // Insérer le message dans la table Message
         $messageTemporaire = "";
         if (is_array($message)) {
@@ -82,8 +107,8 @@ class ChatServer implements MessageComponentInterface {
         }
         
         // Insérer des informations dans la table Contenu
-        $stmt = $this->pdo->prepare("INSERT INTO Contenu (message, filePath, fileType, idClient, isAdmin) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$message, $file, $fileType, $idClient, $isAdmin]);
+        $stmt = $this->pdo->prepare("INSERT INTO Contenu (message, filePath, fileType, isAdmin, lastQuestion) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$message, $file, $fileType, $isAdmin, $lastQuestion]);
         
         // Récupérer l'ID du message inséré
 //        $idMessage = $this->pdo->lastInsertId();
@@ -134,6 +159,7 @@ class ChatServer implements MessageComponentInterface {
         }
         
     }
+    
 
     public function onMessage(ConnectionInterface $from, $msg) {
         $data = json_decode($msg, true);
@@ -251,7 +277,7 @@ class ChatServer implements MessageComponentInterface {
                                 'from' => $client->clientId
                             ]);
                 
-                $this->insertMessage($client->clientId, true, '', $data['file']['name'], $fileType);
+                $this->insertMessage($client->clientId, true, '', null, $data['file']['name'], $fileType);
                 
                 $client->send($rep);
                 if ($this->admin !== null) {
@@ -264,7 +290,7 @@ class ChatServer implements MessageComponentInterface {
                                 'message' => $array,    
                                 'from' => $from->clientId
                             ]);
-                $this->insertMessage($from->clientId, true, '', $data['file']['name'], $fileType);
+                $this->insertMessage($from->clientId, true, '', null,$data['file']['name'], $fileType);
                 $from->send($rep);
                 if ($this->admin !== null) {
                     $this->admin->send($rep);
@@ -297,9 +323,9 @@ class ChatServer implements MessageComponentInterface {
         $responseById = $this->getResponseById($questionId, $reponse);
         if ($question) {
             //envoie question
-            $this->insertMessage($conn->clientId, true, $question);
+            $this->insertMessage($conn->clientId, true, $question, $questionId);
             //envoie reponse user
-            $this->insertMessage($conn->clientId, false, $responseById);
+            $this->insertMessage($conn->clientId, false, $responseById, $questionId);
             $conn->send(json_encode(['reponseQuestion' => $responseById,  'questionOld' => $question, 'choicesOld' => $question['choices']]));
             if ($this->admin !== null) {
                 $this->admin->send(json_encode(['type' => 'message', 'from' => $conn->clientId, 'reponseQuestion' => $responseById,  'questionOld' => $question, 'choicesOld' => $question['choices']]));
