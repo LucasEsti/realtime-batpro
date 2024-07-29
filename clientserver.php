@@ -8,12 +8,15 @@ $scriptName = dirname($_SERVER['SCRIPT_NAME']);
 
 // Définir l'URL de base
 $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
+$source = $scheme . '://' . $host . $scriptName . '/';
 
 ?>
 <!DOCTYPE html>
 <html>
 <head>
     <title>Client Chat</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="<?php echo $source; ?>style/chatbox.css">
     <style>
         #chatBox {
             height: 200px;
@@ -35,16 +38,40 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
     </style>
 </head>
 <body>
-    <div id="chatBox" readonly>
-        <div id="chat"></div>
+        <div id="chatBox" readonly>
+        <div ></div>
         <div id="choices"></div>
         <input type="text" id="response" placeholder="Entrez votre réponse" class="hidden" />
         <button id="sendButton" onclick="sendResponse()" class="hidden">Envoyer</button>
         <input type="text" id="simpleMessage" placeholder="Entrez un message simple" class="hidden" />
         <input type="file" id="fileInput" class="hidden" />
         <button id="sendSimpleMessageButton" onclick="sendMessage()" class="hidden">Envoyer Message</button>
+        
+        <div class="floating-chat">
+            <i class="fa fa-comments" aria-hidden="true"></i>
+            <div class="chat">
+                <div class="header">
+                    <span class="title">
+                        what's on your mind?
+                    </span>
+                    <button>
+                        <i class="fa fa-times" aria-hidden="true"></i>
+                    </button>
+
+                </div>
+                <ul id="chat" class="messages">
+                </ul>
+                <div class="footer">
+                    <div class="text-box" contenteditable="true" disabled="true"></div>
+                    <button id="sendMessage">send</button>
+                </div>
+            </div>
+        </div>
+        
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="<?php echo $source; ?>style/chatbox.js"></script>
 
         <!--<button id="sendFileButton" onclick="sendFile()" class="hidden">Envoyer Fichier</button>-->
     </div>
@@ -91,42 +118,46 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
             } 
             
             if (data.type === 'listMessages') {
+                console.log("listMessages");
                 if (data.messageClient) {
                     data.messageClient.forEach(message => {
-                        console.log(message);
-                        isClient = 'you';
+                        
+                        isClient = 'other';
                         if (message.isAdmin) {
-                            isClient = 'Admin';
+                            isClient = 'self';
                         }
 
                         if (message.filePath) {
                             if (imageTypes.includes(message.fileType)) {
-                                messageDiv = document.createElement('img');
-                                messageDiv.src = uploadsUrl + message.filePath;
-                                messageDiv.className = "img-fluid";
+                                let img = document.createElement('img');
+                                img.src = uploadsUrl + message.filePath;
+                                img.className = "img-fluid";
 
-                                let messageDiv2 = document.createElement('div');
-                                  messageDiv2.textContent = isClient;
-                                  chat.appendChild(messageDiv2);
-
-                                chat.appendChild(messageDiv);
+                                var li = document.createElement('li');
+                                li.className = isClient;
+                                li.appendChild(img);
+                                
+                                chat.appendChild(li);
+                                
                             } else {
-                                messageDiv = document.createElement('a');
-                                messageDiv.href = uploadsUrl + message.filePath;
-                                messageDiv.textContent = message.filePath;
+                                let link = document.createElement('a');
+                                link.href = uploadsUrl + message.filePath;
+                                link.textContent = message.filePath;
 
-                                let messageDiv2 = document.createElement('div');
-                                  messageDiv2.textContent = isClient;
-                                  chat.appendChild(messageDiv2);
-
-                                chat.appendChild(messageDiv);
+                                var li = document.createElement('li');
+                                li.className = isClient;
+                                li.appendChild(link);
+                                
+                                chat.appendChild(li);
+                                
                             }
                         }
 
                         if (message.message) {
-                            var chatMessage = document.createElement('div');
-                            chatMessage.textContent = isClient + " :" + message.message;
-                            chat.appendChild(chatMessage);
+                            var li = document.createElement('li');
+                            li.className = isClient;
+                            li.textContent = message.message;
+                            chat.appendChild(li);
                         }
 
 
@@ -136,8 +167,8 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
                     console.log("affiche");
                     responseInput.classList.remove('hidden');
                     sendButton.classList.remove('hidden');
-                    
-                    choicesDiv.innerHTML = ''; // Clear choices div when done
+                    $(".choices").remove();
+//                    choicesDiv.innerHTML = ''; // Clear choices div when done
                     
                     simpleMessageInput.classList.add('hidden');
                     sendSimpleMessageButton.classList.add('hidden');
@@ -147,26 +178,49 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
             }
             
             if (data.questionOld) {
+                console.log("questionOld");
                 if (Object.keys(data.choicesOld).length > 0) {
+                    var li = document.createElement('li');
+                    li.className = 'other';
+                    
                     for (var choice in data.choicesOld) {
                         var chatMessage = document.createElement('div');
                         chatMessage.textContent = data.choicesOld[choice];
-                        chat.appendChild(chatMessage);
+                        
+                        li.appendChild(chatMessage);
+                        
                     }
+                    
+                    chat.appendChild(li);
+                    
                 } 
-                var chatMessage = document.createElement('div');
-                chatMessage.textContent = "reponse :" + data.reponseQuestion;
-                chat.appendChild(chatMessage);
+                
+                var li = document.createElement('li');
+                li.className = 'self';
+                li.textContent = data.reponseQuestion;
+                chat.appendChild(li);
             }
             
             if (data.question) {
+                
                 console.log('question');
                 currentQuestionId = data.question_id;  // Mise à jour de currentQuestionId
-                chat.innerHTML += '<p>' + data.question + '</p>';
-                choicesDiv.innerHTML = ''; // Clear previous choices
+                
+                var li = document.createElement('li');
+                li.className = "other";
+                console.log(data.question);
+                li.textContent = data.question;
+                chat.appendChild(li);
+                
+                $(".choices").remove();
+//                choicesDiv.innerHTML = ''; // Clear previous choices
                 if (Object.keys(data.choices).length > 0) {
-                    console.log('choices');
+                    
+                    var li = document.createElement('li');
+                    li.classList.add('other', 'choices', 'class3');
+                    
                     for (var choice in data.choices) {
+                        
                         var button = document.createElement('button');
                         button.innerHTML = data.choices[choice];
                         button.onclick = (function(choice) {
@@ -174,8 +228,13 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
                                 sendChoice(choice);
                             };
                         })(choice);
-                        choicesDiv.appendChild(button);
+                        
+                        li.appendChild(button);
+//                        choicesDiv.appendChild(button);
                     }
+                    
+                    chat.appendChild(li);
+                    
                     responseInput.classList.add('hidden');
                     sendButton.classList.add('hidden');
                     simpleMessageInput.classList.add('hidden');
@@ -192,22 +251,50 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
 //                    sendFileButton.classList.add('hidden');
                 }
             } else if (data.message) {
-                
+                console.log("message");
                 if (isObject(data.message)) {
                     if (imageTypes.includes(data.message["type"])) {
-                        chat.innerHTML += '<p> <img class="img-fluid" src="' + uploadsUrl + data.message["file-name"] + '"/></p>' ;
+                        let img = document.createElement('img');
+                        img.src = uploadsUrl + data.message["file-name"];
+                        img.className = "img-fluid";
+
+                        var li = document.createElement('li');
+                        li.className = 'self';
+                        li.appendChild(img);
+
+                        chat.appendChild(li);
                     } else {
-                        chat.innerHTML += '<p> <a href="' + uploadsUrl + data.message["file-name"] + '" target="_blank">' + data.message["file-name"] + '<a></p>';
+                        
+                        let link = document.createElement('a');
+                        link.href = uploadsUrl + data.message["file-name"];
+                        link.target = '_blank';
+                        link.textContent = data.message["file-name"];
+
+                        var li = document.createElement('li');
+                        li.className = 'self';
+                        li.appendChild(link);
+
+                        chat.appendChild(li);
+                        
                     }
                 } else {
                     
-                    chat.innerHTML += '<p>' + data.message + '</p>';
+                    var li = document.createElement('li');
+                    li.className = 'self';
+
+                    var chatMessage = document.createElement('div');
+                    chatMessage.textContent = data.message;
+
+                    li.appendChild(chatMessage);
+                    chat.appendChild(li);
+                    
                     // Show input for simple message and file upload if the questionnaire is complete
                     if (data.message.includes('Merci pour vos réponses!')) {
                         simpleMessageInput.classList.remove('hidden');
                         sendSimpleMessageButton.classList.remove('hidden');
                         fileInput.classList.remove('hidden');
 //                        sendFileButton.classList.remove('hidden');
+                        $(".choices").remove();
                         choicesDiv.innerHTML = ''; // Clear choices div when done
                         responseInput.classList.add('hidden');
                         sendButton.classList.add('hidden');
@@ -251,11 +338,6 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
             }
         }
 
-        
-
-        function sendFile() {
-            
-        }
         
     </script>
 </body>

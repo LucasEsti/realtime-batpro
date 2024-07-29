@@ -34,7 +34,7 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
 </head>
 <body>
     <div id="messageContainer"></div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <script>
         var ws = new WebSocket('ws://localhost:8080?type=admin');

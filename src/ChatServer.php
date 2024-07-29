@@ -214,7 +214,6 @@ class ChatServer implements MessageComponentInterface {
                         if ($idByResponse != null) {
                             $this->sendQuestion($conn, $idByResponse);
                         } else {
-                            
                             $this->sendQuestion($conn, $nextQuestion);
                         }
                         
