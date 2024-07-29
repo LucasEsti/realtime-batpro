@@ -41,11 +41,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         <div id="chatBox" readonly>
         <div ></div>
         <div id="choices"></div>
-        <input type="text" id="response" placeholder="Entrez votre réponse" class="hidden" />
-        <button id="sendButton" onclick="sendResponse()" class="hidden">Envoyer</button>
-        <input type="text" id="simpleMessage" placeholder="Entrez un message simple" class="hidden" />
-        <input type="file" id="fileInput" class="hidden" />
-        <button id="sendSimpleMessageButton" onclick="sendMessage()" class="hidden">Envoyer Message</button>
+        
         
         <div class="floating-chat">
             <i class="fa fa-comments" aria-hidden="true"></i>
@@ -62,8 +58,14 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 <ul id="chat" class="messages">
                 </ul>
                 <div class="footer">
-                    <div class="text-box" contenteditable="true" disabled="true"></div>
-                    <button id="sendMessage">send</button>
+                    <input type="text" id="response" placeholder="Entrez votre réponse" class=" hidden" />
+                    <button id="sendButton" onclick="sendResponse()" class="hidden">Send</button>
+                    <input type="text" id="simpleMessage" placeholder="Entrez un message simple" class=" hidden" />
+                    <input type="file" id="fileInput" class="hidden" />
+                    <button id="sendSimpleMessageButton" onclick="sendMessage()" class="hidden">Send</button>
+                    
+                    <div class="text-box hidden" contenteditable="true" disabled="true"></div>
+                    <button id="sendMessage" class="hidden">send</button>
                 </div>
             </div>
         </div>
@@ -122,9 +124,9 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 if (data.messageClient) {
                     data.messageClient.forEach(message => {
                         
-                        isClient = 'other';
+                        isClient = 'self';
                         if (message.isAdmin) {
-                            isClient = 'self';
+                            isClient = 'other';
                         }
 
                         if (message.filePath) {
@@ -165,10 +167,19 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 }
                 if (data.lastQuestionSave == null) {
                     console.log("affiche");
+                    simpleMessageInput.classList.remove('hidden');
+                    sendSimpleMessageButton.classList.remove('hidden');
+                    fileInput.classList.remove('hidden');
+                    $(".choices").remove();
+                    
+                    responseInput.classList.add('hidden');
+                    sendButton.classList.add('hidden');
+                    
+                } else {
+                    console.log("affiche 2");
                     responseInput.classList.remove('hidden');
                     sendButton.classList.remove('hidden');
                     $(".choices").remove();
-//                    choicesDiv.innerHTML = ''; // Clear choices div when done
                     
                     simpleMessageInput.classList.add('hidden');
                     sendSimpleMessageButton.classList.add('hidden');
@@ -306,6 +317,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         };
 
         function sendMessage() {
+            console.log('sendMessage');
             var message2 = simpleMessageInput.value;
             var file = fileInput.files[0];
             if (message2) {
@@ -331,6 +343,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         }
 
         function sendResponse() {
+            console.log('sendResponse');
             var response = responseInput.value;
             if (response && currentQuestionId !== null) {
                 conn.send(JSON.stringify({ question_id: currentQuestionId, response: response }));

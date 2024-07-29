@@ -305,7 +305,7 @@ class ChatServer implements MessageComponentInterface {
         } else if (isset($data['simple_message'])) {
             if (isset($this->userStates[$userId]) && $this->userStates[$userId]['completed'] === ['completed']) {
                 
-                $repClient = 'Message reçu: ' . $data['simple_message'];
+                $repClient = $data['simple_message'];
                 //envoie reponse user
                 $this->insertMessage($from->clientId, false, $repClient);
                 
