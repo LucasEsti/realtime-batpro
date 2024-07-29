@@ -49,8 +49,16 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
         <!--<button id="sendFileButton" onclick="sendFile()" class="hidden">Envoyer Fichier</button>-->
     </div>
     <script>
-        var conn = new WebSocket('ws://localhost:8080?type=client');
-        var clientId = null;
+        
+        var clientId = $.cookie('clientId');
+        
+        let connex = "";
+        if (clientId !== undefined) {
+            connex = 'ws://localhost:8080?type=client&userId=' + clientId;
+        } else {
+            connex = 'ws://localhost:8080?type=client';
+        }
+        var conn = new WebSocket(connex);
         
         // Définir l'URL des uploads depuis PHP
         const uploadsUrl = '<?php echo $uploadsUrl; ?>';
@@ -79,23 +87,63 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
             
 //            var chatBox = document.getElementById('chatBox');
             if (data.type === 'id') {
-                clientId = data.id;
-                $.cookie('clientId', clientId, { expires: 7, path: '/' });
-//                $.cookie('clientId');
-
+                $.cookie('clientId', data.id, { expires: 7, path: '/' });
             } 
             
             if (data.type === 'listMessages') {
-                if (Object.keys(data.choicesOld).length > 0) {
-                    for (var choice in data.choicesOld) {
-                        var chatMessage = document.createElement('div');
-                        chatMessage.textContent = data.choicesOld[choice];
-                        chat.appendChild(chatMessage);
-                    }
-                } 
-                var chatMessage = document.createElement('div');
-                chatMessage.textContent = "reponse :" + data.reponseQuestion;
-                chat.appendChild(chatMessage);
+                if (data.messageClient) {
+                    data.messageClient.forEach(message => {
+                        console.log(message);
+                        isClient = 'you';
+                        if (message.isAdmin) {
+                            isClient = 'Admin';
+                        }
+
+                        if (message.filePath) {
+                            if (imageTypes.includes(message.fileType)) {
+                                messageDiv = document.createElement('img');
+                                messageDiv.src = uploadsUrl + message.filePath;
+                                messageDiv.className = "img-fluid";
+
+                                let messageDiv2 = document.createElement('div');
+                                  messageDiv2.textContent = isClient;
+                                  chat.appendChild(messageDiv2);
+
+                                chat.appendChild(messageDiv);
+                            } else {
+                                messageDiv = document.createElement('a');
+                                messageDiv.href = uploadsUrl + message.filePath;
+                                messageDiv.textContent = message.filePath;
+
+                                let messageDiv2 = document.createElement('div');
+                                  messageDiv2.textContent = isClient;
+                                  chat.appendChild(messageDiv2);
+
+                                chat.appendChild(messageDiv);
+                            }
+                        }
+
+                        if (message.message) {
+                            var chatMessage = document.createElement('div');
+                            chatMessage.textContent = isClient + " :" + message.message;
+                            chat.appendChild(chatMessage);
+                        }
+
+
+                    });
+                }
+                if (data.lastQuestionSave == null) {
+                    console.log("affiche");
+                    responseInput.classList.remove('hidden');
+                    sendButton.classList.remove('hidden');
+                    
+                    choicesDiv.innerHTML = ''; // Clear choices div when done
+                    
+                    simpleMessageInput.classList.add('hidden');
+                    sendSimpleMessageButton.classList.add('hidden');
+                    fileInput.classList.add('hidden');
+                }
+                
             }
             
             if (data.questionOld) {
@@ -135,7 +183,7 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
                     fileInput.classList.add('hidden');
 //                    sendFileButton.classList.add('hidden');
                 } else {
-                    console.log('not choices');
+                    console.log('not choices 1');
                     responseInput.classList.remove('hidden');
                     sendButton.classList.remove('hidden');
                     simpleMessageInput.classList.add('hidden');

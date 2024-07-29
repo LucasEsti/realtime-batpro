@@ -152,7 +152,7 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
             if (data.type === 'message') {
                 var messageContainer = document.getElementById('messageContainer');
                 
-                createMessageSection(data.from);
+                createMessageSection(data.from, data.from);
                 
                 var messageDisplay = document.getElementById('messages-' + data.from);
                 var messageDiv = document.createElement('div');

@@ -77,7 +77,10 @@ class ChatServer implements MessageComponentInterface {
                 m.isReadAdmin,
                 m.isReadClient,
                 m.nom,
-                m.mail
+                m.mail,
+                c.lastQuestion,
+                c.filePath,
+                c.fileType
             FROM 
                 Message m
             JOIN 
@@ -143,6 +146,26 @@ class ChatServer implements MessageComponentInterface {
         $stmt->execute([$message, $file, $fileType, $idMessage, $isAdmin, $lastQuestion]);
         
     }
+    
+    protected function getIDByResponse($id, $reponse) {
+        $keyFound = null;
+        foreach ($this->questions as $question) {
+            if ($question['id'] == $id) {
+                if (count($question['choices']) != 0) {
+                    foreach ($question['choices'] as $key => $value) {
+                        if ($value === $reponse) {
+                          $keyFound = $key;
+                          break;
+                        }
+                    }
+                }
+                
+                
+            }
+        }
+        return $keyFound;
+    }
+    
 
     public function onOpen(ConnectionInterface $conn) {
         // Ajouter la connexion à la liste des clients
@@ -157,18 +180,60 @@ class ChatServer implements MessageComponentInterface {
             $this->admin->send(json_encode(['type' => 'listMessages', 'message' => $this->getListMessagesClients()]));
         } else {
             //check if client exist before and send the last question if exist
-            #test id 66a3a83c35ccc
-            $id = "66a3a83c35ccc";
-            $conn->send(json_encode(['type' => 'listMessages', 'messageClient' => $this->getMessageByClient($id)]));
-            
-            
-            $this->sendQuestion($conn, 1); // Start with the first question
-            // Envoyer un identifiant unique au client
-            $clientId = uniqid();
-            $conn->send(json_encode(['type' => 'id', 'id' => $clientId]));
+            if (isset($params['userId'])) {
+                $id = $params['userId'];
+                $conn->clientId = $id;
+                $this->listClients[$id] = $conn;
+                
+                $result = $this->getMessageByClient($id);
+                
+                //si des messages sont dans la base
+                if (count($result) == 0) {
+                    $this->sendQuestion($conn, 1); // Start with the first question
+                    // Envoyer un identifiant unique au client ---
+                    $conn->send(json_encode(['type' => 'id', 'id' => $id ]));
 
-            $conn->clientId = $clientId;
-            $this->listClients[$clientId] = $conn;
+                    $conn->clientId = $id ;
+                    $this->listClients[$id] = $conn;
+                    $this->userStates[$id] = [
+                        'current_question' => 1,
+                        'completed' => []
+                    ];
+                    
+                    
+                } else {
+                    $conn->send(json_encode(['type' => 'listMessages', 'messageClient' => $result]));
+                    $lastQuestionSave = $result[count($result) - 1]["lastQuestion"];
+                    $lastReponseSave = $result[count($result) - 1]["message"];
+                    if ($lastQuestionSave != null) {
+                        $idByResponse = $this->getIDByResponse($lastQuestionSave, $lastReponseSave);
+                        
+                        $nextQuestion = $this->getQuestionById($lastQuestionSave)['next_question']["1"];
+                        $this->userStates[$id]['completed'][] = $nextQuestion;
+                        $this->userStates[$id]['current_question'] = $nextQuestion;
+                        if ($idByResponse != null) {
+                            $this->sendQuestion($conn, $idByResponse);
+                        } else {
+                            
+                            $this->sendQuestion($conn, $nextQuestion);
+                        }
+                        
+                    } else {
+                        $this->userStates[$id]['completed'] = ['completed'];
+                        $conn->send(json_encode(['type' => 'listMessages', 'lastQuestionSave' => $lastQuestionSave]));
+                    }
+                }
+                
+            } else {
+                $this->sendQuestion($conn, 1); // Start with the first question
+                // Envoyer un identifiant unique au client ---
+                $clientId = uniqid();
+                $conn->send(json_encode(['type' => 'id', 'id' => $clientId]));
+
+                $conn->clientId = $clientId;
+                $this->listClients[$clientId] = $conn;
+            }
+            
         }
         
     }
@@ -194,7 +259,7 @@ class ChatServer implements MessageComponentInterface {
             }
         } 
         
-        $userId = $from->resourceId;
+        $userId = $from->clientId;
 
         if (isset($data['question_id']) && isset($data['response'])) {
             if (!isset($this->userStates[$userId])) {
@@ -203,10 +268,9 @@ class ChatServer implements MessageComponentInterface {
                     'completed' => []
                 ];
             }
-
             $currentQuestionId = $this->userStates[$userId]['current_question'];
             $currentQuestion = $this->getQuestionById($currentQuestionId);
-
+            
             if ($currentQuestion) {
                 if (empty($currentQuestion['choices'])) {
                     $this->saveUserData($from->clientId, $userId, $currentQuestionId, $data['response']);
@@ -270,7 +334,7 @@ class ChatServer implements MessageComponentInterface {
                     "type" => $fileType, 
                 ];
             
-            if ($data['clientId']) {
+            if (isset($data['clientId']) && $data['clientId']) {
                 /// file avy any @ admin
                 $client = $this->listClients[$data['clientId']];
                 
