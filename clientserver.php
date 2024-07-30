@@ -16,6 +16,8 @@ $source = $scheme . '://' . $host . $scriptName . '/';
 <head>
     <title>Client Chat</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <link rel="stylesheet" href="<?php echo $source; ?>style/chatbox.css">
     <style>
         #chatBox {
@@ -35,6 +37,10 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             display: none;
         }
         
+        input[type='file'] {
+            color: transparent;
+          }
+        
     </style>
 </head>
 <body>
@@ -45,10 +51,10 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         
         <div class="floating-chat">
             <i class="fa fa-comments" aria-hidden="true"></i>
-            <div class="chat">
+            <div class="chat container-fluid">
                 <div class="header">
                     <span class="title">
-                        what's on your mind?
+                        CahtLive
                     </span>
                     <button>
                         <i class="fa fa-times" aria-hidden="true"></i>
@@ -57,12 +63,12 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 </div>
                 <ul id="chat" class="messages">
                 </ul>
-                <div class="footer">
-                    <input type="text" id="response" placeholder="Entrez votre réponse" class=" hidden" />
-                    <button id="sendButton" onclick="sendResponse()" class="hidden">Send</button>
-                    <input type="text" id="simpleMessage" placeholder="Entrez un message simple" class=" hidden" />
-                    <input type="file" id="fileInput" class="hidden" />
-                    <button id="sendSimpleMessageButton" onclick="sendMessage()" class="hidden">Send</button>
+                <div class="row footer ">
+                    <input type="text" id="response" placeholder="Entrez votre réponse" class="col-7 text-box hidden" />
+                    <button id="sendButton" onclick="sendResponse()" class="col-1 hidden">Send</button>
+                    <input type="text" id="simpleMessage" placeholder="Entrez un message simple" class="col-7 text-box hidden" />
+                    <input type="file" id="fileInput" class="col-3 hidden" title=" "/>
+                    <button id="sendSimpleMessageButton" onclick="sendMessage()" class="col-1 hidden">Send</button>
                     
                     <div class="text-box hidden" contenteditable="true" disabled="true"></div>
                     <button id="sendMessage" class="hidden">send</button>

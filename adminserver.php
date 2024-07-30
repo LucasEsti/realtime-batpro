@@ -8,12 +8,15 @@ $scriptName = dirname($_SERVER['SCRIPT_NAME']);
 
 // Définir l'URL de base
 $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
+$source = $scheme . '://' . $host . $scriptName . '/';
 
 ?>
 <!DOCTYPE html>
 <html>
 <head>
     <title>Admin Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+<link rel="stylesheet" href="<?php echo $source; ?>direct-messaging/dist/style.css">
     <style>
         #messageContainer {
             height: 400px;
@@ -30,10 +33,41 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
         .adminMessage {
             color: blue;
         }
+        
+        .scrollable-div {
+            overflow-y: scroll; /* Active le défilement vertical si nécessaire */
+        }
+
+        
     </style>
 </head>
 <body>
-    <div id="messageContainer"></div>
+    <div ></div>
+    
+    <div class="wrapper">
+    <div class="container">
+        <div class="left">
+            <div class="top">
+                <input type="text" placeholder="Search" />
+                <a href="javascript:;" class="search"></a>
+            </div>
+            <ul id="listPeople" class="people">
+            </ul>
+        </div>
+        <div id="messageContainer" class="right">
+            <div class="top"><span>To: <span class="name"></span></span></div>
+            
+            
+<!--            <div class="write">
+                <a href="javascript:;" class="write-link attach"></a>
+                <input type="text" />
+                <a href="javascript:;" class="write-link smiley"></a>
+                <a href="javascript:;" class="write-link send"></a>
+            </div>-->
+        </div>
+    </div>
+</div>
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <script>
@@ -48,50 +82,69 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
             console.log('WebSocket connection opened');
         };
         
+        var listMessage = document.getElementById('listMessage');
+        
         function createMessageSection(idClient, nom) {
             var from = idClient;
             var messageContainer = document.getElementById('messageContainer');
+            var people = document.getElementById('listPeople');
+            
             var clientDiv = document.getElementById('client-' + from);
             if (!clientDiv) {
+                let name = from;
+                if (nom != "") {
+                    name = nom;
+                }
+
+                <!--list chat-->
+                var liPersonne = document.createElement('li');
+                liPersonne.setAttribute('data-chat', from);
+                liPersonne.id = 'client-' + from;
+                liPersonne.classList.add('person', 'chat');
+
+                var spanPerson = document.createElement('span');
+                spanPerson.className = 'name';
+                spanPerson.textContent = name;
+
+                liPersonne.appendChild(spanPerson);
+
+                people.appendChild(liPersonne);
+                updateFriends();
+                    <!--list client-->
+                
+                
                   clientDiv = document.createElement('div');
-                  clientDiv.id = 'client-' + from;
-                  clientDiv.className = 'clientSection';
-                  
-                  let name = from;
-                  if (nom != "") {
-                      name = nom;
-                  }
-                  var clientTitle = document.createElement('h3');
-                  clientTitle.textContent = 'Client ' + name;
-                  clientDiv.appendChild(clientTitle);
-
-                  var messageDisplay = document.createElement('div');
-                  messageDisplay.id = 'messages-' + from;
-                  clientDiv.appendChild(messageDisplay);
-
-                  var messageInput = document.createElement('input');
-                  messageInput.type = 'text';
-                  messageInput.placeholder = 'Type your message...';
-                  messageInput.id = 'input-' + from;
-                  clientDiv.appendChild(messageInput);
-
-                  var fileInput = document.createElement('input');
-                  fileInput.type = 'file';
-                  fileInput.id = 'file-' + from;
-                  clientDiv.appendChild(fileInput);
-
-
-                  var sendButton = document.createElement('button');
-                  sendButton.textContent = 'Send';
-                  sendButton.onclick = (function(clientId) {
-                      return function() {
-                          sendMessage(clientId);
-                      };
-                  })(from);
-                  clientDiv.appendChild(sendButton);
+                  clientDiv.id = 'messages-' + from;
+                  clientDiv.setAttribute('data-chat', from);
+                  clientDiv.classList.add('clientSection', 'chat', 'scrollable-div');
 
                   messageContainer.appendChild(clientDiv);
               }
+        }
+        
+        function createInput(from, clientDiv) {
+            var messageInput = document.createElement('input');
+            messageInput.type = 'text';
+            messageInput.placeholder = 'Type your message...';
+            messageInput.id = 'input-' + from;
+            clientDiv.appendChild(messageInput);
+
+            var fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.id = 'file-' + from;
+            clientDiv.appendChild(fileInput);
+
+
+            var sendButton = document.createElement('button');
+            sendButton.textContent = 'Send';
+            sendButton.onclick = (function(clientId) {
+                return function() {
+                    sendMessage(clientId);
+                };
+            })(from);
+            clientDiv.appendChild(sendButton);
+            
+            
         }
         
         ws.onmessage = function(event) {
@@ -101,14 +154,14 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
             if (data.type === 'listMessages') {
                 messages = data.message;
                 for (const key in messages) {
-                    if (messages.hasOwnProperty(key)) { 
+                    
+                    if (messages.hasOwnProperty(key)) {
                         messages[key].forEach(message => {
-//                              console.log(`ID: ${message.idClient}, Content: ${message.message}`);
                                 var messageContainer = document.getElementById('messageContainer');
                                 createMessageSection(message.idClient, message.nom);
-                                let textAdmin = 'Client: ';
+                                let textAdmin = 'bubble me';
                                 if (message.isAdmin == true) {
-                                     textAdmin = 'Admin: ';
+                                     textAdmin = 'bubble you';
                                 }
                                 var messageDisplay = document.getElementById('messages-' + message.idClient);
                                 if (message.filePath) {
@@ -139,14 +192,22 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
                                   if (message.message) {
                                       console.log("message simple");
                                       messageDiv = document.createElement('div');
-                                      messageDiv.textContent = textAdmin + 'Client: ' + message.message;
+                                      messageDiv.textContent = message.message;
+                                      messageDiv.className = textAdmin;
 
                                       messageDisplay.appendChild(messageDiv);
                                       messageContainer.scrollTop = messageContainer.scrollHeight;
                                   }
-                        });
+                                  
+                                 
+                            });
+                            createInput(key, document.getElementById('messages-' + key));
                     }
                   }
+                  document.getElementById('listPeople').firstElementChild.classList.add('active');
+                  document.getElementById('messageContainer').children[1].classList.add('active-chat');
+                
+                  
             }
             
             if (data.type === 'message') {
@@ -159,7 +220,7 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
                 
                 if (data.questionOld) {
                     if (data.questionOld.id == 2) {
-                        $("#client-" + data.from + " h3" ).text("Client " + data.reponseQuestion);
+                        $("#client-" + data.from + " span" ).text(data.reponseQuestion);
                     }
                     messageDiv = document.createElement('div');
                     messageDiv.textContent = data.questionOld.question;
@@ -234,5 +295,7 @@ $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
             }
         }
     </script>
+    
+    <script  src="<?php echo $source; ?>direct-messaging/dist/script.js"></script>
 </body>
 </html>
