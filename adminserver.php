@@ -116,33 +116,42 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                   clientDiv = document.createElement('div');
                   clientDiv.id = 'messages-' + from;
                   clientDiv.setAttribute('data-chat', from);
-                  clientDiv.classList.add('clientSection', 'chat', 'scrollable-div');
-
+                  clientDiv.classList.add('clientSection', 'chat');
+                  
+                  contentDiv = document.createElement('div');
+                  contentDiv.id = 'content-' + from;
+                  contentDiv.classList.add('scrollable-div');
+                  clientDiv.appendChild(contentDiv);
+                  
                   messageContainer.appendChild(clientDiv);
+                  
               }
         }
         
-        function createInput(from, clientDiv) {
-            var messageInput = document.createElement('input');
-            messageInput.type = 'text';
-            messageInput.placeholder = 'Type your message...';
-            messageInput.id = 'input-' + from;
-            clientDiv.appendChild(messageInput);
+        function createInput(from) {
+            if (!document.getElementById('input-' + from)) {
+                let clientDiv = document.getElementById('messages-' + from);
+                var messageInput = document.createElement('input');
+                messageInput.type = 'text';
+                messageInput.placeholder = 'Type your message...';
+                messageInput.id = 'input-' + from;
+                clientDiv.appendChild(messageInput);
 
-            var fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.id = 'file-' + from;
-            clientDiv.appendChild(fileInput);
+                var fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.id = 'file-' + from;
+                clientDiv.appendChild(fileInput);
 
 
-            var sendButton = document.createElement('button');
-            sendButton.textContent = 'Send';
-            sendButton.onclick = (function(clientId) {
-                return function() {
-                    sendMessage(clientId);
-                };
-            })(from);
-            clientDiv.appendChild(sendButton);
+                var sendButton = document.createElement('button');
+                sendButton.textContent = 'Send';
+                sendButton.onclick = (function(clientId) {
+                    return function() {
+                        sendMessage(clientId);
+                    };
+                })(from);
+                clientDiv.appendChild(sendButton);
+            }
             
             
         }
@@ -163,30 +172,23 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                                 if (message.isAdmin == true) {
                                      textAdmin = 'bubble you';
                                 }
-                                var messageDisplay = document.getElementById('messages-' + message.idClient);
+                                var messageDisplay = document.getElementById('content-' + message.idClient);
                                 if (message.filePath) {
                                       if (imageTypes.includes(message.fileType)) {
-                                          messageDiv = document.createElement('img');
-                                          messageDiv.src = uploadsUrl + message.filePath;
-                                          messageDiv.className = "img-fluid";
+                                            messageDiv = document.createElement('img');
+                                            messageDiv.src = uploadsUrl + message.filePath;
+                                            messageDiv.classList.add('img-fluid', textAdmin);
                                           
-                                          let messageDiv2 = document.createElement('div');
-                                            messageDiv2.textContent = textAdmin;
-                                            messageDisplay.appendChild(messageDiv2);
-                                          
-                                          messageDisplay.appendChild(messageDiv);
-                                          messageContainer.scrollTop = messageContainer.scrollHeight;
-                                      } else {
-                                          messageDiv = document.createElement('a');
-                                          messageDiv.href = uploadsUrl + message.filePath;
-                                          messageDiv.textContent = message.filePath;
-                                          
-                                          let messageDiv2 = document.createElement('div');
-                                            messageDiv2.textContent = textAdmin;
-                                            messageDisplay.appendChild(messageDiv2);
+                                            messageDisplay.appendChild(messageDiv);
+                                            messageContainer.scrollTop = messageContainer.scrollHeight;
+                                        } else {
+                                            messageDiv = document.createElement('a');
+                                            messageDiv.href = uploadsUrl + message.filePath;
+                                            messageDiv.textContent = message.filePath;
+                                            messageDiv.classList.add(textAdmin);
 
-                                          messageDisplay.appendChild(messageDiv);
-                                          messageContainer.scrollTop = messageContainer.scrollHeight;
+                                            messageDisplay.appendChild(messageDiv);
+                                            messageContainer.scrollTop = messageContainer.scrollHeight;
                                       }
                                   } 
                                   if (message.message) {
@@ -201,21 +203,19 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                                   
                                  
                             });
-                            createInput(key, document.getElementById('messages-' + key));
+                            createInput(key);
                     }
                   }
                   document.getElementById('listPeople').firstElementChild.classList.add('active');
                   document.getElementById('messageContainer').children[1].classList.add('active-chat');
-                
-                  
             }
             
             if (data.type === 'message') {
                 var messageContainer = document.getElementById('messageContainer');
                 
                 createMessageSection(data.from, data.from);
-                
-                var messageDisplay = document.getElementById('messages-' + data.from);
+                createInput(data.from);
+                var messageDisplay = document.getElementById('content-' + data.from);
                 var messageDiv = document.createElement('div');
                 
                 if (data.questionOld) {
@@ -223,17 +223,21 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                         $("#client-" + data.from + " span" ).text(data.reponseQuestion);
                     }
                     messageDiv = document.createElement('div');
+                    messageDiv.classList.add('bubble', 'you');
                     messageDiv.textContent = data.questionOld.question;
                     messageDisplay.appendChild(messageDiv);
+                    
                     if (Object.keys(data.choicesOld).length > 0) {
                         for (var choice in data.choicesOld) {
                             messageDiv = document.createElement('div');
                             messageDiv.textContent = data.choicesOld[choice];
+                            messageDiv.classList.add('bubble', 'you');
                             messageDisplay.appendChild(messageDiv);
                         }
                     } 
                     messageDiv = document.createElement('div');
-                    messageDiv.textContent = "reponse :" + data.reponseQuestion;
+                    messageDiv.classList.add('bubble', 'me');
+                    messageDiv.textContent = data.reponseQuestion;
                     messageDisplay.appendChild(messageDiv);
                 } else if (data.message) {
                     console.log("data.message");
@@ -243,26 +247,27 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                         if (imageTypes.includes(data.message["type"])) {
                             messageDiv = document.createElement('img');
                             messageDiv.src = uploadsUrl + data.message["file-name"];
-                            messageDiv.className = "img-fluid";
+                            messageDiv.classList.add('bubble', 'you', "img-fluid");
                             messageDisplay.appendChild(messageDiv);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
                         } else {
                             messageDiv = document.createElement('a');
                             messageDiv.href = uploadsUrl + data.message["file-name"];
                             messageDiv.textContent = data.message["file-name"];
-                            
+                            messageDiv.classList.add('bubble', 'you');
                             messageDisplay.appendChild(messageDiv);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
                         }
                     } else {
                         console.log("message simple");
                         messageDiv = document.createElement('div');
-                        messageDiv.textContent = 'Client: ' + data.message;
-                        
+                        messageDiv.textContent = data.message;
+                        messageDiv.classList.add('bubble', 'you');
                         messageDisplay.appendChild(messageDiv);
                         messageContainer.scrollTop = messageContainer.scrollHeight;
                     }
                 } 
+                
                 console.log("-------------");
 
             } 
@@ -276,10 +281,10 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             if (message && clientId) {
                 ws.send(JSON.stringify({ type: 'admin', message: message, clientId: clientId }));
 
-                var messageDisplay = document.getElementById('messages-' + clientId);
+                var messageDisplay = document.getElementById('content-' + clientId);
                 var adminMessageDiv = document.createElement('div');
-                adminMessageDiv.textContent = 'Admin: ' + message;
-                adminMessageDiv.className = 'adminMessage';
+                adminMessageDiv.classList.add('bubble', 'you', 'adminMessage');
+                adminMessageDiv.textContent = message;
                 messageDisplay.appendChild(adminMessageDiv);
 
                 messageInput.value = '';

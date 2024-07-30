@@ -276,7 +276,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                         img.className = "img-fluid";
 
                         var li = document.createElement('li');
-                        li.className = 'self';
+                        li.className = 'other';
                         li.appendChild(img);
 
                         chat.appendChild(li);
@@ -288,7 +288,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                         link.textContent = data.message["file-name"];
 
                         var li = document.createElement('li');
-                        li.className = 'self';
+                        li.className = 'other';
                         li.appendChild(link);
 
                         chat.appendChild(li);
@@ -297,7 +297,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 } else {
                     
                     var li = document.createElement('li');
-                    li.className = 'self';
+                    li.className = 'other';
 
                     var chatMessage = document.createElement('div');
                     chatMessage.textContent = data.message;
