@@ -225,7 +225,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 var messageDiv = document.createElement('div');
                 
                 if (data.questionOld) {
-                    if (data.questionOld.id == 2) {
+                    if (data.questionOld.id == 102 || data.questionOld.id == 202) {
                         $("#client-" + data.from + " span" ).text(data.reponseQuestion);
                     }
                     messageDiv = document.createElement('div');

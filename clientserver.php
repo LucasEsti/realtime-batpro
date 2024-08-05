@@ -218,6 +218,11 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 chat.appendChild(li);
             }
             
+            let self = "other";
+            if (data.self) {
+                self = "self";
+            }
+            
             if (data.question) {
                 
                 console.log('question');
@@ -269,6 +274,9 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 }
             } else if (data.message) {
                 console.log("message");
+                console.log(data.message);
+                
+                
                 if (isObject(data.message)) {
                     if (imageTypes.includes(data.message["type"])) {
                         let img = document.createElement('img');
@@ -276,7 +284,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                         img.className = "img-fluid";
 
                         var li = document.createElement('li');
-                        li.className = 'other';
+                        li.className = self;
                         li.appendChild(img);
 
                         chat.appendChild(li);
@@ -288,7 +296,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                         link.textContent = data.message["file-name"];
 
                         var li = document.createElement('li');
-                        li.className = 'other';
+                        li.className = self;
                         li.appendChild(link);
 
                         chat.appendChild(li);
@@ -297,7 +305,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 } else {
                     
                     var li = document.createElement('li');
-                    li.className = 'other';
+                    li.className = self;
 
                     var chatMessage = document.createElement('div');
                     chatMessage.textContent = data.message;
@@ -306,7 +314,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                     chat.appendChild(li);
                     
                     // Show input for simple message and file upload if the questionnaire is complete
-                    if (data.message.includes('Merci pour vos réponses!')) {
+                    if (data.message.includes('Bienvenue au service commercial')) {
                         simpleMessageInput.classList.remove('hidden');
                         sendSimpleMessageButton.classList.remove('hidden');
                         fileInput.classList.remove('hidden');

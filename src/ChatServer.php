@@ -290,7 +290,7 @@ class ChatServer implements MessageComponentInterface {
                 if ($nextQuestionId === null || in_array($nextQuestionId, $this->userStates[$userId]['completed'])) {
                     $this->sendOldQuestion($from, $currentQuestionId, $data['response']);
                     $this->userStates[$userId]['completed'][] = $currentQuestionId;
-                    $repAdmin = 'Merci pour vos réponses! Vous pouvez maintenant poser des questions supplémentaires.';
+                    $repAdmin = 'Bienvenue au service commercial de BATPRO. Un agent vous contactera dans peu';
                     
                     //envoie reponse by  admin
                     $this->insertMessage($from->clientId, true, $repAdmin);
@@ -318,10 +318,10 @@ class ChatServer implements MessageComponentInterface {
                 //envoie reponse user
                 $this->insertMessage($from->clientId, false, $repClient);
                 
-                $from->send(json_encode(['message' => $repClient]));
+                $from->send(json_encode(['message' => $repClient, "self" => "self"]));
                 if ($this->admin !== null) {
-                        $this->admin->send(json_encode(['type' => 'message', 'from' => $from->clientId, 'message' => $repClient]));
-                    }
+                    $this->admin->send(json_encode(['type' => 'message', 'from' => $from->clientId, 'message' => $repClient]));
+                }
             } else {
                 $from->send(json_encode(['message' => 'Envoyez un message après avoir complété le questionnaire.']));
             }
@@ -459,10 +459,13 @@ class ChatServer implements MessageComponentInterface {
             $this->userData[$resourceId] = [];
         }
         
-        $stmt = $this->pdo->prepare("UPDATE Message SET " . $libelle . " = ? WHERE idClient = ?");
-        $stmt->execute([$response, $idClient]);
+        if (in_array($libelle, ["nom", "mail"])) {
+            $stmt = $this->pdo->prepare("UPDATE Message SET " . $libelle . " = ? WHERE idClient = ?");
+            $stmt->execute([$response, $idClient]);
+
+            $this->userData[$resourceId][$questionId] = $response;
+        }
         
-        $this->userData[$resourceId][$questionId] = $response;
     }
 }
 

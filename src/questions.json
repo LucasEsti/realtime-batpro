@@ -8,42 +8,404 @@
         "2": "Malagasy"
       },
       "next_question": {
-        "1": 2,
-        "2": 2
+        "1": 102,
+        "2": 202
       }
     },
-    {
-      "id": 2,
-      "libelle": "nom",
-      "question": "Quel est votre nom?",
-      "choices": {},
-      "next_question": {
-        "1": 3,
-        "2": 3,
-        "3": 3
-      }
-    },
-    {
-      "id": 3,
-      "libelle": "mail",    
-      "question": "Quel est votre email?",
-      "choices": {},
-      "next_question": {
-        "1": 4,
-        "2": 4,
-        "3": 4
-      }
-    },
-    {
-      "id": 4,
-      "question": "Quel est votre plat préféré?",
-      "choices": {
-        "1": "Pizza",
-        "2": "Sushi",
-        "3": "Pâtes"
-      },
-      "next_question": {}
-    }
+        {
+          "id": 102,
+          "libelle": "nom",
+          "question": "Quel est votre nom?",
+          "choices": {},
+          "next_question": {
+            "1": 103,
+            "2": 103,
+            "3": 103
+          }
+        },
+            {
+              "id": 103,
+              "libelle": "mail",    
+              "question": "Quel est votre email?",
+              "choices": {},
+              "next_question": {
+                "1": 104,
+                "2": 104,
+                "3": 104
+              }
+            },
+                {
+                  "id": 104,
+                  "question": "Vous êtes?",
+                  "choices": {
+                    "1": "Professionnel",
+                    "2": "Particulier"
+                  },
+                  "next_question": {
+                    "1": 105,
+                    "2": 105
+                  }
+                },
+                    {
+                      "id": 105,
+                      "question": "Veuillez choisir ce qui vous convient :",
+                      "choices": {
+                        "1": "Je cherche un produit",
+                        "2": "Demander des renseignements",
+                        "3": "Demander un devis",
+                        "4": "détails sur un produit"
+                      },
+                      "next_question": {
+                        "1": 1061,
+                        "2": 1062,
+                        "3": 1063,
+                        "4": 107
+                      }
+                    },
+                        {
+                          "id": 1061,
+                          "question": "Je cherche un produit :",
+                          "choices": {
+                            "1": "Outillage",
+                            "2": "Métallurgie",
+                            "3": "Peinture & étanchéité",
+                            "4": "Travaux publics & génie civil",
+                            "5": "Sécurité incendie",
+                            "6": "Équipement électrique & soudage"
+                          },
+                          "next_question": {
+                            "1": 107,
+                            "2": 107,
+                            "3": 107,
+                            "4": 107,
+                            "5": 107,
+                            "6": 107
+                          }
+                        },
+                        {
+                          "id": 1062,
+                          "question": "Demander des renseignements",
+                          "choices": {
+                            "1": "SAV",
+                            "2": "Fournisseurs",
+                            "3": "Contacter magasins",
+                            "4": "Partenariat",
+                            "5": "Recrutement",
+                            "6": "Autres"
+                          },
+                          "next_question": {
+                            "1": 10621,
+                            "2": 109,
+                            "3": 109,
+                            "4": 109,
+                            "5": 109,
+                            "6": 109
+                          }
+                        },
+                            {
+                              "id": 10621,
+                              "question": "Service après vente",
+                              "choices": {
+                                "1": "Réclamation",
+                                "2": "Chercher des pièces détachées",
+                                "3": "Récupérer un produit",
+                                "4": "Réparer un produit",
+                                "5": "Garantie",
+                                "6": "Autre"
+                              },
+                              "next_question": {
+                                "1": 109,
+                                "2": 109,
+                                "3": 109,
+                                "4": 109,
+                                "5": 109,
+                                "6": 109
+                              }
+                            },
+                        {
+                          "id": 1063,
+                          "libelle": "lien",
+                          "question": "Veuillez envoyer le lien ou la photo du produit",
+                          "choices": {},
+                          "next_question": {
+                            "1": 10631
+                          }
+                        },
+                            {
+                              "id": 10631,
+                              "libelle": "quantité",
+                              "question": "En combien de quantité ?",
+                              "choices": {},
+                              "next_question": {
+                                "1": 10632
+                              }
+                            },
+                            {
+                              "id": 10632,
+                              "question": "Quel est votre mode de paiement",
+                              "choices": {
+                                "1": "Espèce",
+                                "2": "Chèque",
+                                "3": "Virement",
+                                "4": "Autre"
+                              },
+                              "next_question": {
+                                "1": 10633,
+                                "2": 10633,
+                                "3": 10633,
+                                "4": 10633
+                              }
+                            },
+                            {
+                              "id": 10633,
+                              "libelle": "livraison",
+                              "question": "Veuillez indiquer la date et le lieu de livraison souhaités",
+                              "choices": {},
+                              "next_question": {
+                                "1": 10634
+                              }
+                            },
+                            {
+                              "id": 10634,
+                              "question": "Souhaitez vous rajouter d’autres informations ?",
+                              "choices": {
+                                "1": "Oui",
+                                "2": "Non"
+                              },
+                              "next_question": {
+                                "1": 109,
+                                "2": 110
+                              }
+                            },
+                {
+                  "id": 107,
+                  "libelle": "lien",
+                  "question": "Veuillez envoyer le lien ou la photo du produit",
+                  "choices": {},
+                  "next_question": {
+                    "1": 108,
+                    "2": 108
+                  }
+                },
+                {
+                  "id": 108,
+                  "libelle": "Fin",
+                  "question": "Patientez un moment, je vérifie le stock",
+                  "choices": {},
+                  "next_question": {}
+                },
+                {
+                  "id": 109,
+                  "libelle": "Fin",
+                  "question": "Veuillez nous soumettre plus de details sur votre demande",
+                  "choices": {},
+                  "next_question": {}
+                },
+                {
+                  "id": 110,
+                  "libelle": "Fin",
+                  "question": "Notre service commercial vous enverra un devis par e mail sous peu. Merci de nous avoir contacté. A bientôt !",
+                  "choices": {},
+                  "next_question": {}
+                },
+    
+        {
+          "id": 202,
+          "libelle": "nom",
+          "question": "Ampidiro ny anaranao?",
+          "choices": {},
+          "next_question": {
+            "1": 203,
+            "2": 203,
+            "3": 203
+          }
+        },
+            {
+              "id": 203,
+              "libelle": "mail",    
+              "question": "Inona ny mailaka anao?",
+              "choices": {},
+              "next_question": {
+                "1": 204,
+                "2": 204,
+                "3": 204
+              }
+            },
+                {
+                  "id": 204,
+                  "question": "Ianao dia?",
+                  "choices": {
+                    "1": "Mpiasa",
+                    "2": "Olon-tsotra"
+                  },
+                  "next_question": {
+                    "1": 205,
+                    "2": 205
+                  }
+                },
+                    {
+                      "id": 205,
+                      "question": "Misafidiana amin'izay tadiavinao eto :",
+                      "choices": {
+                        "1": "Hitady entana",
+                        "2": "Hanontany fanazavana",
+                        "3": "Hanontany vinavina",
+                        "4": "Antsipirian'ny entana"
+                      },
+                      "next_question": {
+                        "1": 2061,
+                        "2": 2062,
+                        "3": 2063,
+                        "4": 207
+                      }
+                    },
+                        {
+                          "id": 2061,
+                          "question": "Ireto avy ny entana afaka hanampiana anao :",
+                          "choices": {
+                            "1": "Fitaovana",
+                            "2": "Metaly",
+                            "3": "Loko sy étanchéité",
+                            "4": "Asa vaventy & injeniera sivily",
+                            "5": "Fiarovana amin'ny afo",
+                            "6": "Fitaovana elektrika sy soudage"
+                          },
+                          "next_question": {
+                            "1": 207,
+                            "2": 207,
+                            "3": 207,
+                            "4": 207,
+                            "5": 207,
+                            "6": 207
+                          }
+                        },
+                        {
+                          "id": 2062,
+                          "question": "Hanontany vinavina",
+                          "choices": {
+                            "1": "SAV",
+                            "2": "Mpamatsy",
+                            "3": "Fifandraisana @ magazay",
+                            "4": "Fiaraha-miasa",
+                            "5": "Hitady asa",
+                            "6": "Hafa"
+                          },
+                          "next_question": {
+                            "1": 20621,
+                            "2": 209,
+                            "3": 209,
+                            "4": 209,
+                            "5": 209,
+                            "6": 209
+                          }
+                        },
+                            {
+                              "id": 20621,
+                              "question": "SAV",
+                              "choices": {
+                                "1": "Fanitsiana",
+                                "2": "Hitady piesy antsinjarany",
+                                "3": "Haka entana",
+                                "4": "Hanamboatra entana",
+                                "5": "Antoka",
+                                "6": "Hafa"
+                              },
+                              "next_question": {
+                                "1": 209,
+                                "2": 209,
+                                "3": 209,
+                                "4": 209,
+                                "5": 209,
+                                "6": 209
+                              }
+                            },
+                        {
+                          "id": 2063,
+                          "libelle": "lien",
+                          "question": "Mba alefaso ny rohy na sarin'ilay entana azafady",
+                          "choices": {},
+                          "next_question": {
+                            "1": 20631
+                          }
+                        },
+                            {
+                              "id": 20631,
+                              "libelle": "quantité",
+                              "question": "Firy isa ?",
+                              "choices": {},
+                              "next_question": {
+                                "1": 20632
+                              }
+                            },
+                            {
+                              "id": 20632,
+                              "question": "Inona no fomba fandoavanao vola?",
+                              "choices": {
+                                "1": "Espèce",
+                                "2": "Chèque",
+                                "3": "Virement",
+                                "4": "Autre"
+                              },
+                              "next_question": {
+                                "1": 20633,
+                                "2": 20633,
+                                "3": 20633,
+                                "4": 20633
+                              }
+                            },
+                            {
+                              "id": 20633,
+                              "libelle": "livraison",
+                              "question": "VDaty sy toerana hanaterana azy",
+                              "choices": {},
+                              "next_question": {
+                                "1": 20634
+                              }
+                            },
+                            {
+                              "id": 20634,
+                              "question": "Inona ny fanampim-panazavana mbola tinao ho fantatra ?",
+                              "choices": {
+                                "1": "Oui",
+                                "2": "Non"
+                              },
+                              "next_question": {
+                                "1": 209,
+                                "2": 210
+                              }
+                            },
+                {
+                  "id": 207,
+                  "libelle": "lien",
+                  "question": "Veuillez envoyer le lien ou la photo du produit",
+                  "choices": {},
+                  "next_question": {
+                    "1": 208,
+                    "2": 308
+                  }
+                },
+                {
+                  "id": 208,
+                  "libelle": "Fin",
+                  "question": "Patientez un moment, je vérifie le stock",
+                  "choices": {},
+                  "next_question": {}
+                },
+                {
+                  "id": 209,
+                  "libelle": "Fin",
+                  "question": "Veuillez nous soumettre plus de details sur votre demande",
+                  "choices": {},
+                  "next_question": {}
+                },
+                {
+                  "id": 210,
+                  "libelle": "Fin",
+                  "question": "Notre service commercial vous enverra un devis par e mail sous peu. Merci de nous avoir contacté. A bientôt !",
+                  "choices": {},
+                  "next_question": {}
+                }
+    
   ]
 }
 
