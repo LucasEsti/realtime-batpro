@@ -147,6 +147,11 @@ class ChatServer implements MessageComponentInterface {
         
     }
     
+     protected function insertIsRead($isReadAdmin, $idClient) {
+            $stmt = $this->pdo->prepare("UPDATE Message SET isReadAdmin = ? WHERE idClient = ?");
+            $stmt->execute([$isReadAdmin, $idClient]);
+     }
+    
     protected function getIDByResponse($id, $reponse) {
         $keyFound = null;
         foreach ($this->questions as $question) {
@@ -244,9 +249,13 @@ class ChatServer implements MessageComponentInterface {
             if ($data['type'] === 'admin') {
                 // Si le message vient de l'admin, envoyez-le au client spécifié
                 if ($from === $this->admin && isset($data['clientId'])) {
-                    $cli = $this->listClients[$data['clientId']];
-                    $this->insertMessage($data['clientId'], true, $data['message']);
-                    $cli->send(json_encode(['type' => 'message', 'message' => $data['message']]));
+                    if (isset($data['isReadAdmin'])) {
+                        $this->insertIsRead($data['isReadAdmin'], $data['clientId'] );
+                    } else {
+                        $cli = $this->listClients[$data['clientId']];
+                        $this->insertMessage($data['clientId'], true, $data['message']);
+                        $cli->send(json_encode(['type' => 'message', 'message' => $data['message']]));
+                    }
                     
                 }
             } else {
@@ -356,7 +365,7 @@ class ChatServer implements MessageComponentInterface {
                                 'message' => $array,    
                                 'from' => $from->clientId
                             ]);
-                $this->insertMessage($from->clientId, true, '', null,$data['file']['name'], $fileType);
+                $this->insertMessage($from->clientId, false, '', null,$data['file']['name'], $fileType);
                 $from->send($rep);
                 if ($this->admin !== null) {
                     $this->admin->send($rep);

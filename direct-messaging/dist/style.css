@@ -26,6 +26,20 @@ body {
   background-repeat: none;
 }
 
+.container .left .people .person.non-lu {
+    margin-top: -1px;
+    margin-left: -1px;
+    padding-top: 13px;
+    border: 0;
+    width: calc(100% + 2px);
+    padding-left: calc(10% + 1px);
+    background-color: #88898a;
+}
+
+.container .left .people .person.non-lu:after {
+  display: none;
+}
+
 .wrapper {
   position: relative;
   left: 50%;

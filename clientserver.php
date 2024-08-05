@@ -54,7 +54,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             <div class="chat container-fluid">
                 <div class="header">
                     <span class="title">
-                        CahtLive
+                        ChatLive
                     </span>
                     <button>
                         <i class="fa fa-times" aria-hidden="true"></i>

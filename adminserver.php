@@ -165,7 +165,8 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 for (const key in messages) {
                     
                     if (messages.hasOwnProperty(key)) {
-                        messages[key].forEach(message => {
+                        var statusMessage = 0;
+                            messages[key].forEach(message => {
                                 var messageContainer = document.getElementById('messageContainer');
                                 createMessageSection(message.idClient, message.nom);
                                 let textAdmin = 'bubble me';
@@ -200,9 +201,14 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                                       messageDisplay.appendChild(messageDiv);
                                       messageContainer.scrollTop = messageContainer.scrollHeight;
                                   }
-                                  
+                                  statusMessage = message.isReadAdmin;
                                  
                             });
+                            
+                            if (statusMessage == 0) {
+                                $("#client-" + key).addClass('non-lu');
+                            }
+                            
                             createInput(key);
                     }
                   }
@@ -262,11 +268,17 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                         console.log("message simple");
                         messageDiv = document.createElement('div');
                         messageDiv.textContent = data.message;
-                        messageDiv.classList.add('bubble', 'you');
+                        messageDiv.classList.add('bubble', 'me');
                         messageDisplay.appendChild(messageDiv);
                         messageContainer.scrollTop = messageContainer.scrollHeight;
                     }
+                    
+
                 } 
+                
+                //                    mettre en top dernier message non lu 
+                    $("#client-" + data.from).prependTo('#listPeople');
+                    $("#client-" + data.from).addClass('non-lu');
                 
                 console.log("-------------");
 

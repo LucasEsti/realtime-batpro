@@ -33,9 +33,11 @@ function setAciveChat(f) {
     if (friends.list != null) {
         friends.list.querySelector('.active').classList.remove('active');
         f.classList.add('active');
+        f.classList.remove('non-lu');
         chat.current = chat.container.querySelector('.active-chat');
 
         chat.person = f.getAttribute('data-chat');
+        ws.send(JSON.stringify({ type: 'admin', isReadAdmin: true, clientId: chat.person }));
         console.log(chat.person);
         chat.current.classList.remove('active-chat');
         chat.container.querySelector('[data-chat="' + chat.person + '"]').classList.add('active-chat');
