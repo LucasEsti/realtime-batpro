@@ -151,6 +151,11 @@ class ChatServer implements MessageComponentInterface {
             $stmt = $this->pdo->prepare("UPDATE Message SET isReadAdmin = ? WHERE idClient = ?");
             $stmt->execute([$isReadAdmin, $idClient]);
      }
+     
+     protected function insertIsReadClient($idClient) {
+            $stmt = $this->pdo->prepare("UPDATE Message SET isReadClient = true WHERE idClient = ?");
+            $stmt->execute([$idClient]);
+     }
     
     protected function getIDByResponse($id, $reponse) {
         $keyFound = null;
@@ -244,7 +249,12 @@ class ChatServer implements MessageComponentInterface {
     
 
     public function onMessage(ConnectionInterface $from, $msg) {
+        $userId = $from->clientId;
         $data = json_decode($msg, true);
+        
+        if (isset($data['isReadClient'])) {
+            $this->insertIsReadClient($userId);
+        } 
         if (isset($data['type'])) {
             if ($data['type'] === 'admin') {
                 // Si le message vient de l'admin, envoyez-le au client spécifié
@@ -262,12 +272,12 @@ class ChatServer implements MessageComponentInterface {
                 // Si le message vient d'un client, envoyez-le à l'admin
                 
                 if ($this->admin !== null) {
-                    $this->admin->send(json_encode(['type' => 'message', 'message' => $data['message'], 'from' => $from->clientId]));
+                    $this->admin->send(json_encode(['type' => 'message', 'message' => $data['message'], 'from' => $userId]));
                 }
             }
         } 
         
-        $userId = $from->clientId;
+        
 
         if (isset($data['question_id']) && isset($data['response'])) {
             if (!isset($this->userStates[$userId])) {
@@ -281,7 +291,7 @@ class ChatServer implements MessageComponentInterface {
             
             if ($currentQuestion) {
                 if (empty($currentQuestion['choices'])) {
-                    $this->saveUserData($from->clientId, $userId, $currentQuestionId, $data['response']);
+                    $this->saveUserData($userId, $userId, $currentQuestionId, $data['response']);
                     $nextQuestionId = array_values($currentQuestion['next_question'])[0] ?? null;
                 } else {
                     $nextQuestionId = $currentQuestion['next_question'][$data['response']] ?? null;
@@ -293,11 +303,11 @@ class ChatServer implements MessageComponentInterface {
                     $repAdmin = 'Bienvenue au service commercial de BATPRO. Un agent vous contactera dans peu';
                     
                     //envoie reponse by  admin
-                    $this->insertMessage($from->clientId, true, $repAdmin);
+                    $this->insertMessage($userId, true, $repAdmin);
                     
                     $from->send(json_encode(['message' => $repAdmin]));
                     if ($this->admin !== null) {
-                        $this->admin->send(json_encode(['type' => 'message', 'from' => $from->clientId, 'message' => $repAdmin]));
+                        $this->admin->send(json_encode(['type' => 'message', 'from' => $userId, 'message' => $repAdmin]));
                     }
                     $this->userStates[$userId]['completed'] = ['completed']; // Mark the questionnaire as completed
                 } else {
@@ -316,11 +326,11 @@ class ChatServer implements MessageComponentInterface {
                 
                 $repClient = $data['simple_message'];
                 //envoie reponse user
-                $this->insertMessage($from->clientId, false, $repClient);
+                $this->insertMessage($userId, false, $repClient);
                 
                 $from->send(json_encode(['message' => $repClient, "self" => "self"]));
                 if ($this->admin !== null) {
-                    $this->admin->send(json_encode(['type' => 'message', 'from' => $from->clientId, 'message' => $repClient]));
+                    $this->admin->send(json_encode(['type' => 'message', 'from' => $userId, 'message' => $repClient]));
                 }
             } else {
                 $from->send(json_encode(['message' => 'Envoyez un message après avoir complété le questionnaire.']));
@@ -363,18 +373,16 @@ class ChatServer implements MessageComponentInterface {
                 $rep = json_encode([
                                 'type' => 'message',
                                 'message' => $array,    
-                                'from' => $from->clientId
+                                'from' => $userId
                             ]);
-                $this->insertMessage($from->clientId, false, '', null,$data['file']['name'], $fileType);
+                $this->insertMessage($userId, false, '', null,$data['file']['name'], $fileType);
                 $from->send($rep);
                 if ($this->admin !== null) {
                     $this->admin->send($rep);
                 }
             }
             
-        } else {
-            $from->send(json_encode(['message' => 'Données invalides.']));
-        }
+        } 
     }
 
     public function onClose(ConnectionInterface $conn) {

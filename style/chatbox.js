@@ -28,6 +28,10 @@ function openElement() {
     element.find('.header button').click(closeElement);
     element.find('#sendMessage').click(sendNewMessage);
     messages.scrollTop(messages.prop("scrollHeight"));
+    newMessage.addClass("hidden");
+    
+    //vue sur message
+    conn.send(JSON.stringify({ isReadClient: true }));
 }
 
 function closeElement() {

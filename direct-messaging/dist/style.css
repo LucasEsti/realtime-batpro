@@ -211,7 +211,7 @@ body {
   border-width: 1px 1px 1px 0;
   border-style: solid;
   border-color: var(--light);
-  height: calc(100% - 48px);
+  /*height: calc(100% - 48px);*/
   justify-content: flex-end;
   flex-direction: column;
 }

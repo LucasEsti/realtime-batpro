@@ -50,6 +50,10 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         
         
         <div class="floating-chat">
+            <div class="new-message hidden">
+                <i class="fa-solid fa-1"></i>
+            </div>
+            
             <i class="fa fa-comments" aria-hidden="true"></i>
             <div class="chat container-fluid">
                 <div class="header">
@@ -79,13 +83,14 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-    <script src="<?php echo $source; ?>style/chatbox.js"></script>
+    
 
         <!--<button id="sendFileButton" onclick="sendFile()" class="hidden">Envoyer Fichier</button>-->
     </div>
     <script>
         
         var clientId = $.cookie('clientId');
+        var newMessage = $(".new-message");
         
         let connex = "";
         if (clientId !== undefined) {
@@ -128,6 +133,9 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             if (data.type === 'listMessages') {
                 console.log("listMessages");
                 if (data.messageClient) {
+                    console.log(data);
+                    var statusMessage = 0;
+                    
                     data.messageClient.forEach(message => {
                         
                         isClient = 'self';
@@ -167,9 +175,12 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                             li.textContent = message.message;
                             chat.appendChild(li);
                         }
-
-
+                        statusMessage = message.isReadClient;
                     });
+                    
+                    if (statusMessage == false) {
+                        newMessage.removeClass("hidden");
+                    }
                 }
                 if (data.lastQuestionSave == null) {
                     console.log("affiche");
@@ -324,6 +335,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                         responseInput.classList.add('hidden');
                         sendButton.classList.add('hidden');
                     }
+                    newMessage.removeClass("hidden");
                 }
             }
             
@@ -367,5 +379,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
 
         
     </script>
+    
+    <script src="<?php echo $source; ?>style/chatbox.js"></script>
 </body>
 </html>
