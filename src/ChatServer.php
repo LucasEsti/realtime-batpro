@@ -107,7 +107,7 @@ class ChatServer implements MessageComponentInterface {
             if (isset($message["question"])) {
                 $messageTemporaire .= $message["question"] . "<br>";
                 foreach ($message["choices"] as $choice) {
-                    $messageTemporaire .= $choice . "<br>";
+                    $messageTemporaire .=  '<button type=\"button\" class=\"btn btn-primary\"> '. $choice .' </button>';
                 }
                 $message = $messageTemporaire;
             }
@@ -131,7 +131,7 @@ class ChatServer implements MessageComponentInterface {
         if ($exists == null) {
             $insertStmt = $this->pdo->prepare("INSERT INTO Message (idClient, isReadClient, isReadAdmin) VALUES (?, ?, ?)");
             $insertStmt->execute([$idClient, $isReadClient, $isReadAdmin]);
-            // Récupérer l'ID du message inséré
+            // Récupérer l"ID du message inséré
             $idMessage = $this->pdo->lastInsertId();
         } else {
             $stmt = $this->pdo->prepare("UPDATE Message SET isReadClient = ?, isReadAdmin = ? WHERE idClient = ?");

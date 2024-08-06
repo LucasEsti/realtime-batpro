@@ -273,9 +273,10 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                     li.classList.add('other', 'choices', 'class3');
                     
                     for (var choice in data.choices) {
-                        
                         var button = document.createElement('button');
                         button.innerHTML = data.choices[choice];
+                        button.setAttribute('type', 'button');
+                        button.classList.add('btn', 'btn-outline-primary', 'me-1');
                         button.onclick = (function(choice) {
                             return function() {
                                 sendChoice(choice);
