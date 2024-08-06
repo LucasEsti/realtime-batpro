@@ -18,8 +18,8 @@ body {
   position: fixed;
   bottom: 10px;
   right: 10px;
-  width: 56px;
-  height: 56px;
+  width: 65px;
+  height: 65px;
   
   transform: translateY(70px);
   transition: all 250ms ease-out;
@@ -59,7 +59,7 @@ body {
 }
 .floating-chat.expand {
   width: 400px;
-  max-height: 400px;
+  /*max-height: 400px;*/
   height: 400px;
   border-radius: 5px;
   cursor: auto;
@@ -224,6 +224,8 @@ body {
   background-color: rgba(25, 147, 147, 0.2);
 }
 
+
+
 @keyframes show-chat-even {
   0% {
     margin-left: -480px;
@@ -271,4 +273,18 @@ body {
   100% {
     margin-right: 0;
   }
+}
+
+@media (max-width: 1024px){
+}
+
+@media (max-width: 768px ) and (max-width: 428px) {
+    .floating-chat.expand {
+        width: 80%;
+        height: 50%;
+    }
+    .floating-chat {
+        width: 65px;
+        height: 65px;
+    }
 }
