@@ -19,11 +19,8 @@ $source = $scheme . '://' . $host . $scriptName . '/';
 <link rel="stylesheet" href="<?php echo $source; ?>direct-messaging/dist/style.css">
     <style>
         #messageContainer {
-            height: 400px;
             overflow-y: scroll;
             border: 1px solid #ccc;
-            padding: 10px;
-            margin-bottom: 10px;
         }
         .clientSection {
             margin-bottom: 20px;
@@ -37,7 +34,12 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         .scrollable-div {
             overflow-y: scroll; /* Active le défilement vertical si nécessaire */
         }
-
+         #messageContainer2 {
+            width: 300px;
+            height: 200px;
+            border: 1px solid #ccc;
+            overflow-y: auto;
+        }
         
     </style>
 </head>
@@ -54,9 +56,10 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             <ul id="listPeople" class="people">
             </ul>
         </div>
+
+    
         <div id="messageContainer" class="right">
             <div class="top"><span>To: <span class="name"></span></span></div>
-            
             
 <!--            <div class="write">
                 <a href="javascript:;" class="write-link attach"></a>
@@ -71,6 +74,8 @@ $source = $scheme . '://' . $host . $scriptName . '/';
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <script>
+       
+        
         var ws = new WebSocket('ws://localhost:8080?type=admin');
         function isObject(value) {
             return value !== null && typeof value === 'object' && value.constructor === Object;
@@ -151,6 +156,8 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                     };
                 })(from);
                 clientDiv.appendChild(sendButton);
+                
+                
             }
             
             
@@ -166,8 +173,9 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                     
                     if (messages.hasOwnProperty(key)) {
                         var statusMessage = 0;
+                        var messageContainer = document.getElementById('messageContainer');
                             messages[key].forEach(message => {
-                                var messageContainer = document.getElementById('messageContainer');
+                                
                                 createMessageSection(message.idClient, message.nom);
                                 let textAdmin = 'bubble me';
                                 if (message.isAdmin == true) {
@@ -205,16 +213,29 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                                  
                             });
                             
+                            
+                            
                             if (statusMessage == 0) {
                                 $("#client-" + key).addClass('non-lu');
                             }
                             
                             createInput(key);
-                    }
+                        }
+                        
                   }
-                  document.getElementById('listPeople').firstElementChild.classList.add('active');
-                  document.getElementById('messageContainer').children[1].classList.add('active-chat');
+                    document.getElementById('listPeople').firstElementChild.classList.add('active');
+                    document.getElementById('messageContainer').children[1].classList.add('active-chat');
+                    
+                    var container = $('#messageContainer');
+                    var target = $('#input-' + document.getElementById('messageContainer').children[1].getAttribute("data-chat"));
+                    console.log(target);
+                    container.animate({
+                        scrollTop: target.offset().top - container.offset().top + container.scrollTop()
+                    }, 'slow');
+                    
             }
+            
+            
             
             if (data.type === 'message') {
                 var messageContainer = document.getElementById('messageContainer');

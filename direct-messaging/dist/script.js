@@ -43,6 +43,12 @@ function setAciveChat(f) {
         chat.container.querySelector('[data-chat="' + chat.person + '"]').classList.add('active-chat');
         friends.name = f.querySelector('.name').innerText;
         chat.name.innerHTML = friends.name;
+        
+        var container = $('#messageContainer');
+        var target = $('#input-' + chat.person);
+        container.animate({
+            scrollTop: target.offset().top - container.offset().top + container.scrollTop()
+        }, 'slow');
     }
   
 }
