@@ -15,6 +15,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
 <html>
 <head>
     <title>Admin Chat</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
 <link rel="stylesheet" href="<?php echo $source; ?>direct-messaging/dist/style.css">
     <style>
@@ -50,8 +51,8 @@ $source = $scheme . '://' . $host . $scriptName . '/';
     <div class="container">
         <div class="left">
             <div class="top">
-                <input type="text" placeholder="Search" />
-                <a href="javascript:;" class="search"></a>
+<!--                <input type="text" placeholder="Search" />
+                <a href="javascript:;" class="search"></a>-->
             </div>
             <ul id="listPeople" class="people">
             </ul>
@@ -61,16 +62,10 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         <div id="messageContainer" class="right">
             <div class="top"><span>To: <span class="name"></span></span></div>
             
-<!--            <div class="write">
-                <a href="javascript:;" class="write-link attach"></a>
-                <input type="text" />
-                <a href="javascript:;" class="write-link smiley"></a>
-                <a href="javascript:;" class="write-link send"></a>
-            </div>-->
         </div>
     </div>
 </div>
-    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <script>
@@ -120,8 +115,9 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 
                   clientDiv = document.createElement('div');
                   clientDiv.id = 'messages-' + from;
+                  
                   clientDiv.setAttribute('data-chat', from);
-                  clientDiv.classList.add('clientSection', 'chat');
+                  clientDiv.classList.add('clientSection', 'chat', 'row');
                   
                   contentDiv = document.createElement('div');
                   contentDiv.id = 'content-' + from;
@@ -133,23 +129,30 @@ $source = $scheme . '://' . $host . $scriptName . '/';
               }
         }
         
-        function createInput(from) {
+        function createInput(from, firstLoad = false) {
             if (!document.getElementById('input-' + from)) {
                 let clientDiv = document.getElementById('messages-' + from);
                 var messageInput = document.createElement('input');
                 messageInput.type = 'text';
+                messageInput.classList.add('form-control', 'mt-5');
+                
                 messageInput.placeholder = 'Type your message...';
+                
                 messageInput.id = 'input-' + from;
                 clientDiv.appendChild(messageInput);
 
                 var fileInput = document.createElement('input');
                 fileInput.type = 'file';
+                fileInput.classList.add('mt-2', 'form-control');
                 fileInput.id = 'file-' + from;
                 clientDiv.appendChild(fileInput);
 
 
                 var sendButton = document.createElement('button');
                 sendButton.textContent = 'Send';
+                sendButton.classList.add('mt-2');
+                sendButton.classList.add('btn', 'btn-primary');
+                sendButton.setAttribute('type', 'button');
                 sendButton.onclick = (function(clientId) {
                     return function() {
                         sendMessage(clientId);
@@ -157,6 +160,10 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 })(from);
                 clientDiv.appendChild(sendButton);
                 
+                if (firstLoad == true) {
+                    document.getElementById('client-' + from).classList.add('active');
+                    document.getElementById('messages-' + from).classList.add('active-chat');
+                }
                 
             }
             
@@ -169,69 +176,83 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             
             if (data.type === 'listMessages') {
                 messages = data.message;
-                for (const key in messages) {
-                    
-                    if (messages.hasOwnProperty(key)) {
-                        var statusMessage = 0;
-                        var messageContainer = document.getElementById('messageContainer');
-                            messages[key].forEach(message => {
-                                
-                                createMessageSection(message.idClient, message.nom);
-                                let textAdmin = 'bubble me';
-                                if (message.isAdmin == true) {
-                                     textAdmin = 'bubble you';
-                                }
-                                var messageDisplay = document.getElementById('content-' + message.idClient);
-                                if (message.filePath) {
-                                      if (imageTypes.includes(message.fileType)) {
-                                            messageDiv = document.createElement('img');
-                                            messageDiv.src = uploadsUrl + message.filePath;
-                                            messageDiv.classList.add('img-fluid', textAdmin);
-                                          
-                                            messageDisplay.appendChild(messageDiv);
-                                            messageContainer.scrollTop = messageContainer.scrollHeight;
-                                        } else {
-                                            messageDiv = document.createElement('a');
-                                            messageDiv.href = uploadsUrl + message.filePath;
-                                            messageDiv.textContent = message.filePath;
-                                            messageDiv.classList.add(textAdmin);
+                if (data.message.length != 0) {
+                    var idFirstElement = "";
+                    for (const key in messages) {
 
-                                            messageDisplay.appendChild(messageDiv);
-                                            messageContainer.scrollTop = messageContainer.scrollHeight;
+                        if (messages.hasOwnProperty(key)) {
+                            var statusMessage = 0;
+                            var messageContainer = document.getElementById('messageContainer');
+                                messages[key].forEach(message => {
+
+                                    createMessageSection(message.idClient, message.nom);
+                                    let textAdmin = 'me';
+                                    if (message.isAdmin == true) {
+                                         textAdmin = 'you';
+                                    }
+                                    var messageDisplay = document.getElementById('content-' + message.idClient);
+                                    if (message.filePath) {
+                                          if (imageTypes.includes(message.fileType)) {
+                                                messageDiv = document.createElement('div');
+                                                messageDiv.classList.add('bubble', textAdmin);
+                                                
+                                                let img = document.createElement('img');
+                                                img.src = uploadsUrl + message.filePath;
+                                                img.classList.add('img-fluid');
+                                                messageDiv.appendChild(img);
+
+                                                messageDisplay.appendChild(messageDiv);
+                                                messageContainer.scrollTop = messageContainer.scrollHeight;
+                                            } else {
+                                                messageDiv = document.createElement('div');
+                                                messageDiv.classList.add('bubble', textAdmin);
+                                                
+                                                let divA = document.createElement('a');
+                                                divA.href = uploadsUrl + message.filePath;
+                                                divA.textContent = message.filePath;
+                                                messageDiv.appendChild(divA);
+
+                                                messageDisplay.appendChild(messageDiv);
+                                                messageContainer.scrollTop = messageContainer.scrollHeight;
+                                          }
+                                      } 
+                                      if (message.message) {
+                                          console.log("message simple");
+                                          messageDiv = document.createElement('div');
+                                          messageDiv.textContent = message.message;
+                                          messageDiv.classList.add('bubble', textAdmin);
+
+                                          messageDisplay.appendChild(messageDiv);
+                                          messageContainer.scrollTop = messageContainer.scrollHeight;
                                       }
-                                  } 
-                                  if (message.message) {
-                                      console.log("message simple");
-                                      messageDiv = document.createElement('div');
-                                      messageDiv.textContent = message.message;
-                                      messageDiv.className = textAdmin;
+                                      statusMessage = message.isReadAdmin;
 
-                                      messageDisplay.appendChild(messageDiv);
-                                      messageContainer.scrollTop = messageContainer.scrollHeight;
-                                  }
-                                  statusMessage = message.isReadAdmin;
-                                 
-                            });
-                            
-                            
-                            
-                            if (statusMessage == 0) {
-                                $("#client-" + key).addClass('non-lu');
+                                });
+                                
+                                if (idFirstElement == "") {
+                                    idFirstElement = key;
+                                }
+
+                                
+                                if (statusMessage == 0) {
+                                    $("#client-" + key).addClass('non-lu');
+                                }
+
+                                createInput(key);
                             }
-                            
-                            createInput(key);
-                        }
-                        
+
+                      }
+                  
+                        document.getElementById('client-' + idFirstElement).classList.add('active');
+                        document.getElementById('messages-' + idFirstElement).classList.add('active-chat');
+
+                        var container = $('#messageContainer');
+                        var target = $('#input-' + document.getElementById('messageContainer').children[1].getAttribute("data-chat"));
+                        container.animate({
+                            scrollTop: target.offset().top - container.offset().top + container.scrollTop()
+                        }, 'slow');
                   }
-                    document.getElementById('listPeople').firstElementChild.classList.add('active');
-                    document.getElementById('messageContainer').children[1].classList.add('active-chat');
                     
-                    var container = $('#messageContainer');
-                    var target = $('#input-' + document.getElementById('messageContainer').children[1].getAttribute("data-chat"));
-                    console.log(target);
-                    container.animate({
-                        scrollTop: target.offset().top - container.offset().top + container.scrollTop()
-                    }, 'slow');
                     
             }
             
@@ -241,7 +262,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 var messageContainer = document.getElementById('messageContainer');
                 
                 createMessageSection(data.from, data.from);
-                createInput(data.from);
+                createInput(data.from, true);
                 var messageDisplay = document.getElementById('content-' + data.from);
                 var messageDiv = document.createElement('div');
                 
@@ -272,16 +293,25 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                     if (isObject(data.message)) {
                         console.log(data.message["type"]);
                         if (imageTypes.includes(data.message["type"])) {
-                            messageDiv = document.createElement('img');
-                            messageDiv.src = uploadsUrl + data.message["file-name"];
-                            messageDiv.classList.add('bubble', 'you', "img-fluid");
+                            messageDiv = document.createElement('div');
+                            messageDiv.classList.add('bubble', textAdmin);
+
+                            let img = document.createElement('img');
+                            img.src = uploadsUrl + data.message["file-name"];
+                            img.classList.add("img-fluid");
+                            messageDiv.appendChild(img);
+                            
                             messageDisplay.appendChild(messageDiv);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
                         } else {
-                            messageDiv = document.createElement('a');
-                            messageDiv.href = uploadsUrl + data.message["file-name"];
-                            messageDiv.textContent = data.message["file-name"];
-                            messageDiv.classList.add('bubble', 'you');
+                            messageDiv = document.createElement('div');
+                            messageDiv.classList.add('bubble', textAdmin);
+
+                            let divA = document.createElement('a');
+                            divA.href = uploadsUrl + data.message["file-name"];
+                            divA.textContent = data.message["file-name"];
+                            messageDiv.appendChild(divA);
+                            
                             messageDisplay.appendChild(messageDiv);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
                         }
@@ -298,8 +328,8 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 } 
                 
                 //                    mettre en top dernier message non lu 
-                    $("#client-" + data.from).prependTo('#listPeople');
-                    $("#client-" + data.from).addClass('non-lu');
+                $("#client-" + data.from).prependTo('#listPeople');
+                $("#client-" + data.from).addClass('non-lu');
                 
                 console.log("-------------");
 

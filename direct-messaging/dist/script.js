@@ -30,7 +30,7 @@ friends.all.forEach(f => {
 });
 
 function setAciveChat(f) {
-    if (friends.list != null) {
+    if (friends.list != null && friends.list.querySelector('.active') != null) {
         friends.list.querySelector('.active').classList.remove('active');
         f.classList.add('active');
         f.classList.remove('non-lu');

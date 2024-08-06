@@ -60,22 +60,45 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                     <span class="title">
                         ChatLive
                     </span>
-                    <button>
-                        <i class="fa fa-times" aria-hidden="true"></i>
-                    </button>
+                    <button type="button" class="close" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
 
                 </div>
                 <ul id="chat" class="messages">
                 </ul>
-                <div class="row footer ">
-                    <input type="text" id="response" placeholder="Entrez votre réponse" class="col-7 text-box hidden" />
-                    <button id="sendButton" onclick="sendResponse()" class="col-1 hidden">Send</button>
-                    <input type="text" id="simpleMessage" placeholder="Entrez un message simple" class="col-7 text-box hidden" />
-                    <input type="file" id="fileInput" class="col-3 hidden" title=" "/>
-                    <button id="sendSimpleMessageButton" onclick="sendMessage()" class="col-1 hidden">Send</button>
+                <div class=" footer">
                     
-                    <div class="text-box hidden" contenteditable="true" disabled="true"></div>
-                    <button id="sendMessage" class="hidden">send</button>
+                    
+                    <div class="container">
+                        <div class="row ">
+                            <div id="response" class="col-7 hidden">
+                                <input type="text" id="response" placeholder="Entrez votre réponse" class="form-control text-box " />
+                            </div>
+                            
+                            <div id="sendButton" class="col-2 hidden ">
+                                <button  type="button" onclick="sendResponse()" class=" btn btn-primary ">Send</button>
+                            </div>
+                            
+                            
+                            <div id="simpleMessage" class="col-12 hidden">
+                                <input type="text" id="simpleMessageInput" placeholder="Entrez un message simple" class=" form-control text-box " />
+                            </div>
+                            
+                            <div id="fileInput" class="col-6 hidden mt-2 ">
+                                <input type="file" id="fileInputValue" class="form-control  " title=" "/>
+                            </div>
+                            
+                            <div id="sendSimpleMessageButton" class="col-6 hidden mt-2 ">
+                                <button type="button" onclick="sendMessage()" class=" btn btn-primary ">Send</button>
+                            </div>
+                            
+                            
+                        </div>
+                    </div>
+                    
+                    
+                    
                 </div>
             </div>
         </div>
@@ -339,16 +362,23 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 }
             }
             
+            var container = $('#chat');
+            
+            var target = $('#chat li:last');
+            container.animate({
+                scrollTop: target.offset().top - container.offset().top + container.scrollTop()
+            }, 'slow');
+            
             
         };
 
         function sendMessage() {
             console.log('sendMessage');
-            var message2 = simpleMessageInput.value;
-            var file = fileInput.files[0];
+            var message2 = $('#simpleMessageInput').value;
+            var file = $('#fileInputValue').files[0];
             if (message2) {
                 conn.send(JSON.stringify({ simple_message: message2 }));
-                simpleMessageInput.value = '';
+                $('#simpleMessageInput').value = '';
             }
             if (file) {
                 var reader = new FileReader();
@@ -357,7 +387,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                     conn.send(JSON.stringify({ file: { name: file.name, data: base64File } }));
                 };
                 reader.readAsDataURL(file);
-                fileInput.value = ''; // Clear the file input
+                $('#fileInputValue').value = ''; // Clear the file input
             }
         }
         
@@ -370,10 +400,10 @@ $source = $scheme . '://' . $host . $scriptName . '/';
 
         function sendResponse() {
             console.log('sendResponse');
-            var response = responseInput.value;
+            var response = $('#responseInput').value;
             if (response && currentQuestionId !== null) {
                 conn.send(JSON.stringify({ question_id: currentQuestionId, response: response }));
-                responseInput.value = '';
+                $('#responseInput').value = '';
             }
         }
 
