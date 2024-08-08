@@ -26,6 +26,29 @@ body {
   background-repeat: none;
 }
 
+#messageContainer {
+    overflow-y: scroll;
+    border: 1px solid #ccc;
+}
+.clientSection {
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+.adminMessage {
+    color: blue;
+}
+
+.scrollable-div {
+    overflow-y: scroll; /* Active le défilement vertical si nécessaire */
+}
+ #messageContainer2 {
+    width: 300px;
+    height: 200px;
+    border: 1px solid #ccc;
+    overflow-y: auto;
+}
+
 .container .left .people .person.non-lu {
     margin-top: -1px;
     margin-left: -1px;

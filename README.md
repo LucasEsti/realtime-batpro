@@ -35,7 +35,7 @@ Page du client, appeler les shortcode
 [websocket_client_script] 
 
 
-nano /etc/nginx/conf.d/users/xnrafbmy.conf
+nano /etc/nginx/conf.d/users/xnrafbmy/somalaval-ai.xnr.afb.mybluehost.me/somalaval-ai.custom.conf
 sudo nginx -t
 sudo systemctl reload nginx
 sudo systemctl restart nginx
