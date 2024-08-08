@@ -172,7 +172,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                                 messages[key].forEach(message => {
 
                                     createMessageSection(message.idClient, message.nom);
-                                    let textAdmin = 'me';
+                                    var textAdmin = 'me';
                                     if (message.isAdmin == true) {
                                          textAdmin = 'you';
                                     }
@@ -205,7 +205,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                                       if (message.message) {
                                           console.log("message simple");
                                           messageDiv = document.createElement('div');
-                                          messageDiv.textContent = message.message;
+                                          messageDiv.innerHTML = message.message;
                                           messageDiv.classList.add('bubble', textAdmin);
 
                                           messageDisplay.appendChild(messageDiv);
@@ -280,7 +280,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                         console.log(data.message["type"]);
                         if (imageTypes.includes(data.message["type"])) {
                             messageDiv = document.createElement('div');
-                            messageDiv.classList.add('bubble', textAdmin);
+                            messageDiv.classList.add('bubble', 'me');
 
                             let img = document.createElement('img');
                             img.src = uploadsUrl + data.message["file-name"];
@@ -291,7 +291,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                             messageContainer.scrollTop = messageContainer.scrollHeight;
                         } else {
                             messageDiv = document.createElement('div');
-                            messageDiv.classList.add('bubble', textAdmin);
+                            messageDiv.classList.add('bubble', 'me');
 
                             let divA = document.createElement('a');
                             divA.href = uploadsUrl + data.message["file-name"];
