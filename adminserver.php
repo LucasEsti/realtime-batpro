@@ -61,6 +61,13 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             console.log('WebSocket connection opened');
         };
         
+        ws.onclose = function() {
+                console.log('WebSocket is closed now.');
+            };
+        ws.onerror = function(error) {
+            console.log('WebSocket error: ' + error.message);
+        };
+        
         var listMessage = document.getElementById('listMessage');
         
         function createMessageSection(idClient, nom) {
@@ -341,6 +348,57 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 fileInput.value = ''; // Clear the file input
             }
         }
+        
+        let friends = {
+  list: document.querySelector('ul.people'),
+  all: document.querySelectorAll('.left .person'),
+  name: '' },
+
+chat = {
+  container: document.querySelector('.container .right'),
+  current: null,
+  person: null,
+  name: document.querySelector('.container .right .top .name') };
+
+function updateFriends() {
+    friends.all = document.querySelectorAll('.left .person');
+    friends.list = document.querySelector('ul.people');
+    friends.all.forEach(f => {
+        f.addEventListener('mousedown', () => {
+          f.classList.contains('active') || setAciveChat(f);
+        });
+      });
+}
+
+friends.all.forEach(f => {
+  f.addEventListener('mousedown', () => {
+    f.classList.contains('active') || setAciveChat(f);
+  });
+});
+
+function setAciveChat(f) {
+    if (friends.list != null && friends.list.querySelector('.active') != null) {
+        friends.list.querySelector('.active').classList.remove('active');
+        f.classList.add('active');
+        f.classList.remove('non-lu');
+        chat.current = chat.container.querySelector('.active-chat');
+
+        chat.person = f.getAttribute('data-chat');
+        ws.send(JSON.stringify({ type: 'admin', isReadAdmin: true, clientId: chat.person }));
+        console.log(chat.person);
+        chat.current.classList.remove('active-chat');
+        chat.container.querySelector('[data-chat="' + chat.person + '"]').classList.add('active-chat');
+        friends.name = f.querySelector('.name').innerText;
+        chat.name.innerHTML = friends.name;
+        
+        var container = $('#messageContainer');
+        var target = $('#input-' + chat.person);
+        container.animate({
+            scrollTop: target.offset().top - container.offset().top + container.scrollTop()
+        }, 'slow');
+    }
+  
+}
     </script>
     
     <script  src="<?php echo $source; ?>direct-messaging/dist/script.js"></script>
