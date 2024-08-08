@@ -1,12 +1,10 @@
 <?php
     require dirname(__DIR__) . '/vendor/autoload.php';
-    require dirname(__DIR__) . '/src/Chat.php';
 
     //Utilisation de Ratchet   
     use Ratchet\Server\IoServer;
     use Ratchet\Http\HttpServer;
     use Ratchet\WebSocket\WsServer;
-    use MyApp\MessageServer;
     use MyApp\ChatServer;
 
     $server = IoServer::factory(

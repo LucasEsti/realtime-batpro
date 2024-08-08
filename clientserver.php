@@ -44,24 +44,24 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 <div class=" footer">
                     <div class="container">
                         <div class="row ">
-                            <div id="response" class="col-7 hidden">
+                            <div id="response" class="col-12 hidden">
                                 <input type="text" id="responseInput" placeholder="Entrez votre réponse" class="form-control text-box " />
                             </div>
                             
-                            <div id="sendButton" class="col-2 hidden ">
-                                <button  type="button" onclick="sendResponse()" class=" btn btn-primary ">Send</button>
-                            </div>
-                            
-                            
                             <div id="simpleMessage" class="col-12 hidden">
-                                <input type="text" id="simpleMessageInput" placeholder="Entrez un message simple" class=" form-control text-box " />
+                                <input type="text" id="simpleMessageInput" placeholder="Entrez un message" class=" form-control text-box " />
                             </div>
+                            
                             
                             <div id="fileInput" class="col-9 hidden mt-2 ">
                                 <input type="file" id="fileInputValue" class="form-control  " title=" "/>
                             </div>
                             
-                            <div id="sendSimpleMessageButton" class="col-2 hidden mt-2 ">
+                            
+                            <div id="sendButton" class="col-2 mt-2 hidden ">
+                                <button type="button" onclick="sendResponse()" class=" btn btn-primary ">Send</button>
+                            </div>
+                            <div id="sendSimpleMessageButton" class="col-2 mt-2 hidden">
                                 <button type="button" onclick="sendMessage()" class=" btn btn-primary ">Send</button>
                             </div>
                             
@@ -199,7 +199,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                     
                     simpleMessageInput.classList.add('hidden');
                     sendSimpleMessageButton.classList.add('hidden');
-                    fileInput.classList.add('hidden');
+                    fileInput.classList.remove('hidden');
                 }
                 
             }
@@ -236,6 +236,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             if (data.question) {
                 
                 console.log('question');
+                console.log(data);
                 currentQuestionId = data.question_id;  // Mise à jour de currentQuestionId
                 
                 var li = document.createElement('li');
@@ -246,7 +247,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 
                 $(".choices").remove();
                 if (Object.keys(data.choices).length > 0) {
-                    
+                    console.log('choice object');
                     var li = document.createElement('li');
                     li.classList.add('other', 'choices', 'class3');
                     
@@ -276,9 +277,16 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                     console.log('not choices 1');
                     responseInput.classList.remove('hidden');
                     sendButton.classList.remove('hidden');
+                    
                     simpleMessageInput.classList.add('hidden');
                     sendSimpleMessageButton.classList.add('hidden');
-                    fileInput.classList.add('hidden');
+                    
+                    if (!data.lien) {
+                        fileInput.classList.add('hidden');
+                    } else {
+                        fileInput.classList.remove('hidden');
+                    }
+                    
 //                    sendFileButton.classList.add('hidden');
                 }
             } else if (data.message) {
@@ -345,6 +353,39 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             
         };
 
+        
+        function sendResponse() {
+            console.log('sendResponse');
+            var response = $('#responseInput').val();
+            var file = document.getElementById('fileInputValue').files[0];
+            if (currentQuestionId !== null) {
+                var dataResp = { question_id: currentQuestionId};
+                dataResp.response = "";
+                
+                if (file) {
+                    var reader = new FileReader();
+                    var readFile = null;
+                    reader.onload = function(e) {
+                        var base64File = e.target.result.split(',')[1];
+                        dataResp.file = { name: file.name, data: base64File };
+                        
+                        conn.send(JSON.stringify(dataResp));
+                        $('#responseInput').val('');
+                    };
+                    reader.readAsDataURL(file);
+                    $('#fileInputValue').val(''); // Clear the file input
+                } else {
+                    if (response) {
+                        dataResp.response = response;
+                        conn.send(JSON.stringify(dataResp));
+                        $('#responseInput').val('');
+                    }
+                    
+                }
+                
+            }
+        }
+        
         function sendMessage() {
             console.log('sendMessage');
             var message2 = $('#simpleMessageInput').val();
@@ -365,22 +406,14 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         }
         
         
+        
         function sendChoice(choice) {
             if (currentQuestionId !== null) {
                 conn.send(JSON.stringify({ question_id: currentQuestionId, response: choice }));
             }
         }
 
-        function sendResponse() {
-            console.log('sendResponse');
-            var response = $('#responseInput').val();
-            console.log(response);
-            console.log(currentQuestionId);
-            if (response && currentQuestionId !== null) {
-                conn.send(JSON.stringify({ question_id: currentQuestionId, response: response }));
-                $('#responseInput').val('');
-            }
-        }
+        
 
         var element = $('.floating-chat');
         var myStorage = localStorage;

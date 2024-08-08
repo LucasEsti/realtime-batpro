@@ -288,15 +288,40 @@ class ChatServer implements MessageComponentInterface {
             }
             $currentQuestionId = $this->userStates[$userId]['current_question'];
             $currentQuestion = $this->getQuestionById($currentQuestionId);
-            
             if ($currentQuestion) {
+                if (isset($data['file'])) {
+                        // Handle file upload
+                        $fileData = base64_decode($data['file']['data']);
+                        $filePath = __DIR__ . '/../uploads/' . $data['file']['name'];
+
+                        // Make sure the upload directory exists
+                        if (!is_dir(dirname($filePath))) {
+                            mkdir(dirname($filePath), 0777, true);
+                        }
+
+                        file_put_contents($filePath, $fileData);
+                        $fileType = mime_content_type($filePath);
+                        $array = [
+                                "file-name" => $data['file']['name'],
+                                "type" => $fileType, 
+                            ]; 
+                        $rep = json_encode([
+                                'type' => 'message',
+                                'message' => $array,    
+                                'from' => $userId
+                            ]);
+                        $this->insertMessage($userId, false, '', null, $data['file']['name'], $fileType);
+                        $from->send($rep);
+                    }
                 if (empty($currentQuestion['choices'])) {
+                    
                     $this->saveUserData($userId, $userId, $currentQuestionId, $data['response']);
                     $nextQuestionId = array_values($currentQuestion['next_question'])[0] ?? null;
+                    
                 } else {
                     $nextQuestionId = $currentQuestion['next_question'][$data['response']] ?? null;
                 }
-
+                
                 if ($nextQuestionId === null || in_array($nextQuestionId, $this->userStates[$userId]['completed'])) {
                     $this->sendOldQuestion($from, $currentQuestionId, $data['response']);
                     $this->userStates[$userId]['completed'][] = $currentQuestionId;
@@ -375,7 +400,7 @@ class ChatServer implements MessageComponentInterface {
                                 'message' => $array,    
                                 'from' => $userId
                             ]);
-                $this->insertMessage($userId, false, '', null,$data['file']['name'], $fileType);
+                $this->insertMessage($userId, false, '', null, $data['file']['name'], $fileType);
                 $from->send($rep);
                 if ($this->admin !== null) {
                     $this->admin->send($rep);
@@ -422,7 +447,13 @@ class ChatServer implements MessageComponentInterface {
     protected function sendQuestion(ConnectionInterface $conn, $questionId) {
         $question = $this->getQuestionById($questionId);
         if ($question) {
-            $conn->send(json_encode(['question_id' => $questionId, 'question' => $question['question'], 'choices' => $question['choices']]));
+            $questionToSend = ['question_id' => $questionId, 'question' => $question['question'], 'choices' => $question['choices']];
+            if (isset($question['libelle'])) {
+                if ($question['libelle'] == "lien") {
+                    $questionToSend["lien"] = true;
+                }
+            }
+            $conn->send(json_encode($questionToSend));
         } else {
             $conn->send(json_encode(['message' => 'Question non trouvée.']));
         }
