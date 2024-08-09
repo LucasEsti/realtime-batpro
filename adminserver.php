@@ -278,9 +278,13 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                     console.log(data.message);
                     if (isObject(data.message)) {
                         console.log(data.message["type"]);
+                        let self = "me";
+                        if (data.self) {
+                            self = "you";
+                        }
                         if (imageTypes.includes(data.message["type"])) {
                             messageDiv = document.createElement('div');
-                            messageDiv.classList.add('bubble', 'me');
+                            messageDiv.classList.add('bubble', self);
 
                             let img = document.createElement('img');
                             img.src = uploadsUrl + data.message["file-name"];
@@ -291,7 +295,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                             messageContainer.scrollTop = messageContainer.scrollHeight;
                         } else {
                             messageDiv = document.createElement('div');
-                            messageDiv.classList.add('bubble', 'me');
+                            messageDiv.classList.add('bubble', self);
 
                             let divA = document.createElement('a');
                             divA.href = uploadsUrl + data.message["file-name"];

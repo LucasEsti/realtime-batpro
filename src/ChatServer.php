@@ -403,18 +403,19 @@ class ChatServer implements MessageComponentInterface {
                     $this->admin->send(json_encode($rep));
                 }
             } else {
-                
-                $rep = json_encode([
-                                'type' => 'message',
+                $rep = [
+                        'type' => 'message',
                                 'message' => $array,    
-                                'from' => $userId,
-                                "self" => "self"
-                            ]);
-                $this->insertMessage($userId, false, '', null, $data['file']['name'], $fileType);
-                $from->send($rep);
+                                'from' => $userId
+                    ];
+                
                 if ($this->admin !== null) {
-                    $this->admin->send($rep);
+                    
+                    $this->admin->send(json_encode($rep));
                 }
+                $rep["self"] = "self";
+                $this->insertMessage($userId, false, '', null, $data['file']['name'], $fileType);
+                $from->send(json_encode($rep));
             }
             
         } 
