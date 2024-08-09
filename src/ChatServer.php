@@ -180,7 +180,6 @@ class ChatServer implements MessageComponentInterface {
     
 
     public function onOpen(ConnectionInterface $conn) {
-        var_dump($conn->resourceId);
         // Ajouter la connexion à la liste des clients
         $this->clients->attach($conn);
 
@@ -196,7 +195,6 @@ class ChatServer implements MessageComponentInterface {
             if (isset($params['userId'])) {
                 $id = $params['userId'];
                 $this->listClientsConn[$conn->resourceId] = $id;
-//                $conn->clientId = $id;
                 $this->listClients[$id] = $conn;
                 
                 $result = $this->getMessageByClient($id);
@@ -208,7 +206,6 @@ class ChatServer implements MessageComponentInterface {
                     $conn->send(json_encode(['type' => 'id', 'id' => $id ]));
 
                     $this->listClientsConn[$conn->resourceId] = $id;
-//                    $conn->clientId = $id;
                     $this->listClients[$id] = $conn;
                     $this->userStates[$id] = [
                         'current_question' => 1,
@@ -245,7 +242,6 @@ class ChatServer implements MessageComponentInterface {
                 $conn->send(json_encode(['type' => 'id', 'id' => $clientId]));
 
                 $this->listClientsConn[$conn->resourceId] = $clientId;
-                $conn->clientId = $clientId;
                 $this->listClients[$clientId] = $conn;
             }
             
@@ -255,12 +251,16 @@ class ChatServer implements MessageComponentInterface {
     
 
     public function onMessage(ConnectionInterface $from, $msg) {
-        $userId = $from->clientId;
-        $data = json_decode($msg, true);
+        $userId = null;
+        if (isset($this->listClientsConn[$from->resourceId])) {
+            $userId = $this->listClientsConn[$from->resourceId];
+        }
         
+        $data = json_decode($msg, true);
         if (isset($data['isReadClient'])) {
             $this->insertIsReadClient($userId);
-        } 
+        }
+        
         if (isset($data['type'])) {
             if ($data['type'] === 'admin') {
                 // Si le message vient de l'admin, envoyez-le au client spécifié
@@ -268,12 +268,10 @@ class ChatServer implements MessageComponentInterface {
                     if (isset($data['isReadAdmin'])) {
                         $this->insertIsRead($data['isReadAdmin'], $data['clientId'] );
                     } else {
-                        if ($this->listClients) {
+                        $this->insertMessage($data['clientId'], true, $data['message']);
+                        if (isset($this->listClients[$data['clientId']])) {
                             $cli = $this->listClients[$data['clientId']];
-                            $this->insertMessage($data['clientId'], true, $data['message']);
-                            if ($cli) {
-                                $cli->send(json_encode(['type' => 'message', 'message' => $data['message']]));
-                            }
+                            $cli->send(json_encode(['type' => 'message', 'message' => $data['message']]));
                         }
                         
                         
@@ -282,7 +280,6 @@ class ChatServer implements MessageComponentInterface {
                 }
             } else {
                 // Si le message vient d'un client, envoyez-le à l'admin
-                
                 if ($this->admin !== null) {
                     $this->admin->send(json_encode(['type' => 'message', 'message' => $data['message'], 'from' => $userId]));
                 }
@@ -396,12 +393,9 @@ class ChatServer implements MessageComponentInterface {
                 $rep = [
                         'type' => 'message',
                         'message' => $array,    
-                        'from' => $client->clientId
+                        'from' => $data['clientId']
                     ];
-                        
-                        ;
-                
-                $this->insertMessage($client->clientId, true, '', null, $data['file']['name'], $fileType);
+                $this->insertMessage($data['clientId'], true, '', null, $data['file']['name'], $fileType);
                 
                 $client->send(json_encode($rep));
                 if ($this->admin !== null) {
@@ -432,9 +426,12 @@ class ChatServer implements MessageComponentInterface {
         $this->clients->detach($conn);
         echo "Connection {$conn->resourceId} has disconnected\n";
         
-        unset($this->listClients[$this->listClientsConn[$conn->resourceId]]);
-        unset($this->listClientsConn[$conn->resourceId]);
-        // Vérifier si l'administrateur s'est déconnecté
+        if (isset($this->listClientsConn[$conn->resourceId])) {
+            unset($this->listClients[$this->listClientsConn[$conn->resourceId]]);
+            unset($this->listClientsConn[$conn->resourceId]);
+            // Vérifier si l'administrateur s'est déconnecté
+        }
+        
         if ($conn === $this->admin) {
             $this->admin = null;
         }
