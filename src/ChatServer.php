@@ -14,6 +14,7 @@ class ChatServer implements MessageComponentInterface {
     protected $clients;
     protected $admin;
     protected $listClients;
+    protected $listClientsConn;
     protected $questions;
     protected $userData;
     protected $userStates;
@@ -25,13 +26,14 @@ class ChatServer implements MessageComponentInterface {
         $this->admin = null;
         $this->questions = json_decode(file_get_contents(dirname(__DIR__) . '/src/questions.json'), true)['questions'];
         $this->userData = [];
+        $this->listClients = [];
+        $this->listClientsConn = [];
         $this->userStates = [];
         
         $dsn = 'mysql:host=localhost;dbname=chatbot;charset=utf8';
         $username = 'root';
         $password = '';
         $this->pdo = new \PDO($dsn, $username, $password);
-        $test = $this->getListMessagesClients();
     }
     
     protected function getListMessagesClients() {
@@ -178,6 +180,7 @@ class ChatServer implements MessageComponentInterface {
     
 
     public function onOpen(ConnectionInterface $conn) {
+        var_dump($conn->resourceId);
         // Ajouter la connexion à la liste des clients
         $this->clients->attach($conn);
 
@@ -192,7 +195,8 @@ class ChatServer implements MessageComponentInterface {
             //check if client exist before and send the last question if exist
             if (isset($params['userId'])) {
                 $id = $params['userId'];
-                $conn->clientId = $id;
+                $this->listClientsConn[$conn->resourceId] = $id;
+//                $conn->clientId = $id;
                 $this->listClients[$id] = $conn;
                 
                 $result = $this->getMessageByClient($id);
@@ -203,7 +207,8 @@ class ChatServer implements MessageComponentInterface {
                     // Envoyer un identifiant unique au client ---
                     $conn->send(json_encode(['type' => 'id', 'id' => $id ]));
 
-                    $conn->clientId = $id ;
+                    $this->listClientsConn[$conn->resourceId] = $id;
+//                    $conn->clientId = $id;
                     $this->listClients[$id] = $conn;
                     $this->userStates[$id] = [
                         'current_question' => 1,
@@ -239,6 +244,7 @@ class ChatServer implements MessageComponentInterface {
                 $clientId = uniqid();
                 $conn->send(json_encode(['type' => 'id', 'id' => $clientId]));
 
+                $this->listClientsConn[$conn->resourceId] = $clientId;
                 $conn->clientId = $clientId;
                 $this->listClients[$clientId] = $conn;
             }
@@ -329,7 +335,7 @@ class ChatServer implements MessageComponentInterface {
                 }
                 
                 if ($nextQuestionId === null || in_array($nextQuestionId, $this->userStates[$userId]['completed'])) {
-                    $this->sendOldQuestion($from, $currentQuestionId, $data['response']);
+                    $this->sendOldQuestion($from, $userId, $currentQuestionId, $data['response']);
                     $this->userStates[$userId]['completed'][] = $currentQuestionId;
                     $repAdmin = 'Bienvenue au service commercial de BATPRO. Un agent vous contactera dans peu';
                     
@@ -345,7 +351,7 @@ class ChatServer implements MessageComponentInterface {
                     $this->userStates[$userId]['completed'][] = $currentQuestionId;
                     $this->userStates[$userId]['current_question'] = $nextQuestionId;
                     //send question sans possibilité de click à l'admin et au client
-                    $this->sendOldQuestion($from, $currentQuestionId, $data['response']);
+                    $this->sendOldQuestion($from, $userId, $currentQuestionId, $data['response']);
                     
                     $this->sendQuestion($from, $nextQuestionId);
                 }
@@ -425,7 +431,9 @@ class ChatServer implements MessageComponentInterface {
         // Déconnecter le client
         $this->clients->detach($conn);
         echo "Connection {$conn->resourceId} has disconnected\n";
-        unset($this->listClients[$conn->clientId]);
+        
+        unset($this->listClients[$this->listClientsConn[$conn->resourceId]]);
+        unset($this->listClientsConn[$conn->resourceId]);
         // Vérifier si l'administrateur s'est déconnecté
         if ($conn === $this->admin) {
             $this->admin = null;
@@ -437,17 +445,17 @@ class ChatServer implements MessageComponentInterface {
         $conn->close();
     }
     
-    protected function sendOldQuestion(ConnectionInterface $conn, $questionId, $reponse) {
+    protected function sendOldQuestion(ConnectionInterface $conn, $userId, $questionId, $reponse) {
         $question = $this->getQuestionById($questionId);
         $responseById = $this->getResponseById($questionId, $reponse);
         if ($question) {
             //envoie question
-            $this->insertMessage($conn->clientId, true, $question, $questionId);
+            $this->insertMessage($userId, true, $question, $questionId);
             //envoie reponse user
-            $this->insertMessage($conn->clientId, false, $responseById, $questionId);
+            $this->insertMessage($userId, false, $responseById, $questionId);
             $conn->send(json_encode(['reponseQuestion' => $responseById,  'questionOld' => $question, 'choicesOld' => $question['choices']]));
             if ($this->admin !== null) {
-                $this->admin->send(json_encode(['type' => 'message', 'from' => $conn->clientId, 'reponseQuestion' => $responseById,  'questionOld' => $question, 'choicesOld' => $question['choices']]));
+                $this->admin->send(json_encode(['type' => 'message', 'from' => $userId, 'reponseQuestion' => $responseById,  'questionOld' => $question, 'choicesOld' => $question['choices']]));
             }
             
         } else {
