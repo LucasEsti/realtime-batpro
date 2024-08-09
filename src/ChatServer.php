@@ -262,9 +262,15 @@ class ChatServer implements MessageComponentInterface {
                     if (isset($data['isReadAdmin'])) {
                         $this->insertIsRead($data['isReadAdmin'], $data['clientId'] );
                     } else {
-                        $cli = $this->listClients[$data['clientId']];
-                        $this->insertMessage($data['clientId'], true, $data['message']);
-                        $cli->send(json_encode(['type' => 'message', 'message' => $data['message']]));
+                        if ($this->listClients) {
+                            $cli = $this->listClients[$data['clientId']];
+                            $this->insertMessage($data['clientId'], true, $data['message']);
+                            if ($cli) {
+                                $cli->send(json_encode(['type' => 'message', 'message' => $data['message']]));
+                            }
+                        }
+                        
+                        
                     }
                     
                 }
@@ -381,24 +387,28 @@ class ChatServer implements MessageComponentInterface {
                 /// file avy any @ admin
                 $client = $this->listClients[$data['clientId']];
                 
-                $rep = json_encode([
-                                'type' => 'message',
-                                'message' => $array,    
-                                'from' => $client->clientId
-                            ]);
+                $rep = [
+                        'type' => 'message',
+                        'message' => $array,    
+                        'from' => $client->clientId
+                    ];
+                        
+                        ;
                 
                 $this->insertMessage($client->clientId, true, '', null, $data['file']['name'], $fileType);
                 
-                $client->send($rep);
+                $client->send(json_encode($rep));
                 if ($this->admin !== null) {
-                    $this->admin->send($rep);
+                    $rep["self"] = "self";
+                    $this->admin->send(json_encode($rep));
                 }
             } else {
                 
                 $rep = json_encode([
                                 'type' => 'message',
                                 'message' => $array,    
-                                'from' => $userId
+                                'from' => $userId,
+                                "self" => "self"
                             ]);
                 $this->insertMessage($userId, false, '', null, $data['file']['name'], $fileType);
                 $from->send($rep);
