@@ -7,15 +7,16 @@
     use Ratchet\WebSocket\WsServer;
     use MyApp\ChatServer;
 
+    $port = 8080;
     $server = IoServer::factory(
         new HttpServer(
             new WsServer(
                 new ChatServer()
             )
         ),
-        8080
+        $port
     );
 
-    echo "Serveur en marche sur le port 8080...\n";
+    echo "Serveur en marche sur le port " . $port . "...\n";
     $server->run();
 ?>
