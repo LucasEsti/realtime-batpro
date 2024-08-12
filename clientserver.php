@@ -26,7 +26,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
 <body>
         
         
-        <div class="floating-chat">
+        <div class="floating-chat hidden">
             <div class="new-message hidden">
                 <i class="fa-solid fa-1"></i>
             </div>
@@ -119,6 +119,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         
         conn.onopen = function() {
             console.log('WebSocket connection opened');
+            $(".floating-chat").removeClass("hidden");
         };
         
         conn.onmessage = function(e) {
@@ -507,7 +508,5 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             }
         }
     </script>
-    
-    <script src="<?php echo $source; ?>style/chatbox.js"></script>
 </body>
 </html>
