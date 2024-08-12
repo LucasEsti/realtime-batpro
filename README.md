@@ -40,7 +40,7 @@ sudo nginx -t
 sudo systemctl reload nginx
 sudo systemctl restart nginx
 
-location /wp-content/plugins/realtime-batpro/server {
+location /wp-content/themes/realtime-batpro/server {
         proxy_pass http://127.0.0.1:8080; # Le port où votre serveur Ratchet écoute
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
@@ -50,9 +50,9 @@ location /wp-content/plugins/realtime-batpro/server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
 
-         proxy_read_timeout 3600s; # Ajustez le temps selon vos besoins
-    proxy_send_timeout 3600s; # Ajustez le temps selon vos besoins
-    proxy_connect_timeout 3600s; # Ajustez le temps selon vos besoins
+        proxy_read_timeout 3600s; # Ajustez le temps selon vos besoins
+        proxy_send_timeout 3600s; # Ajustez le temps selon vos besoins
+        proxy_connect_timeout 3600s; # Ajustez le temps selon vos besoins
     }
 
 cd /home/xnrafbmy/public_html/somalaval-ai/wp-content/plugins/realtime-batpro/server/

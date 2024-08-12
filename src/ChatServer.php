@@ -30,9 +30,9 @@ class ChatServer implements MessageComponentInterface {
         $this->listClientsConn = [];
         $this->userStates = [];
         
-        $dsn = 'mysql:host=localhost;dbname=chatbot;charset=utf8';
-        $username = 'root';
-        $password = '';
+        $dsn = 'mysql:host=localhost;dbname=xnrafbmy_batpro;charset=utf8';
+        $username = 'xnrafbmy_batpro';
+        $password = '7q8o.5)TSp';
         $this->pdo = new \PDO($dsn, $username, $password);
     }
     
