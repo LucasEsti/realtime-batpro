@@ -1,12 +1,4 @@
 @import "https://fonts.googleapis.com/css?family=Noto+Sans";
-* {
-  box-sizing: border-box;
-}
-
-body {
-  background: skyblue;
-  font: 12px/16px "Noto Sans", sans-serif;
-}
 
 #chatBox {
     height: 200px;
