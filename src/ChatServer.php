@@ -202,6 +202,7 @@ class ChatServer implements MessageComponentInterface {
                 
                 //si des messages sont dans la base
                 if (count($result) == 0) {
+                    
                     $this->sendQuestion($conn, 1); // Start with the first question
                     // Envoyer un identifiant unique au client ---
                     $conn->send(json_encode(['type' => 'id', 'id' => $id ]));
@@ -225,12 +226,16 @@ class ChatServer implements MessageComponentInterface {
                         $this->userStates[$id]['completed'][] = $nextQuestion;
                         $this->userStates[$id]['current_question'] = $nextQuestion;
                         if ($idByResponse != null) {
-                            $this->sendQuestion($conn, $idByResponse);
-                        } else {
                             $this->sendQuestion($conn, $nextQuestion);
+                        } else {
+                            if ($nextQuestion != null) {
+                                $this->sendQuestion($conn, $nextQuestion);
+                            }
+
                         }
                         
                     } else {
+                        
                         $this->userStates[$id]['completed'] = ['completed'];
                         $conn->send(json_encode(['type' => 'listMessages', 'lastQuestionSave' => $lastQuestionSave]));
                     }
