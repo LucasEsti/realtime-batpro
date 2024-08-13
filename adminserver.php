@@ -248,7 +248,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 var messageContainer = document.getElementById('messageContainer');
                 
                 createMessageSection(data.from, data.from);
-                createInput(data.from, true);
+                createInput(data.from, false);
                 var messageDisplay = document.getElementById('content-' + data.from);
                 var messageDiv = document.createElement('div');
                 
