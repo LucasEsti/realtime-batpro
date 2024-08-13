@@ -33,7 +33,7 @@
   right: 10px;
   width: 65px;
   height: 65px;
-  
+  z-index: 9999999;
   transform: translateY(70px);
   transition: all 250ms ease-out;
   border-radius: 50%;
