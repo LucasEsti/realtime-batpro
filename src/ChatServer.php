@@ -269,7 +269,7 @@ class ChatServer implements MessageComponentInterface {
                     if (isset($data['isReadAdmin'])) {
                         $this->insertIsRead($data['isReadAdmin'], $data['clientId'] );
                     } else {
-                        $this->insertMessage($data['clientId'], true, $data['message']);
+                        $this->insertMessage($data['clientId'], 1, $data['message']);
                         if (isset($this->listClients[$data['clientId']])) {
                             $cli = $this->listClients[$data['clientId']];
                             $cli->send(json_encode(['type' => 'message', 'message' => $data['message']]));
@@ -320,7 +320,7 @@ class ChatServer implements MessageComponentInterface {
                                 'message' => $array,    
                                 'from' => $userId
                             ]);
-                        $this->insertMessage($userId, false, '', null, $data['file']['name'], $fileType);
+                        $this->insertMessage($userId, 0, '', null, $data['file']['name'], $fileType);
                         $from->send($rep);
                     }
                 if (empty($currentQuestion['choices'])) {
@@ -338,7 +338,7 @@ class ChatServer implements MessageComponentInterface {
                     $repAdmin = 'Bienvenue au service commercial de BATPRO. Un agent vous contactera dans peu';
                     
                     //envoie reponse by  admin
-                    $this->insertMessage($userId, true, $repAdmin);
+                    $this->insertMessage($userId, 1, $repAdmin);
                     
                     $from->send(json_encode(['message' => $repAdmin]));
                     if ($this->admin !== null) {
@@ -361,7 +361,7 @@ class ChatServer implements MessageComponentInterface {
                 
                 $repClient = $data['simple_message'];
                 //envoie reponse user
-                $this->insertMessage($userId, false, $repClient);
+                $this->insertMessage($userId, 0, $repClient);
                 
                 $from->send(json_encode(['message' => $repClient, "self" => "self"]));
                 if ($this->admin !== null) {
@@ -396,7 +396,7 @@ class ChatServer implements MessageComponentInterface {
                         'message' => $array,    
                         'from' => $data['clientId']
                     ];
-                $this->insertMessage($data['clientId'], true, '', null, $data['file']['name'], $fileType);
+                $this->insertMessage($data['clientId'], 1, '', null, $data['file']['name'], $fileType);
                 
                 $client->send(json_encode($rep));
                 if ($this->admin !== null) {
@@ -415,7 +415,7 @@ class ChatServer implements MessageComponentInterface {
                     $this->admin->send(json_encode($rep));
                 }
                 $rep["self"] = "self";
-                $this->insertMessage($userId, false, '', null, $data['file']['name'], $fileType);
+                $this->insertMessage($userId, 0, '', null, $data['file']['name'], $fileType);
                 $from->send(json_encode($rep));
             }
             
@@ -448,9 +448,9 @@ class ChatServer implements MessageComponentInterface {
         $responseById = $this->getResponseById($questionId, $reponse);
         if ($question) {
             //envoie question
-            $this->insertMessage($userId, true, $question, $questionId);
+            $this->insertMessage($userId, 1, $question, $questionId);
             //envoie reponse user
-            $this->insertMessage($userId, false, $responseById, $questionId);
+            $this->insertMessage($userId, 0, $responseById, $questionId);
             $conn->send(json_encode(['reponseQuestion' => $responseById,  'questionOld' => $question, 'choicesOld' => $question['choices']]));
             if ($this->admin !== null) {
                 $this->admin->send(json_encode(['type' => 'message', 'from' => $userId, 'reponseQuestion' => $responseById,  'questionOld' => $question, 'choicesOld' => $question['choices']]));

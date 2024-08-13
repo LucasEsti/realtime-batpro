@@ -388,7 +388,7 @@ function setAciveChat(f) {
         chat.current = chat.container.querySelector('.active-chat');
 
         chat.person = f.getAttribute('data-chat');
-        ws.send(JSON.stringify({ type: 'admin', isReadAdmin: true, clientId: chat.person }));
+        ws.send(JSON.stringify({ type: 'admin', isReadAdmin: 1, clientId: chat.person }));
         console.log(chat.person);
         chat.current.classList.remove('active-chat');
         chat.container.querySelector('[data-chat="' + chat.person + '"]').classList.add('active-chat');
