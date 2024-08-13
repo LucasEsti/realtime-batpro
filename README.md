@@ -69,22 +69,26 @@ wscat -c wss://batpro-madagascar.com/wp-content/themes/theme-batpro/realtime-bat
 admin_9wmjaorl
 xfSe44e%VB@JF824
 
--- Création de la table Message
-CREATE TABLE Message (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    idClient VARCHAR(255) NOT NULL,
-    isAdmin BOOLEAN NOT NULL,
-    isReadClient BOOLEAN NOT NULL,
-    isReadAdmin BOOLEAN NOT NULL
-);
+CREATE TABLE IF NOT EXISTS `Contenu` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `message` text,
+  `filePath` varchar(255) DEFAULT NULL,
+  `fileType` varchar(255) DEFAULT NULL,
+  `idMessage` int NOT NULL,
+  `isAdmin` tinyint(1) NOT NULL,
+  `lastQuestion` int DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
 
--- Création de la table Contenu
-CREATE TABLE Contenu (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    message TEXT,
-    filePath VARCHAR(255),  -- Chemin du fichier
-    fileType VARCHAR(255),
-    idMessage INT,
-    FOREIGN KEY (idMessage) REFERENCES Message(id) ON DELETE CASCADE ON UPDATE CASCADE
-);
+CREATE TABLE IF NOT EXISTS `Message` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `idClient` varchar(255) NOT NULL,
+  `nom` varchar(255) NOT NULL,
+  `mail` varchar(255) NOT NULL,
+  `isReadClient` tinyint(1) NOT NULL,
+  `isReadAdmin` tinyint(1) NOT NULL,
+  `dateEnvoi` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=53 DEFAULT CHARSET=utf8mb4;
+
 

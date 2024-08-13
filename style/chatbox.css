@@ -76,6 +76,7 @@
   height: 400px;
   border-radius: 5px;
   cursor: auto;
+  z-index: 99999999999;
   opacity: 1;
 }
 .floating-chat :focus {
