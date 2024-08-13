@@ -116,7 +116,9 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         }
         
         function createInput(from, firstLoad = false) {
+            
             if (!document.getElementById('input-' + from)) {
+                console.log("createInput");
                 let clientDiv = document.getElementById('messages-' + from);
                 var messageInput = document.createElement('input');
                 messageInput.type = 'text';
@@ -147,8 +149,20 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 clientDiv.appendChild(sendButton);
                 
                 if (firstLoad == true) {
-                    document.getElementById('client-' + from).classList.add('active');
-                    document.getElementById('messages-' + from).classList.add('active-chat');
+                    const personElements = document.querySelectorAll('.person');
+                    let hasActivePerson = false;
+
+                    personElements.forEach(person => {
+                        if (person.classList.contains('active')) {
+                            hasActivePerson = true;
+                        }
+                    });
+
+                    if (!hasActivePerson) {
+                        document.getElementById('client-' + from).classList.add('active');
+                        document.getElementById('messages-' + from).classList.add('active-chat');
+                    }
+                    
                 }
                 
             }
@@ -248,7 +262,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 var messageContainer = document.getElementById('messageContainer');
                 
                 createMessageSection(data.from, data.from);
-                createInput(data.from, false);
+                createInput(data.from, true);
                 var messageDisplay = document.getElementById('content-' + data.from);
                 var messageDiv = document.createElement('div');
                 
