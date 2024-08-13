@@ -83,8 +83,8 @@ CREATE TABLE IF NOT EXISTS `Contenu` (
 CREATE TABLE IF NOT EXISTS `Message` (
   `id` int NOT NULL AUTO_INCREMENT,
   `idClient` varchar(255) NOT NULL,
-  `nom` varchar(255) NOT NULL,
-  `mail` varchar(255) NOT NULL,
+  `nom` varchar(255) NULL,
+  `mail` varchar(255) NULL,
   `isReadClient` tinyint(1) NOT NULL,
   `isReadAdmin` tinyint(1) NOT NULL,
   `dateEnvoi` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

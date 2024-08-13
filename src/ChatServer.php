@@ -118,11 +118,11 @@ class ChatServer implements MessageComponentInterface {
         }
         
         
-        $isReadClient = true;
-        $isReadAdmin = false;
-        if ($isAdmin == true) {
-            $isReadClient = false;
-            $isReadAdmin = true;
+        $isReadClient = 1;
+        $isReadAdmin = 0;
+        if ($isAdmin == 1) {
+            $isReadClient = 0;
+            $isReadAdmin = 1;
         }
         // Correctly prepare and execute the SELECT query
         $checkStmt = $this->pdo->prepare("SELECT * FROM Message WHERE idClient = ?");
@@ -156,7 +156,7 @@ class ChatServer implements MessageComponentInterface {
      }
      
      protected function insertIsReadClient($idClient) {
-            $stmt = $this->pdo->prepare("UPDATE Message SET isReadClient = true WHERE idClient = ?");
+            $stmt = $this->pdo->prepare("UPDATE Message SET isReadClient = 1 WHERE idClient = ?");
             $stmt->execute([$idClient]);
      }
     
