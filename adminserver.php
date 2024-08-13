@@ -78,7 +78,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             var clientDiv = document.getElementById('client-' + from);
             if (!clientDiv) {
                 let name = from;
-                if (nom != "") {
+                if (nom != "" || nom != null) {
                     name = nom;
                 }
 

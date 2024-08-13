@@ -132,8 +132,8 @@ class ChatServer implements MessageComponentInterface {
 
 //        // If the idClient does not exist, perform the INSERT
         if ($exists == null) {
-            $insertStmt = $this->pdo->prepare("INSERT INTO Message (idClient, isReadClient, isReadAdmin) VALUES (?, ?, ?)");
-            $insertStmt->execute([$idClient, $isReadClient, $isReadAdmin]);
+            $insertStmt = $this->pdo->prepare("INSERT INTO Message (idClient, isReadClient, isReadAdmin, nom) VALUES (?, ?, ?, ?)");
+            $insertStmt->execute([$idClient, $isReadClient, $isReadAdmin, $idClient]);
             // Récupérer l"ID du message inséré
             $idMessage = $this->pdo->lastInsertId();
         } else {
