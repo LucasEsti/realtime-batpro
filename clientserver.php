@@ -340,8 +340,14 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                         responseInput.classList.add('hidden');
                         sendButton.classList.add('hidden');
                     }
+                    
+                }
+                if (self == "self") {
+                    newMessage.addClass("hidden");
+                } else {
                     newMessage.removeClass("hidden");
                 }
+                
             }
             
             var container = $('#chat');
@@ -383,6 +389,8 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                     }
                     
                 }
+                conn.send(JSON.stringify({ isReadClient: 1 }));
+                newMessage.addClass("hidden");
                 
             }
         }
@@ -404,6 +412,8 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 reader.readAsDataURL(file);
                 $('#fileInputValue').val(''); // Clear the file input
             }
+            conn.send(JSON.stringify({ isReadClient: 1 }));
+            newMessage.addClass("hidden");
         }
         
         
@@ -411,6 +421,8 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         function sendChoice(choice) {
             if (currentQuestionId !== null) {
                 conn.send(JSON.stringify({ question_id: currentQuestionId, response: choice }));
+                conn.send(JSON.stringify({ isReadClient: 1 }));
+                newMessage.addClass("hidden");
             }
         }
 

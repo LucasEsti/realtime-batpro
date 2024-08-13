@@ -162,19 +162,17 @@ class ChatServer implements MessageComponentInterface {
     
     protected function getIDByResponse($id, $reponse) {
         $keyFound = null;
-        foreach ($this->questions as $question) {
-            if ($question['id'] == $id) {
-                if (count($question['choices']) != 0) {
-                    foreach ($question['choices'] as $key => $value) {
-                        if ($value === $reponse) {
-                          $keyFound = $key;
-                          break;
-                        }
+        if (isset($this->questions[$id])) {
+            if (count($this->questions[$id]['choices']) != 0) {
+                foreach ($this->questions[$id]['choices'] as $key => $value) {
+                    if ($value === $reponse) {
+                      $keyFound = $key;
+                      break;
                     }
                 }
-                
-                
             }
+
+
         }
         return $keyFound;
     }
@@ -482,33 +480,26 @@ class ChatServer implements MessageComponentInterface {
     }
     
     protected function getResponseById($id, $idReponse) {
-        foreach ($this->questions as $question) {
-            if ($question['id'] == $id) {
-                if (isset($question['choices'][$idReponse])) {
-                    return $question['choices'][$idReponse];
-                } else {
-                    return $idReponse;
-                }
-                
+        if (isset($this->questions[$id])) {
+            if (isset($this->questions[$id]['choices'][$idReponse])) {
+                return $this->questions[$id]['choices'][$idReponse];
+            } else {
+                return $idReponse;
             }
         }
         return null;
     }
     
     protected function getQuestionById($id) {
-        foreach ($this->questions as $question) {
-            if ($question['id'] == $id) {
-                return $question;
-            }
+        if (isset($this->questions[$id])) {
+            return $this->questions[$id];
         }
         return null;
     }
     
     protected function getQuestionLibelle($id) {
-        foreach ($this->questions as $question) {
-            if ($question['id'] == $id) {
-                return $question['libelle'];
-            }
+        if (isset($this->questions[$id])) {
+            return $this->questions[$id]['libelle'];
         }
         return null;
     }

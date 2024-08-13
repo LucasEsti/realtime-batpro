@@ -1,6 +1,6 @@
 {
-  "questions": [
-    {
+  "questions": {
+    "1": {
       "id": 1,
       "question": "Bienvenu, Quelle est votre langue préférée?",
       "choices": {
@@ -12,7 +12,7 @@
         "2": 202
       }
     },
-        {
+        "102": {
           "id": 102,
           "libelle": "nom",
           "question": "Quel est votre nom?",
@@ -23,7 +23,7 @@
             "3": 103
           }
         },
-            {
+            "103": {
               "id": 103,
               "libelle": "mail",    
               "question": "Quel est votre email?",
@@ -34,7 +34,7 @@
                 "3": 104
               }
             },
-                {
+                "104":  {
                   "id": 104,
                   "question": "Vous êtes?",
                   "choices": {
@@ -46,7 +46,7 @@
                     "2": 105
                   }
                 },
-                    {
+                    "105": {
                       "id": 105,
                       "question": "Veuillez choisir ce qui vous convient :",
                       "choices": {
@@ -62,7 +62,7 @@
                         "4": 107
                       }
                     },
-                        {
+                        "1061": {
                           "id": 1061,
                           "question": "Je cherche un produit :",
                           "choices": {
@@ -82,7 +82,7 @@
                             "6": 107
                           }
                         },
-                        {
+                        "1062": {
                           "id": 1062,
                           "question": "Demander des renseignements",
                           "choices": {
@@ -102,7 +102,7 @@
                             "6": 109
                           }
                         },
-                            {
+                            "10621": {
                               "id": 10621,
                               "question": "Service après vente",
                               "choices": {
@@ -122,7 +122,7 @@
                                 "6": 109
                               }
                             },
-                        {
+                        "1063": {
                           "id": 1063,
                           "libelle": "lien",
                           "question": "Veuillez envoyer le lien ou la photo du produit",
@@ -131,7 +131,7 @@
                             "1": 10631
                           }
                         },
-                            {
+                            "10631": {
                               "id": 10631,
                               "libelle": "quantité",
                               "question": "En combien de quantité ?",
@@ -140,7 +140,7 @@
                                 "1": 10632
                               }
                             },
-                            {
+                            "10632": {
                               "id": 10632,
                               "question": "Quel est votre mode de paiement",
                               "choices": {
@@ -156,7 +156,7 @@
                                 "4": 10633
                               }
                             },
-                            {
+                            "10633": {
                               "id": 10633,
                               "libelle": "livraison",
                               "question": "Veuillez indiquer la date et le lieu de livraison souhaités",
@@ -165,7 +165,7 @@
                                 "1": 10634
                               }
                             },
-                            {
+                            "10634": {
                               "id": 10634,
                               "question": "Souhaitez vous rajouter d’autres informations ?",
                               "choices": {
@@ -177,7 +177,7 @@
                                 "2": 110
                               }
                             },
-                {
+                "107": {
                   "id": 107,
                   "libelle": "lien",
                   "question": "Veuillez envoyer le lien ou la photo du produit",
@@ -187,21 +187,21 @@
                     "2": 108
                   }
                 },
-                {
+                "108": {
                   "id": 108,
                   "libelle": "Fin",
                   "question": "Patientez un moment, je vérifie le stock",
                   "choices": {},
                   "next_question": {}
                 },
-                {
+                "109": {
                   "id": 109,
                   "libelle": "Fin",
                   "question": "Veuillez nous soumettre plus de details sur votre demande",
                   "choices": {},
                   "next_question": {}
                 },
-                {
+                "110": {
                   "id": 110,
                   "libelle": "Fin",
                   "question": "Notre service commercial vous enverra un devis par e mail sous peu. Merci de nous avoir contacté. A bientôt !",
@@ -209,7 +209,7 @@
                   "next_question": {}
                 },
     
-        {
+        "202": {
           "id": 202,
           "libelle": "nom",
           "question": "Ampidiro ny anaranao?",
@@ -220,7 +220,7 @@
             "3": 203
           }
         },
-            {
+            "203": {
               "id": 203,
               "libelle": "mail",    
               "question": "Inona ny mailaka anao?",
@@ -231,7 +231,7 @@
                 "3": 204
               }
             },
-                {
+                "204": {
                   "id": 204,
                   "question": "Ianao dia?",
                   "choices": {
@@ -243,7 +243,7 @@
                     "2": 205
                   }
                 },
-                    {
+                    "205": {
                       "id": 205,
                       "question": "Misafidiana amin'izay tadiavinao eto :",
                       "choices": {
@@ -259,7 +259,7 @@
                         "4": 207
                       }
                     },
-                        {
+                        "2061": {
                           "id": 2061,
                           "question": "Ireto avy ny entana afaka hanampiana anao :",
                           "choices": {
@@ -279,7 +279,7 @@
                             "6": 207
                           }
                         },
-                        {
+                        "2062": {
                           "id": 2062,
                           "question": "Hanontany vinavina",
                           "choices": {
@@ -299,7 +299,7 @@
                             "6": 209
                           }
                         },
-                            {
+                            "20621": {
                               "id": 20621,
                               "question": "SAV",
                               "choices": {
@@ -319,7 +319,7 @@
                                 "6": 209
                               }
                             },
-                        {
+                        "2063": {
                           "id": 2063,
                           "libelle": "lien",
                           "question": "Mba alefaso ny rohy na sarin'ilay entana azafady",
@@ -328,7 +328,7 @@
                             "1": 20631
                           }
                         },
-                            {
+                            "20631": {
                               "id": 20631,
                               "libelle": "quantité",
                               "question": "Firy isa ?",
@@ -337,7 +337,7 @@
                                 "1": 20632
                               }
                             },
-                            {
+                            "20632": {
                               "id": 20632,
                               "question": "Inona no fomba fandoavanao vola?",
                               "choices": {
@@ -353,7 +353,7 @@
                                 "4": 20633
                               }
                             },
-                            {
+                            "20633": {
                               "id": 20633,
                               "libelle": "livraison",
                               "question": "VDaty sy toerana hanaterana azy",
@@ -362,7 +362,7 @@
                                 "1": 20634
                               }
                             },
-                            {
+                            "20634": {
                               "id": 20634,
                               "question": "Inona ny fanampim-panazavana mbola tinao ho fantatra ?",
                               "choices": {
@@ -374,7 +374,7 @@
                                 "2": 210
                               }
                             },
-                {
+                "207": {
                   "id": 207,
                   "libelle": "lien",
                   "question": "Veuillez envoyer le lien ou la photo du produit",
@@ -384,21 +384,21 @@
                     "2": 308
                   }
                 },
-                {
+                "208": {
                   "id": 208,
                   "libelle": "Fin",
                   "question": "Patientez un moment, je vérifie le stock",
                   "choices": {},
                   "next_question": {}
                 },
-                {
+                "209": {
                   "id": 209,
                   "libelle": "Fin",
                   "question": "Veuillez nous soumettre plus de details sur votre demande",
                   "choices": {},
                   "next_question": {}
                 },
-                {
+                "210": {
                   "id": 210,
                   "libelle": "Fin",
                   "question": "Notre service commercial vous enverra un devis par e mail sous peu. Merci de nous avoir contacté. A bientôt !",
@@ -406,6 +406,6 @@
                   "next_question": {}
                 }
     
-  ]
+  }
 }
 
