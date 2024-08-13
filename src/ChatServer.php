@@ -110,7 +110,7 @@ class ChatServer implements MessageComponentInterface {
             if (isset($message["question"])) {
                 $messageTemporaire .= $message["question"] . "<br>";
                 foreach ($message["choices"] as $choice) {
-                    $messageTemporaire .=  '<button type="button" class="btn btn-primary mb-1 me-1"> '. $choice .' </button>';
+                    $messageTemporaire .=  '<button type="button" class="btn btn-primary mb-1 me-1 mt-1"> '. $choice .' </button>';
                 }
                 $message = $messageTemporaire;
             }
