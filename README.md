@@ -81,7 +81,7 @@ user = root
 stderr_logfile=/var/log/supervisor/ratchet.err.log
 stdout_logfile=/var/log/supervisor/ratchet.out.log
 stdout_logfile_maxbytes = 1MB
-
+stderr_logfile_maxbytes = 1MB
 
 admin_9wmjaorl
 xfSe44e%VB@JF824
