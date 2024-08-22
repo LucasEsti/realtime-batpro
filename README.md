@@ -66,6 +66,23 @@ rm -rf vendor/
 wscat -c wss://batpro-madagascar.com/wp-content/themes/theme-batpro/realtime-batpro/server
 
 
+launch with supervisord
+the file configuration is in /etc/supervisord.conf
+kill supervisord before sudo pkill supervisord
+and then sudo supervisord -c supervisor.conf
+
+[program:ratchet]
+command = bash -c "ulimit -n 10000; exec /usr/local/bin/php /home/xnrafbmy/public_html/batpro/wp-content/themes/theme-batpro/realtime-batpro/server/server.php"
+process_name = Ratchet
+numprocs = 1
+autostart = true
+autorestart = true
+user = root
+stderr_logfile=/var/log/supervisor/ratchet.err.log
+stdout_logfile=/var/log/supervisor/ratchet.out.log
+stdout_logfile_maxbytes = 1MB
+
+
 admin_9wmjaorl
 xfSe44e%VB@JF824
 
