@@ -21,6 +21,10 @@
     color: transparent;
   }*/
 
+#chat a {
+    color: #11956c;
+}
+
 .floating-chat {
   cursor: pointer;
   display: flex;
