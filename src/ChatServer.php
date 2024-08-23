@@ -30,11 +30,20 @@ class ChatServer implements MessageComponentInterface {
         $this->listClientsConn = [];
         $this->userStates = [];
         
-        $bdd = json_decode(file_get_contents(dirname(__DIR__) . '/src/config.json'), true);
-        $dsn = 'mysql:host=localhost;dbname=' . $bdd ["database"] . ';charset=utf8';
-        $username = $bdd ["username"];
-        $password = $bdd ["password"];
-        $this->pdo = new \PDO($dsn, $username, $password);
+        $this->pdo = $this->connectToDatabase();
+    }
+    
+    protected function connectToDatabase() {
+        try {
+            $bdd = json_decode(file_get_contents(dirname(__DIR__) . '/src/config.json'), true);
+            $dsn = 'mysql:host=localhost;dbname=' . $bdd ["database"] . ';charset=utf8';
+            $username = $bdd ["username"];
+            $password = $bdd ["password"];
+            return new \PDO($dsn, $username, $password);
+        } catch (PDOException $e) {
+            error_log("Initial DB connection failed: " . $e->getMessage());
+            throw $e;
+        }
     }
     
     protected function getListMessagesClients() {
@@ -443,7 +452,20 @@ class ChatServer implements MessageComponentInterface {
 
     public function onError(ConnectionInterface $conn, \Exception $e) {
         echo "An error has occurred: {$e->getMessage()}\n";
-        $conn->close();
+        if ($e instanceof PDOException && $e->getCode() == 2006) {
+            // Handle MySQL server has gone away
+            try {
+                // Attempt to reconnect
+                $this->pdo = $this->connectToDatabase();
+                error_log("Reconnected to the database.");
+            } catch (PDOException $reconnectException) {
+                error_log("Failed to reconnect to the database: " . $reconnectException->getMessage());
+                $conn->close();
+            }
+        } else {
+            // Handle other types of exceptions
+            $conn->close();
+        }
     }
     
     protected function sendOldQuestion(ConnectionInterface $conn, $userId, $questionId, $reponse) {
