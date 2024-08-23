@@ -318,7 +318,7 @@ class ChatServer implements MessageComponentInterface {
 
                         // Make sure the upload directory exists
                         if (!is_dir(dirname($filePath))) {
-                            mkdir(dirname($filePath), 0777, true);
+                            mkdir(dirname($filePath), 0755, true);
                         }
 
                         file_put_contents($filePath, $fileData);
@@ -389,7 +389,7 @@ class ChatServer implements MessageComponentInterface {
 
             // Make sure the upload directory exists
             if (!is_dir(dirname($filePath))) {
-                mkdir(dirname($filePath), 0777, true);
+                mkdir(dirname($filePath), 0755, true);
             }
 
             file_put_contents($filePath, $fileData);
