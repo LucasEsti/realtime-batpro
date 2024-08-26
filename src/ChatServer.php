@@ -29,8 +29,8 @@ class ChatServer implements MessageComponentInterface {
         $this->listClients = [];
         $this->listClientsConn = [];
         $this->userStates = [];
-        
-        $this->pdo = $this->connectToDatabase();
+//        $this->pdo = $this->connectToDatabase();
+        $this->ensureConnection();
     }
     
     protected function connectToDatabase() {
@@ -66,7 +66,7 @@ class ChatServer implements MessageComponentInterface {
             ORDER BY 
                 m.dateEnvoi DESC, c.id ASC;
         ";
-
+        
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute();
 
@@ -188,6 +188,7 @@ class ChatServer implements MessageComponentInterface {
     
 
     public function onOpen(ConnectionInterface $conn) {
+         $this->ensureConnection();
         // Ajouter la connexion à la liste des clients
         $this->clients->attach($conn);
 
@@ -264,6 +265,7 @@ class ChatServer implements MessageComponentInterface {
     
 
     public function onMessage(ConnectionInterface $from, $msg) {
+         $this->ensureConnection();
         $userId = null;
         if (isset($this->listClientsConn[$from->resourceId])) {
             $userId = $this->listClientsConn[$from->resourceId];
@@ -449,21 +451,54 @@ class ChatServer implements MessageComponentInterface {
             $this->admin = null;
         }
     }
+    
+    private function ensureConnection() {
+        if ($this->pdo === null) {
+            try {
+                $this->pdo = $this->connectToDatabase();
+                echo "Reconnected to the database.";
+            } catch (PDOException $reconnectException) {
+                error_log("Failed to reconnect to the database: " . $reconnectException->getMessage());
+                throw $reconnectException;
+            }
+        }
+        
+        try {
+            // Check if the connection is alive
+            $this->pdo->query('SELECT 1');
+        } catch (PDOException $e) {
+            echo "Reconnected to the database: {$e->getCode()}";
+            if ($e->getCode() == 2006) {
+                // Attempt to reconnect if the connection has gone away
+                try {
+                    $this->pdo = $this->connectToDatabase();
+                    echo "Reconnected to the database.";
+                } catch (PDOException $reconnectException) {
+                    error_log("Failed to reconnect to the database: " . $reconnectException->getMessage());
+                    throw $reconnectException;  // Re-throw the exception to handle it appropriately
+                }
+            } else {
+                // Handle other exceptions
+                throw $e;
+            }
+        }
+    }
 
     public function onError(ConnectionInterface $conn, \Exception $e) {
-        echo "An error has occurred: {$e->getMessage()}\n";
+        echo "An error has occurred: {$e->getMessage()} and {$e->getCode()} \n";
         if ($e instanceof PDOException && $e->getCode() == 2006) {
             // Handle MySQL server has gone away
             try {
                 // Attempt to reconnect
                 $this->pdo = $this->connectToDatabase();
-                error_log("Reconnected to the database.");
+                echo " Reconnected to the database.";
             } catch (PDOException $reconnectException) {
                 error_log("Failed to reconnect to the database: " . $reconnectException->getMessage());
                 $conn->close();
             }
         } else {
             // Handle other types of exceptions
+            echo 'connecton close';
             $conn->close();
         }
     }
