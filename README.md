@@ -74,6 +74,7 @@ and then sudo supervisord -c supervisor.conf
 sudo supervisorctl status
 sudo supervisorctl stop ratchet:Ratchet
 sudo supervisorctl start ratchet:Ratchet
+sudo supervisorctl restart ratchet:Ratchet
 
 [program:ratchet]
 command = bash -c "ulimit -n 10000; exec /usr/local/bin/php /home/xnrafbmy/public_html/batpro/wp-content/themes/theme-batpro/realtime-batpro/server/server.php"

@@ -458,7 +458,7 @@ class ChatServer implements MessageComponentInterface {
                 $this->pdo = $this->connectToDatabase();
                 echo "Reconnected to the database.";
             } catch (PDOException $reconnectException) {
-                error_log("Failed to reconnect to the database: " . $reconnectException->getMessage());
+                error_log("Failed to reconnect to the database 1: " . $reconnectException->getMessage());
                 throw $reconnectException;
             }
         }
@@ -474,7 +474,7 @@ class ChatServer implements MessageComponentInterface {
                     $this->pdo = $this->connectToDatabase();
                     echo "Reconnected to the database.";
                 } catch (PDOException $reconnectException) {
-                    error_log("Failed to reconnect to the database: " . $reconnectException->getMessage());
+                    error_log("Failed to reconnect to the database 2: " . $reconnectException->getMessage());
                     throw $reconnectException;  // Re-throw the exception to handle it appropriately
                 }
             } else {
@@ -485,20 +485,20 @@ class ChatServer implements MessageComponentInterface {
     }
 
     public function onError(ConnectionInterface $conn, \Exception $e) {
-        echo "An error has occurred: {$e->getMessage()} and {$e->getCode()} \n";
+        echo "An error has occurred 2: {$e->getMessage()} and {$e->getCode()} \n";
         if ($e instanceof PDOException && $e->getCode() == 2006) {
             // Handle MySQL server has gone away
             try {
                 // Attempt to reconnect
                 $this->pdo = $this->connectToDatabase();
-                echo " Reconnected to the database.";
+                echo " Reconnected to the database. 2";
             } catch (PDOException $reconnectException) {
-                error_log("Failed to reconnect to the database: " . $reconnectException->getMessage());
+                error_log("Failed to reconnect to the database 3: " . $reconnectException->getMessage());
                 $conn->close();
             }
         } else {
             // Handle other types of exceptions
-            echo 'connecton close';
+            echo 'connecton close.';
             $conn->close();
         }
     }
