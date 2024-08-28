@@ -33,160 +33,6 @@ class ChatServer implements MessageComponentInterface {
         $this->ensureConnection();
     }
     
-    protected function connectToDatabase() {
-        try {
-            $bdd = json_decode(file_get_contents(dirname(__DIR__) . '/src/config.json'), true);
-            $dsn = 'mysql:host=localhost;dbname=' . $bdd ["database"] . ';charset=utf8';
-            $username = $bdd ["username"];
-            $password = $bdd ["password"];
-            return new \PDO($dsn, $username, $password);
-        } catch (PDOException $e) {
-            error_log("Initial DB connection failed: " . $e->getMessage());
-            throw $e;
-        }
-    }
-    
-    protected function getListMessagesClients() {
-        $sql = "
-            SELECT 
-                m.idClient, 
-                c.message,
-                c.filePath,
-                c.fileType,
-                m.dateEnvoi,
-                c.isAdmin,
-                m.isReadAdmin,
-                m.isReadClient,
-                m.nom,
-                m.mail
-            FROM 
-                Message m
-            JOIN 
-                Contenu c ON m.id = c.idMessage
-            ORDER BY 
-                m.dateEnvoi DESC, c.id ASC;
-        ";
-        
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute();
-
-        // Récupérer les résultats
-        $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        $listMessageClients = [];
-        foreach ($result as $row) {
-            $listMessageClients[$row['idClient']][] = $row;
-        }
-        return $listMessageClients;
-    }
-    
-    protected function getMessageByClient($idClient) {
-        $sql = "
-            SELECT 
-                m.idClient, 
-                c.message, 
-                m.dateEnvoi,
-                c.isAdmin,
-                m.isReadAdmin,
-                m.isReadClient,
-                m.nom,
-                m.mail,
-                c.lastQuestion,
-                c.filePath,
-                c.fileType
-            FROM 
-                Message m
-            JOIN 
-                Contenu c ON m.id = c.idMessage
-            WHERE
-                m.idClient = :idClient
-            ORDER BY 
-                m.dateEnvoi DESC, c.id ASC;
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindValue(':idClient', $idClient, \PDO::PARAM_STR);
-        $stmt->execute();
-
-        $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        return $result;
-    }
-
-
-    protected function insertMessage($idClient, $isAdmin, $message, $lastQuestion = null, $file = null, $fileType = null) {
-        // Insérer le message dans la table Message
-        $messageTemporaire = "";
-        if (is_array($message)) {
-            if (isset($message["question"])) {
-                $messageTemporaire .= $message["question"] . "<br>";
-                foreach ($message["choices"] as $choice) {
-                    $messageTemporaire .=  '<button type="button" class="btn btn-primary mb-1 me-1 mt-1"> '. $choice .' </button>';
-                }
-                $message = $messageTemporaire;
-            }
-            
-        }
-        
-        
-        $isReadClient = 1;
-        $isReadAdmin = 0;
-        if ($isAdmin == 1) {
-            $isReadClient = 0;
-            $isReadAdmin = 1;
-        }
-        // Correctly prepare and execute the SELECT query
-        $checkStmt = $this->pdo->prepare("SELECT * FROM Message WHERE idClient = ?");
-        $checkStmt->execute([$idClient]);
-        $exists = $checkStmt->fetch(\PDO::FETCH_ASSOC);
-        $idMessage = 0;
-
-//        // If the idClient does not exist, perform the INSERT
-        if ($exists == null) {
-            $insertStmt = $this->pdo->prepare("INSERT INTO Message (idClient, isReadClient, isReadAdmin, nom) VALUES (?, ?, ?, ?)");
-            $insertStmt->execute([$idClient, $isReadClient, $isReadAdmin, $idClient]);
-            // Récupérer l"ID du message inséré
-            $idMessage = $this->pdo->lastInsertId();
-        } else {
-            $stmt = $this->pdo->prepare("UPDATE Message SET isReadClient = ?, isReadAdmin = ? WHERE idClient = ?");
-            // Execute the statement with the bound values
-            $stmt->execute([$isReadClient, $isReadAdmin, $idClient]);
-            $idMessage = $exists["id"];
-        }
-        
-        
-        // Insérer des informations dans la table Contenu
-        $stmt = $this->pdo->prepare("INSERT INTO Contenu (message, filePath, fileType, idMessage, isAdmin, lastQuestion) VALUES (?, ?, ?, ?,?, ?)");
-        $stmt->execute([$message, $file, $fileType, $idMessage, $isAdmin, $lastQuestion]);
-        
-    }
-    
-     protected function insertIsRead($isReadAdmin, $idClient) {
-            $stmt = $this->pdo->prepare("UPDATE Message SET isReadAdmin = ? WHERE idClient = ?");
-            $stmt->execute([$isReadAdmin, $idClient]);
-     }
-     
-     protected function insertIsReadClient($idClient) {
-            $stmt = $this->pdo->prepare("UPDATE Message SET isReadClient = 1 WHERE idClient = ?");
-            $stmt->execute([$idClient]);
-     }
-    
-    protected function getIDByResponse($id, $reponse) {
-        $keyFound = null;
-        if (isset($this->questions[$id])) {
-            if (count($this->questions[$id]['choices']) != 0) {
-                foreach ($this->questions[$id]['choices'] as $key => $value) {
-                    if ($value === $reponse) {
-                      $keyFound = $key;
-                      break;
-                    }
-                }
-            }
-
-
-        }
-        return $keyFound;
-    }
-    
-
     public function onOpen(ConnectionInterface $conn) {
         $this->ensureConnection();
         // Ajouter la connexion à la liste des clients
@@ -262,24 +108,6 @@ class ChatServer implements MessageComponentInterface {
         
     }
     
-    protected function fileTreatment($data) {
-        $fileData = base64_decode($data['data']);
-        $filePath = __DIR__ . '/../uploads/' . $data['name'];
-
-        // Make sure the upload directory exists
-        if (!is_dir(dirname($filePath))) {
-            mkdir(dirname($filePath), 0755, true);
-        }
-
-        file_put_contents($filePath, $fileData);
-        $fileType = mime_content_type($filePath);
-        return [
-                "file-name" => $data['name'],
-                "type" => $fileType, 
-            ];
-    }
-    
-
     public function onMessage(ConnectionInterface $from, $msg) {
          $this->ensureConnection();
         $userId = null;
@@ -433,40 +261,7 @@ class ChatServer implements MessageComponentInterface {
             $this->admin = null;
         }
     }
-    
-    private function ensureConnection() {
-        echo 'ensureConnection \n';
-        if ($this->pdo === null) {
-            try {
-                $this->pdo = $this->connectToDatabase();
-                echo "Reconnected to the database 3. \n";
-            } catch (PDOException $reconnectException) {
-                error_log("Failed to reconnect to the database 1: " . $reconnectException->getMessage()) . "\n";
-                throw $reconnectException;
-            }
-        }
-        
-        try {
-            // Check if the connection is alive
-            $this->pdo->query('SELECT 1');
-        } catch (PDOException $e) {
-            echo "Reconnected to the database: {$e->getCode()} \n";
-            if ($e->getCode() == 2006) {
-                // Attempt to reconnect if the connection has gone away
-                try {
-                    $this->pdo = $this->connectToDatabase();
-                    echo "Reconnected to the database 2. \n";
-                } catch (PDOException $reconnectException) {
-                    error_log("Failed to reconnect to the database 2: " . $reconnectException->getMessage()) . "\n";
-                    throw $reconnectException;  // Re-throw the exception to handle it appropriately
-                }
-            } else {
-                // Handle other exceptions
-                throw $e;
-            }
-        }
-    }
-
+   
     public function onError(ConnectionInterface $conn, \Exception $e) {
         echo "An error has occurred 2: {$e->getMessage()} and {$e->getCode()} \n";
         if ($e instanceof PDOException && $e->getCode() == 2006) {
@@ -558,6 +353,208 @@ class ChatServer implements MessageComponentInterface {
             $this->userData[$resourceId][$questionId] = $response;
         }
         
+    }
+    
+    protected function connectToDatabase() {
+        try {
+            $bdd = json_decode(file_get_contents(dirname(__DIR__) . '/src/config.json'), true);
+            $dsn = 'mysql:host=localhost;dbname=' . $bdd ["database"] . ';charset=utf8';
+            $username = $bdd ["username"];
+            $password = $bdd ["password"];
+            return new \PDO($dsn, $username, $password);
+        } catch (PDOException $e) {
+            error_log("Initial DB connection failed: " . $e->getMessage());
+            throw $e;
+        }
+    }
+    
+    protected function getListMessagesClients() {
+        $sql = "
+            SELECT 
+                m.idClient, 
+                c.message,
+                c.filePath,
+                c.fileType,
+                m.dateEnvoi,
+                c.isAdmin,
+                m.isReadAdmin,
+                m.isReadClient,
+                m.nom,
+                m.mail
+            FROM 
+                Message m
+            JOIN 
+                Contenu c ON m.id = c.idMessage
+            ORDER BY 
+                m.dateEnvoi DESC, c.id ASC;
+        ";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+
+        // Récupérer les résultats
+        $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $listMessageClients = [];
+        foreach ($result as $row) {
+            $listMessageClients[$row['idClient']][] = $row;
+        }
+        return $listMessageClients;
+    }
+    
+    protected function getMessageByClient($idClient) {
+        $sql = "
+            SELECT 
+                m.idClient, 
+                c.message, 
+                m.dateEnvoi,
+                c.isAdmin,
+                m.isReadAdmin,
+                m.isReadClient,
+                m.nom,
+                m.mail,
+                c.lastQuestion,
+                c.filePath,
+                c.fileType
+            FROM 
+                Message m
+            JOIN 
+                Contenu c ON m.id = c.idMessage
+            WHERE
+                m.idClient = :idClient
+            ORDER BY 
+                m.dateEnvoi DESC, c.id ASC;
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':idClient', $idClient, \PDO::PARAM_STR);
+        $stmt->execute();
+
+        $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return $result;
+    }
+    
+    protected function insertMessage($idClient, $isAdmin, $message, $lastQuestion = null, $file = null, $fileType = null) {
+        // Insérer le message dans la table Message
+        $messageTemporaire = "";
+        if (is_array($message)) {
+            if (isset($message["question"])) {
+                $messageTemporaire .= $message["question"] . "<br>";
+                foreach ($message["choices"] as $choice) {
+                    $messageTemporaire .=  '<button type="button" class="btn btn-primary mb-1 me-1 mt-1"> '. $choice .' </button>';
+                }
+                $message = $messageTemporaire;
+            }
+            
+        }
+        
+        
+        $isReadClient = 1;
+        $isReadAdmin = 0;
+        if ($isAdmin == 1) {
+            $isReadClient = 0;
+            $isReadAdmin = 1;
+        }
+        // Correctly prepare and execute the SELECT query
+        $checkStmt = $this->pdo->prepare("SELECT * FROM Message WHERE idClient = ?");
+        $checkStmt->execute([$idClient]);
+        $exists = $checkStmt->fetch(\PDO::FETCH_ASSOC);
+        $idMessage = 0;
+
+//        // If the idClient does not exist, perform the INSERT
+        if ($exists == null) {
+            $insertStmt = $this->pdo->prepare("INSERT INTO Message (idClient, isReadClient, isReadAdmin, nom) VALUES (?, ?, ?, ?)");
+            $insertStmt->execute([$idClient, $isReadClient, $isReadAdmin, $idClient]);
+            // Récupérer l"ID du message inséré
+            $idMessage = $this->pdo->lastInsertId();
+        } else {
+            $stmt = $this->pdo->prepare("UPDATE Message SET isReadClient = ?, isReadAdmin = ? WHERE idClient = ?");
+            // Execute the statement with the bound values
+            $stmt->execute([$isReadClient, $isReadAdmin, $idClient]);
+            $idMessage = $exists["id"];
+        }
+        
+        
+        // Insérer des informations dans la table Contenu
+        $stmt = $this->pdo->prepare("INSERT INTO Contenu (message, filePath, fileType, idMessage, isAdmin, lastQuestion) VALUES (?, ?, ?, ?,?, ?)");
+        $stmt->execute([$message, $file, $fileType, $idMessage, $isAdmin, $lastQuestion]);
+        
+    }
+    
+     protected function insertIsRead($isReadAdmin, $idClient) {
+            $stmt = $this->pdo->prepare("UPDATE Message SET isReadAdmin = ? WHERE idClient = ?");
+            $stmt->execute([$isReadAdmin, $idClient]);
+     }
+     
+     protected function insertIsReadClient($idClient) {
+            $stmt = $this->pdo->prepare("UPDATE Message SET isReadClient = 1 WHERE idClient = ?");
+            $stmt->execute([$idClient]);
+     }
+    
+    protected function getIDByResponse($id, $reponse) {
+        $keyFound = null;
+        if (isset($this->questions[$id])) {
+            if (count($this->questions[$id]['choices']) != 0) {
+                foreach ($this->questions[$id]['choices'] as $key => $value) {
+                    if ($value === $reponse) {
+                      $keyFound = $key;
+                      break;
+                    }
+                }
+            }
+
+
+        }
+        return $keyFound;
+    }
+    
+    private function ensureConnection() {
+        echo 'ensureConnection \n';
+        if ($this->pdo === null) {
+            try {
+                $this->pdo = $this->connectToDatabase();
+                echo "Reconnected to the database 3. \n";
+            } catch (PDOException $reconnectException) {
+                error_log("Failed to reconnect to the database 1: " . $reconnectException->getMessage()) . "\n";
+                throw $reconnectException;
+            }
+        }
+        
+        try {
+            // Check if the connection is alive
+            $this->pdo->query('SELECT 1');
+        } catch (PDOException $e) {
+            echo "Reconnected to the database: {$e->getCode()} \n";
+            if ($e->getCode() == 2006) {
+                // Attempt to reconnect if the connection has gone away
+                try {
+                    $this->pdo = $this->connectToDatabase();
+                    echo "Reconnected to the database 2. \n";
+                } catch (PDOException $reconnectException) {
+                    error_log("Failed to reconnect to the database 2: " . $reconnectException->getMessage()) . "\n";
+                    throw $reconnectException;  // Re-throw the exception to handle it appropriately
+                }
+            } else {
+                // Handle other exceptions
+                throw $e;
+            }
+        }
+    }
+    
+    protected function fileTreatment($data) {
+        $fileData = base64_decode($data['data']);
+        $filePath = __DIR__ . '/../uploads/' . $data['name'];
+
+        // Make sure the upload directory exists
+        if (!is_dir(dirname($filePath))) {
+            mkdir(dirname($filePath), 0755, true);
+        }
+
+        file_put_contents($filePath, $fileData);
+        $fileType = mime_content_type($filePath);
+        return [
+                "file-name" => $data['name'],
+                "type" => $fileType, 
+            ];
     }
 }
 
