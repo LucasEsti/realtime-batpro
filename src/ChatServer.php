@@ -421,7 +421,7 @@ class ChatServer implements MessageComponentInterface {
     public function onClose(ConnectionInterface $conn) {
         // Déconnecter le client
         $this->clients->detach($conn);
-        echo "Connection {$conn->resourceId} has disconnected\n";
+        echo "Connection {$conn->resourceId} has disconnected \n";
         
         if (isset($this->listClientsConn[$conn->resourceId])) {
             unset($this->listClients[$this->listClientsConn[$conn->resourceId]]);
@@ -435,13 +435,13 @@ class ChatServer implements MessageComponentInterface {
     }
     
     private function ensureConnection() {
-        echo 'ensureConnection';
+        echo 'ensureConnection \n';
         if ($this->pdo === null) {
             try {
                 $this->pdo = $this->connectToDatabase();
-                echo "Reconnected to the database 3.";
+                echo "Reconnected to the database 3. \n";
             } catch (PDOException $reconnectException) {
-                error_log("Failed to reconnect to the database 1: " . $reconnectException->getMessage());
+                error_log("Failed to reconnect to the database 1: " . $reconnectException->getMessage()) . "\n";
                 throw $reconnectException;
             }
         }
@@ -450,14 +450,14 @@ class ChatServer implements MessageComponentInterface {
             // Check if the connection is alive
             $this->pdo->query('SELECT 1');
         } catch (PDOException $e) {
-            echo "Reconnected to the database: {$e->getCode()}";
+            echo "Reconnected to the database: {$e->getCode()} \n";
             if ($e->getCode() == 2006) {
                 // Attempt to reconnect if the connection has gone away
                 try {
                     $this->pdo = $this->connectToDatabase();
-                    echo "Reconnected to the database 2.";
+                    echo "Reconnected to the database 2. \n";
                 } catch (PDOException $reconnectException) {
-                    error_log("Failed to reconnect to the database 2: " . $reconnectException->getMessage());
+                    error_log("Failed to reconnect to the database 2: " . $reconnectException->getMessage()) . "\n";
                     throw $reconnectException;  // Re-throw the exception to handle it appropriately
                 }
             } else {
@@ -474,14 +474,14 @@ class ChatServer implements MessageComponentInterface {
             try {
                 // Attempt to reconnect
                 $this->pdo = $this->connectToDatabase();
-                echo " Reconnected to the database. 1";
+                echo " Reconnected to the database. 1 \n";
             } catch (PDOException $reconnectException) {
-                error_log("Failed to reconnect to the database 3: " . $reconnectException->getMessage());
+                error_log("Failed to reconnect to the database 3: " . $reconnectException->getMessage()) . "\n";
                 $conn->close();
             }
         } else {
             // Handle other types of exceptions
-            echo 'connecton close.';
+            echo 'connecton close. \n';
             $conn->close();
         }
     }
