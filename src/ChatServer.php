@@ -23,7 +23,6 @@ class ChatServer implements MessageComponentInterface {
 
     public function __construct() {
         $this->clients = new \SplObjectStorage;
-        $this->admin = null;
         $this->admins = new \SplObjectStorage;
         $this->questions = json_decode(file_get_contents(dirname(__DIR__) . '/src/questions.json'), true)['questions'];
         $this->userData = [];
@@ -44,8 +43,6 @@ class ChatServer implements MessageComponentInterface {
         
         if (isset($params['type'])) {
             if ($params['type'] === 'admin') {
-                $this->admin = $conn;
-                
                 if (!$this->admins->contains($conn)) {
                     $adminId = uniqid();
                     $this->admins->attach($conn, ['userId' => $adminId]);
@@ -136,7 +133,7 @@ class ChatServer implements MessageComponentInterface {
         if (isset($data['type'])) {
             if ($data['type'] === 'admin') {
                 // Si le message vient de l'admin, envoyez-le au client spécifié
-                if ($from === $this->admin && isset($data['clientId'])) {
+                if (isset($data['clientId'])) {
                     if (isset($data['isReadAdmin'])) {
                         $this->insertIsRead($data['isReadAdmin'], $data['clientId'] );
                     } elseif ($dataFile != null) {
@@ -147,10 +144,9 @@ class ChatServer implements MessageComponentInterface {
                         $this->insertMessage($data['clientId'], 1, '', null, $data['file']['name'], $dataFile["type"]);
 
                         $client->send(json_encode($rep));
-                        if ($this->admin !== null) {
-                            $rep["self"] = "self";
-                            $this->sendMessageToAdmins(json_encode($rep));
-                        }
+                        
+                        $rep["self"] = "self";
+                        $this->sendMessageToAdmins(json_encode($rep));
                     } else {
                         //mila alefa @ admin rehetra ko ny valiny
                         $this->insertMessage($data['clientId'], 1, $data['message']);
@@ -195,9 +191,9 @@ class ChatServer implements MessageComponentInterface {
                             $this->insertMessage($userId, 1, $repAdmin);
 
                             $from->send(json_encode(['message' => $repAdmin]));
-                            if ($this->admin !== null) {
-                                $this->sendMessageToAdmins(json_encode(['type' => 'message', 'from' => $userId, 'message' => $repAdmin]));
-                            }
+                                
+                            $this->sendMessageToAdmins(json_encode(['type' => 'message', 'from' => $userId, 'message' => $repAdmin]));
+                            
                             $this->userStates[$userId]['completed'] = ['completed']; // Mark the questionnaire as completed
                         } else {
                             $this->userStates[$userId]['completed'][] = $currentQuestionId;
@@ -216,17 +212,17 @@ class ChatServer implements MessageComponentInterface {
                         //envoie reponse user
                         $this->insertMessage($userId, 0, $repClient);
                         $from->send(json_encode(['message' => $repClient, "self" => "self"]));
-                        if ($this->admin !== null) {
-                            $this->sendMessageToAdmins(json_encode(['type' => 'message', 'from' => $userId, 'message' => $repClient]));
-                        }
+                        
+                        $this->sendMessageToAdmins(json_encode(['type' => 'message', 'from' => $userId, 'message' => $repClient]));
+                        
                     } else {
                         $from->send(json_encode(['message' => 'Envoyez un message après avoir complété le questionnaire.']));
                     }
                 } elseif (isset($data['file'])) {
                     $rep["from"] = $userId;
-                    if ($this->admin !== null) {
-                        $this->sendMessageToAdmins(json_encode($rep));
-                    }
+                    
+                    $this->sendMessageToAdmins(json_encode($rep));
+                    
                     $rep["self"] = "self";
                     $this->insertMessage($userId, 0, '', null, $data['file']['name'], $dataFile["type"]);
                     $from->send(json_encode($rep));
@@ -234,9 +230,7 @@ class ChatServer implements MessageComponentInterface {
                     $this->insertIsReadClient($userId);
                 } else {
                     // Si le message vient d'un client, envoyez-le à l'admin
-                    if ($this->admin !== null) {
-                        $this->sendMessageToAdmins(json_encode(['type' => 'message', 'message' => $data['message'], 'from' => $userId]));
-                    }
+                    $this->sendMessageToAdmins(json_encode(['type' => 'message', 'message' => $data['message'], 'from' => $userId]));
                 }
             } 
         } 
@@ -255,9 +249,6 @@ class ChatServer implements MessageComponentInterface {
             // Vérifier si l'administrateur s'est déconnecté
         }
         
-        if ($conn === $this->admin) {
-            $this->admin = null;
-        }
     }
    
     public function onError(ConnectionInterface $conn, \Exception $e) {
@@ -294,9 +285,9 @@ class ChatServer implements MessageComponentInterface {
             //envoie reponse user
             $this->insertMessage($userId, 0, $responseById, $questionId);
             $conn->send(json_encode(['reponseQuestion' => $responseById,  'questionOld' => $question, 'choicesOld' => $question['choices']]));
-            if ($this->admin !== null) {
-                $this->sendMessageToAdmins(json_encode(['type' => 'message', 'from' => $userId, 'reponseQuestion' => $responseById,  'questionOld' => $question, 'choicesOld' => $question['choices']]));
-            }
+            
+            $this->sendMessageToAdmins(json_encode(['type' => 'message', 'from' => $userId, 'reponseQuestion' => $responseById,  'questionOld' => $question, 'choicesOld' => $question['choices']]));
+            
             
         } else {
             $conn->send(json_encode(['message' => 'Question non trouvée.']));
