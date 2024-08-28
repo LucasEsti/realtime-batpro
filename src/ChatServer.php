@@ -188,7 +188,7 @@ class ChatServer implements MessageComponentInterface {
     
 
     public function onOpen(ConnectionInterface $conn) {
-         $this->ensureConnection();
+        $this->ensureConnection();
         // Ajouter la connexion à la liste des clients
         $this->clients->attach($conn);
 
@@ -241,7 +241,6 @@ class ChatServer implements MessageComponentInterface {
                             }
 
                         }
-                        
                     } else {
                         
                         $this->userStates[$id]['completed'] = ['completed'];
@@ -261,6 +260,23 @@ class ChatServer implements MessageComponentInterface {
             
         }
         
+    }
+    
+    protected function fileTreatment($data) {
+        $fileData = base64_decode($data['data']);
+        $filePath = __DIR__ . '/../uploads/' . $data['name'];
+
+        // Make sure the upload directory exists
+        if (!is_dir(dirname($filePath))) {
+            mkdir(dirname($filePath), 0755, true);
+        }
+
+        file_put_contents($filePath, $fileData);
+        $fileType = mime_content_type($filePath);
+        return [
+                "file-name" => $data['name'],
+                "type" => $fileType, 
+            ];
     }
     
 
@@ -314,21 +330,7 @@ class ChatServer implements MessageComponentInterface {
             $currentQuestion = $this->getQuestionById($currentQuestionId);
             if ($currentQuestion) {
                 if (isset($data['file'])) {
-                        // Handle file upload
-                        $fileData = base64_decode($data['file']['data']);
-                        $filePath = __DIR__ . '/../uploads/' . $data['file']['name'];
-
-                        // Make sure the upload directory exists
-                        if (!is_dir(dirname($filePath))) {
-                            mkdir(dirname($filePath), 0755, true);
-                        }
-
-                        file_put_contents($filePath, $fileData);
-                        $fileType = mime_content_type($filePath);
-                        $array = [
-                                "file-name" => $data['file']['name'],
-                                "type" => $fileType, 
-                            ]; 
+                        $array = $this->fileTreatment($data['file']);
                         $rep = json_encode([
                                 'type' => 'message',
                                 'message' => $array,    
@@ -385,31 +387,16 @@ class ChatServer implements MessageComponentInterface {
                 $from->send(json_encode(['message' => 'Envoyez un message après avoir complété le questionnaire.']));
             }
         } else if (isset($data['file'])) {
-            // Handle file upload
-            $fileData = base64_decode($data['file']['data']);
-            $filePath = __DIR__ . '/../uploads/' . $data['file']['name'];
-
-            // Make sure the upload directory exists
-            if (!is_dir(dirname($filePath))) {
-                mkdir(dirname($filePath), 0755, true);
-            }
-
-            file_put_contents($filePath, $fileData);
-            $fileType = mime_content_type($filePath);
-            $array = [
-                    "file-name" => $data['file']['name'],
-                    "type" => $fileType, 
-                ];
-            
+            $array = $this->fileTreatment($data['file']);
+            $rep = [
+                'type' => 'message',
+                'message' => $array
+            ];
             if (isset($data['clientId']) && $data['clientId']) {
                 /// file avy any @ admin
                 $client = $this->listClients[$data['clientId']];
+                $rep["from"] = $data['clientId'];
                 
-                $rep = [
-                        'type' => 'message',
-                        'message' => $array,    
-                        'from' => $data['clientId']
-                    ];
                 $this->insertMessage($data['clientId'], 1, '', null, $data['file']['name'], $fileType);
                 
                 $client->send(json_encode($rep));
@@ -418,14 +405,9 @@ class ChatServer implements MessageComponentInterface {
                     $this->admin->send(json_encode($rep));
                 }
             } else {
-                $rep = [
-                        'type' => 'message',
-                                'message' => $array,    
-                                'from' => $userId
-                    ];
+                $rep["from"] = $userId;
                 
                 if ($this->admin !== null) {
-                    
                     $this->admin->send(json_encode($rep));
                 }
                 $rep["self"] = "self";
@@ -453,6 +435,7 @@ class ChatServer implements MessageComponentInterface {
     }
     
     private function ensureConnection() {
+        echo 'ensureConnection';
         if ($this->pdo === null) {
             try {
                 $this->pdo = $this->connectToDatabase();
