@@ -13,23 +13,23 @@ use Ratchet\ConnectionInterface;
 class ChatServer implements MessageComponentInterface {
     protected $clients;
     protected $admin;
+    protected $admins;
     protected $listClients;
     protected $listClientsConn;
     protected $questions;
     protected $userData;
     protected $userStates;
-    
     protected $pdo;
 
     public function __construct() {
         $this->clients = new \SplObjectStorage;
         $this->admin = null;
+        $this->admins = new \SplObjectStorage;
         $this->questions = json_decode(file_get_contents(dirname(__DIR__) . '/src/questions.json'), true)['questions'];
         $this->userData = [];
         $this->listClients = [];
         $this->listClientsConn = [];
         $this->userStates = [];
-//        $this->pdo = $this->connectToDatabase();
         $this->ensureConnection();
     }
     
@@ -42,82 +42,95 @@ class ChatServer implements MessageComponentInterface {
         $queryParams = $conn->httpRequest->getUri()->getQuery();
         parse_str($queryParams, $params);
         
-        if (isset($params['type']) && $params['type'] === 'admin') {
-            $this->admin = $conn;
-            $this->admin->send(json_encode(['type' => 'listMessages', 'message' => $this->getListMessagesClients()]));
-        } else {
-            //check if client exist before and send the last question if exist
-            if (isset($params['userId'])) {
-                $id = $params['userId'];
-                $this->listClientsConn[$conn->resourceId] = $id;
-                $this->listClients[$id] = $conn;
+        if (isset($params['type'])) {
+            if ($params['type'] === 'admin') {
+                $this->admin = $conn;
                 
-                $result = $this->getMessageByClient($id);
-                
-                //si des messages sont dans la base
-                if (count($result) == 0) {
-                    
-                    $this->sendQuestion($conn, 1); // Start with the first question
-                    // Envoyer un identifiant unique au client ---
-                    $conn->send(json_encode(['type' => 'id', 'id' => $id ]));
-
-                    $this->listClientsConn[$conn->resourceId] = $id;
-                    $this->listClients[$id] = $conn;
-                    $this->userStates[$id] = [
-                        'current_question' => 1,
-                        'completed' => []
-                    ];
-                    
-                    
-                } else {
-                    $conn->send(json_encode(['type' => 'listMessages', 'messageClient' => $result]));
-                    $lastQuestionSave = $result[count($result) - 1]["lastQuestion"];
-                    $lastReponseSave = $result[count($result) - 1]["message"];
-                    if ($lastQuestionSave != null) {
-                        $idByResponse = $this->getIDByResponse($lastQuestionSave, $lastReponseSave);
-                        
-                        $nextQuestion = $this->getQuestionById($lastQuestionSave)['next_question']["1"];
-                        $this->userStates[$id]['completed'][] = $nextQuestion;
-                        $this->userStates[$id]['current_question'] = $nextQuestion;
-                        if ($idByResponse != null) {
-                            $this->sendQuestion($conn, $nextQuestion);
-                        } else {
-                            if ($nextQuestion != null) {
-                                $this->sendQuestion($conn, $nextQuestion);
-                            }
-
-                        }
-                    } else {
-                        
-                        $this->userStates[$id]['completed'] = ['completed'];
-                        $conn->send(json_encode(['type' => 'listMessages', 'lastQuestionSave' => $lastQuestionSave]));
-                    }
+                if (!$this->admins->contains($conn)) {
+                    $adminId = uniqid();
+                    $this->admins->attach($conn, ['userId' => $adminId]);
+                    $conn->send(json_encode(['type' => 'id', 'id' => $adminId]));
                 }
                 
-            } else {
-                $this->sendQuestion($conn, 1); // Start with the first question
-                // Envoyer un identifiant unique au client ---
-                $clientId = uniqid();
-                $conn->send(json_encode(['type' => 'id', 'id' => $clientId]));
+                $conn->send(json_encode(['type' => 'listMessages', 'message' => $this->getListMessagesClients()]));
+            } elseif ($params['type'] === 'client') {
+                //check if client exist before and send the last question if exist
+                if (isset($params['userId'])) {
+                    $id = $params['userId'];
+                    $this->listClientsConn[$conn->resourceId] = $id;
+                    $this->listClients[$id] = $conn;
 
-                $this->listClientsConn[$conn->resourceId] = $clientId;
-                $this->listClients[$clientId] = $conn;
+                    $result = $this->getMessageByClient($id);
+
+                    //si des messages sont dans la base
+                    if (count($result) == 0) {
+                        $this->sendQuestion($conn, 1); // Start with the first question
+                        // Envoyer un identifiant unique au client ---
+                        $conn->send(json_encode(['type' => 'id', 'id' => $id ]));
+
+                        $this->listClientsConn[$conn->resourceId] = $id;
+                        $this->listClients[$id] = $conn;
+                        $this->userStates[$id] = [
+                            'current_question' => 1,
+                            'completed' => []
+                        ];
+
+                    } else {
+                        $conn->send(json_encode(['type' => 'listMessages', 'messageClient' => $result]));
+                        $lastQuestionSave = $result[count($result) - 1]["lastQuestion"];
+                        $lastReponseSave = $result[count($result) - 1]["message"];
+                        if ($lastQuestionSave != null) {
+                            $idByResponse = $this->getIDByResponse($lastQuestionSave, $lastReponseSave);
+
+                            $nextQuestion = $this->getQuestionById($lastQuestionSave)['next_question']["1"];
+                            $this->userStates[$id]['completed'][] = $nextQuestion;
+                            $this->userStates[$id]['current_question'] = $nextQuestion;
+                            if ($idByResponse != null) {
+                                $this->sendQuestion($conn, $nextQuestion);
+                            } else {
+                                if ($nextQuestion != null) {
+                                    $this->sendQuestion($conn, $nextQuestion);
+                                }
+                            }
+                        } else {
+                            $this->userStates[$id]['completed'] = ['completed'];
+                            $conn->send(json_encode(['type' => 'listMessages', 'lastQuestionSave' => $lastQuestionSave]));
+                        }
+                    }
+
+                } else {
+                    $this->sendQuestion($conn, 1); // Start with the first question
+                    // Envoyer un identifiant unique au client ---
+                    $clientId = uniqid();
+                    $conn->send(json_encode(['type' => 'id', 'id' => $clientId]));
+
+                    $this->listClientsConn[$conn->resourceId] = $clientId;
+                    $this->listClients[$clientId] = $conn;
+                }
             }
-            
         }
-        
     }
     
     public function onMessage(ConnectionInterface $from, $msg) {
-         $this->ensureConnection();
+//        $clientData = $this->clients[$from];
+//        $userId = $clientData['userId'];
+        $this->ensureConnection();
         $userId = null;
         if (isset($this->listClientsConn[$from->resourceId])) {
             $userId = $this->listClientsConn[$from->resourceId];
         }
         
         $data = json_decode($msg, true);
-        if (isset($data['isReadClient'])) {
-            $this->insertIsReadClient($userId);
+        
+        
+        $dataFile = null;
+        $rep = null;
+        if (isset($data['file'])) {
+            $dataFile = $this->fileTreatment($data['file']);
+            $rep = [
+                'type' => 'message',
+                'message' => $dataFile
+            ];
         }
         
         if (isset($data['type'])) {
@@ -126,129 +139,114 @@ class ChatServer implements MessageComponentInterface {
                 if ($from === $this->admin && isset($data['clientId'])) {
                     if (isset($data['isReadAdmin'])) {
                         $this->insertIsRead($data['isReadAdmin'], $data['clientId'] );
+                    } elseif ($dataFile != null) {
+                        /// file avy any @ admin
+                        $client = $this->listClients[$data['clientId']];
+                        $rep["from"] = $data['clientId'];
+
+                        $this->insertMessage($data['clientId'], 1, '', null, $data['file']['name'], $dataFile["type"]);
+
+                        $client->send(json_encode($rep));
+                        if ($this->admin !== null) {
+                            $rep["self"] = "self";
+                            $this->sendMessageToAdmins(json_encode($rep));
+                        }
                     } else {
+                        //mila alefa @ admin rehetra ko ny valiny
                         $this->insertMessage($data['clientId'], 1, $data['message']);
                         if (isset($this->listClients[$data['clientId']])) {
                             $cli = $this->listClients[$data['clientId']];
                             $cli->send(json_encode(['type' => 'message', 'message' => $data['message']]));
                         }
-                        
-                        
                     }
                     
                 }
-            } else {
-                // Si le message vient d'un client, envoyez-le à l'admin
-                if ($this->admin !== null) {
-                    $this->admin->send(json_encode(['type' => 'message', 'message' => $data['message'], 'from' => $userId]));
-                }
-            }
-        } 
-        
-        
+            } elseif ($data['type'] === 'client') {
+                if (isset($data['question_id']) && isset($data['response'])) {
+                    if (!isset($this->userStates[$userId])) {
+                        $this->userStates[$userId] = [
+                            'current_question' => 1,
+                            'completed' => []
+                        ];
+                    }
+                    $currentQuestionId = $this->userStates[$userId]['current_question'];
+                    $currentQuestion = $this->getQuestionById($currentQuestionId);
+                    if ($currentQuestion) {
+                        if (isset($data['file'])) {
+                            $rep["from"] = $userId;
+                            $this->insertMessage($userId, 0, '', null, $data['file']['name'], $dataFile["type"]);
+                            $from->send(json_encode($rep));
+                        }
+                        if (empty($currentQuestion['choices'])) {
 
-        if (isset($data['question_id']) && isset($data['response'])) {
-            if (!isset($this->userStates[$userId])) {
-                $this->userStates[$userId] = [
-                    'current_question' => 1,
-                    'completed' => []
-                ];
-            }
-            $currentQuestionId = $this->userStates[$userId]['current_question'];
-            $currentQuestion = $this->getQuestionById($currentQuestionId);
-            if ($currentQuestion) {
-                if (isset($data['file'])) {
-                        $array = $this->fileTreatment($data['file']);
-                        $rep = json_encode([
-                                'type' => 'message',
-                                'message' => $array,    
-                                'from' => $userId
-                            ]);
-                        $this->insertMessage($userId, 0, '', null, $data['file']['name'], $fileType);
-                        $from->send($rep);
+                            $this->saveUserData($userId, $userId, $currentQuestionId, $data['response']);
+                            $nextQuestionId = array_values($currentQuestion['next_question'])[0] ?? null;
+
+                        } else {
+                            $nextQuestionId = $currentQuestion['next_question'][$data['response']] ?? null;
+                        }
+
+                        if ($nextQuestionId === null || in_array($nextQuestionId, $this->userStates[$userId]['completed'])) {
+                            $this->sendOldQuestion($from, $userId, $currentQuestionId, $data['response']);
+                            $this->userStates[$userId]['completed'][] = $currentQuestionId;
+                            $repAdmin = 'Bienvenue au service commercial de BATPRO. Un agent vous contactera dans peu';
+
+                            //envoie reponse by  admin
+                            $this->insertMessage($userId, 1, $repAdmin);
+
+                            $from->send(json_encode(['message' => $repAdmin]));
+                            if ($this->admin !== null) {
+                                $this->sendMessageToAdmins(json_encode(['type' => 'message', 'from' => $userId, 'message' => $repAdmin]));
+                            }
+                            $this->userStates[$userId]['completed'] = ['completed']; // Mark the questionnaire as completed
+                        } else {
+                            $this->userStates[$userId]['completed'][] = $currentQuestionId;
+                            $this->userStates[$userId]['current_question'] = $nextQuestionId;
+                            //send question sans possibilité de click à l'admin et au client
+                            $this->sendOldQuestion($from, $userId, $currentQuestionId, $data['response']);
+
+                            $this->sendQuestion($from, $nextQuestionId);
+                        }
+                    } else {
+                        $from->send(json_encode(['message' => 'Question non trouvée.']));
                     }
-                if (empty($currentQuestion['choices'])) {
-                    
-                    $this->saveUserData($userId, $userId, $currentQuestionId, $data['response']);
-                    $nextQuestionId = array_values($currentQuestion['next_question'])[0] ?? null;
-                    
-                } else {
-                    $nextQuestionId = $currentQuestion['next_question'][$data['response']] ?? null;
-                }
-                
-                if ($nextQuestionId === null || in_array($nextQuestionId, $this->userStates[$userId]['completed'])) {
-                    $this->sendOldQuestion($from, $userId, $currentQuestionId, $data['response']);
-                    $this->userStates[$userId]['completed'][] = $currentQuestionId;
-                    $repAdmin = 'Bienvenue au service commercial de BATPRO. Un agent vous contactera dans peu';
-                    
-                    //envoie reponse by  admin
-                    $this->insertMessage($userId, 1, $repAdmin);
-                    
-                    $from->send(json_encode(['message' => $repAdmin]));
+                } else if (isset($data['simple_message'])) {
+                    if (isset($this->userStates[$userId]) && $this->userStates[$userId]['completed'] === ['completed']) {
+                        $repClient = $data['simple_message'];
+                        //envoie reponse user
+                        $this->insertMessage($userId, 0, $repClient);
+                        $from->send(json_encode(['message' => $repClient, "self" => "self"]));
+                        if ($this->admin !== null) {
+                            $this->sendMessageToAdmins(json_encode(['type' => 'message', 'from' => $userId, 'message' => $repClient]));
+                        }
+                    } else {
+                        $from->send(json_encode(['message' => 'Envoyez un message après avoir complété le questionnaire.']));
+                    }
+                } elseif (isset($data['file'])) {
+                    $rep["from"] = $userId;
                     if ($this->admin !== null) {
-                        $this->admin->send(json_encode(['type' => 'message', 'from' => $userId, 'message' => $repAdmin]));
+                        $this->sendMessageToAdmins(json_encode($rep));
                     }
-                    $this->userStates[$userId]['completed'] = ['completed']; // Mark the questionnaire as completed
-                } else {
-                    $this->userStates[$userId]['completed'][] = $currentQuestionId;
-                    $this->userStates[$userId]['current_question'] = $nextQuestionId;
-                    //send question sans possibilité de click à l'admin et au client
-                    $this->sendOldQuestion($from, $userId, $currentQuestionId, $data['response']);
-                    
-                    $this->sendQuestion($from, $nextQuestionId);
-                }
-            } else {
-                $from->send(json_encode(['message' => 'Question non trouvée.']));
-            }
-        } else if (isset($data['simple_message'])) {
-            if (isset($this->userStates[$userId]) && $this->userStates[$userId]['completed'] === ['completed']) {
-                
-                $repClient = $data['simple_message'];
-                //envoie reponse user
-                $this->insertMessage($userId, 0, $repClient);
-                
-                $from->send(json_encode(['message' => $repClient, "self" => "self"]));
-                if ($this->admin !== null) {
-                    $this->admin->send(json_encode(['type' => 'message', 'from' => $userId, 'message' => $repClient]));
-                }
-            } else {
-                $from->send(json_encode(['message' => 'Envoyez un message après avoir complété le questionnaire.']));
-            }
-        } else if (isset($data['file'])) {
-            $array = $this->fileTreatment($data['file']);
-            $rep = [
-                'type' => 'message',
-                'message' => $array
-            ];
-            if (isset($data['clientId']) && $data['clientId']) {
-                /// file avy any @ admin
-                $client = $this->listClients[$data['clientId']];
-                $rep["from"] = $data['clientId'];
-                
-                $this->insertMessage($data['clientId'], 1, '', null, $data['file']['name'], $fileType);
-                
-                $client->send(json_encode($rep));
-                if ($this->admin !== null) {
                     $rep["self"] = "self";
-                    $this->admin->send(json_encode($rep));
+                    $this->insertMessage($userId, 0, '', null, $data['file']['name'], $dataFile["type"]);
+                    $from->send(json_encode($rep));
+                } elseif (isset($data['isReadClient'])) {
+                    $this->insertIsReadClient($userId);
+                } else {
+                    // Si le message vient d'un client, envoyez-le à l'admin
+                    if ($this->admin !== null) {
+                        $this->sendMessageToAdmins(json_encode(['type' => 'message', 'message' => $data['message'], 'from' => $userId]));
+                    }
                 }
-            } else {
-                $rep["from"] = $userId;
-                
-                if ($this->admin !== null) {
-                    $this->admin->send(json_encode($rep));
-                }
-                $rep["self"] = "self";
-                $this->insertMessage($userId, 0, '', null, $data['file']['name'], $fileType);
-                $from->send(json_encode($rep));
-            }
-            
+            } 
         } 
+        
     }
 
     public function onClose(ConnectionInterface $conn) {
         // Déconnecter le client
         $this->clients->detach($conn);
+        $this->admins->detach($conn);
         echo "Connection {$conn->resourceId} has disconnected \n";
         
         if (isset($this->listClientsConn[$conn->resourceId])) {
@@ -281,6 +279,12 @@ class ChatServer implements MessageComponentInterface {
         }
     }
     
+    protected function sendMessageToAdmins($message) {
+        foreach ($this->admins as $client) {
+            $client->send($message);
+        }
+    }
+    
     protected function sendOldQuestion(ConnectionInterface $conn, $userId, $questionId, $reponse) {
         $question = $this->getQuestionById($questionId);
         $responseById = $this->getResponseById($questionId, $reponse);
@@ -291,7 +295,7 @@ class ChatServer implements MessageComponentInterface {
             $this->insertMessage($userId, 0, $responseById, $questionId);
             $conn->send(json_encode(['reponseQuestion' => $responseById,  'questionOld' => $question, 'choicesOld' => $question['choices']]));
             if ($this->admin !== null) {
-                $this->admin->send(json_encode(['type' => 'message', 'from' => $userId, 'reponseQuestion' => $responseById,  'questionOld' => $question, 'choicesOld' => $question['choices']]));
+                $this->sendMessageToAdmins(json_encode(['type' => 'message', 'from' => $userId, 'reponseQuestion' => $responseById,  'questionOld' => $question, 'choicesOld' => $question['choices']]));
             }
             
         } else {

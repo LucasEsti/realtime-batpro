@@ -366,7 +366,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             var response = $('#responseInput').val();
             var file = document.getElementById('fileInputValue').files[0];
             if (currentQuestionId !== null) {
-                var dataResp = { question_id: currentQuestionId};
+                var dataResp = { type: 'client', question_id: currentQuestionId};
                 dataResp.response = "";
                 
                 if (file) {
@@ -389,7 +389,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                     }
                     
                 }
-                conn.send(JSON.stringify({ isReadClient: 1 }));
+                conn.send(JSON.stringify({type: 'client', isReadClient: 1 }));
                 newMessage.addClass("hidden");
                 
             }
@@ -400,19 +400,19 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             var message2 = $('#simpleMessageInput').val();
             var file = document.getElementById('fileInputValue').files[0];
             if (message2) {
-                conn.send(JSON.stringify({ simple_message: message2 }));
+                conn.send(JSON.stringify({type: 'client', simple_message: message2 }));
                 $('#simpleMessageInput').val('');
             }
             if (file) {
                 var reader = new FileReader();
                 reader.onload = function(e) {
                     var base64File = e.target.result.split(',')[1];
-                    conn.send(JSON.stringify({ file: { name: file.name, data: base64File } }));
+                    conn.send(JSON.stringify({type: 'client', file: { name: file.name, data: base64File } }));
                 };
                 reader.readAsDataURL(file);
                 $('#fileInputValue').val(''); // Clear the file input
             }
-            conn.send(JSON.stringify({ isReadClient: 1 }));
+            conn.send(JSON.stringify({type: 'client', isReadClient: 1 }));
             newMessage.addClass("hidden");
         }
         
@@ -420,8 +420,8 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         
         function sendChoice(choice) {
             if (currentQuestionId !== null) {
-                conn.send(JSON.stringify({ question_id: currentQuestionId, response: choice }));
-                conn.send(JSON.stringify({ isReadClient: 1 }));
+                conn.send(JSON.stringify({type: 'client', question_id: currentQuestionId, response: choice }));
+                conn.send(JSON.stringify({type: 'client', isReadClient: 1 }));
                 newMessage.addClass("hidden");
             }
         }
@@ -457,7 +457,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
 
             if (conn.readyState === conn.OPEN) {
                 //vue sur message
-                conn.send(JSON.stringify({ isReadClient: 1 }));
+                conn.send(JSON.stringify({type: 'client', isReadClient: 1 }));
             }
 
         }
