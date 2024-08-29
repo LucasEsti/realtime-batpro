@@ -253,7 +253,7 @@ class ChatServer implements MessageComponentInterface {
    
     public function onError(ConnectionInterface $conn, \Exception $e) {
         echo "An error has occurred 2: {$e->getMessage()} and {$e->getCode()} \n";
-        if ($e instanceof PDOException && $e->getCode() == 2006) {
+        if ($e->getCode() == "HY000") {
             // Handle MySQL server has gone away
             try {
                 // Attempt to reconnect
