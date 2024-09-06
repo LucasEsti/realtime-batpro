@@ -252,14 +252,11 @@ class ChatServer implements MessageComponentInterface {
             try {
                 // Attempt to reconnect
                 $this->pdo = $this->connectToDatabase();
-                echo " Reconnected to the database. 1 \n";
             } catch (PDOException $reconnectException) {
-                error_log("Failed to reconnect to the database 3: " . $reconnectException->getMessage()) . "\n";
                 $conn->close();
             }
         } else {
             // Handle other types of exceptions
-            echo 'connecton close. \n';
             $conn->close();
         }
     }
@@ -506,13 +503,10 @@ class ChatServer implements MessageComponentInterface {
     }
     
     private function ensureConnection() {
-        echo 'ensureConnection \n';
         if ($this->pdo === null) {
             try {
                 $this->pdo = $this->connectToDatabase();
-                echo "Reconnected to the database 3. \n";
             } catch (PDOException $reconnectException) {
-                error_log("Failed to reconnect to the database 1: " . $reconnectException->getMessage()) . "\n";
                 throw $reconnectException;
             }
         }
@@ -521,14 +515,11 @@ class ChatServer implements MessageComponentInterface {
             // Check if the connection is alive
             $this->pdo->query('SELECT 1');
         } catch (PDOException $e) {
-            echo "Reconnected to the database: {$e->getCode()} \n";
             if ($e->getCode() == 2006) {
                 // Attempt to reconnect if the connection has gone away
                 try {
                     $this->pdo = $this->connectToDatabase();
-                    echo "Reconnected to the database 2. \n";
                 } catch (PDOException $reconnectException) {
-                    error_log("Failed to reconnect to the database 2: " . $reconnectException->getMessage()) . "\n";
                     throw $reconnectException;  // Re-throw the exception to handle it appropriately
                 }
             } else {
