@@ -167,7 +167,7 @@
                             },
                             "10634": {
                               "id": 10634,
-                              "question": "Souhaitez vous rajouter d’autres informations ?",
+                              "question": "Souhaitez-vous rajouter d’autres informations ?",
                               "choices": {
                                 "1": "Oui",
                                 "2": "Non"
@@ -197,7 +197,7 @@
                 "109": {
                   "id": 109,
                   "libelle": "Fin",
-                  "question": "Veuillez nous soumettre plus de details sur votre demande",
+                  "question": "Veuillez nous soumettre plus de détails sur votre demande",
                   "choices": {},
                   "next_question": {}
                 },
