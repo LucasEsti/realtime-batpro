@@ -304,5 +304,7 @@
     .floating-chat {
         width: 65px;
         height: 65px;
+        bottom: 23px;
+    right: 23px;
     }
 }
