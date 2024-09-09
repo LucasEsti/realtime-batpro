@@ -298,8 +298,8 @@
 
 @media (max-width: 768px ) and (max-width: 428px) {
     .floating-chat.expand {
-        width: 80%;
-        height: 50%;
+        width: 90%;
+        height: 90%;
     }
     .floating-chat {
         width: 65px;

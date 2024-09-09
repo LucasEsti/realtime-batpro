@@ -34,10 +34,10 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             <i class="fa fa-comments" aria-hidden="true"></i>
             <div class="chat container-fluid">
                 <div class="header">
-                    <span class="title">
+                    <span class="title" style="align-self: flex-end;">
                         ChatLive
                     </span>
-                    <button type="button" class="btn-close btn-close-white" aria-label="Close"></button>
+                    <button type="button" class="btn btn-link" aria-label="Close"><i class="fa-regular fa-window-minimize text-white"></i></button>
                 </div>
                 <ul id="chat" class="messages">
                 </ul>
