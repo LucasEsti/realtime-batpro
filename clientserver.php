@@ -21,6 +21,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <link rel="stylesheet" href="<?php echo $source; ?>style/chatbox.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <style>
         input[type="file"] {
             display: none;
@@ -35,9 +36,10 @@ $source = $scheme . '://' . $host . $scriptName . '/';
     </style>
 </head>
 <body>
+        <h1 class="my-element">An animated element</h1>
+
         
-        
-        <div class="floating-chat hidden">
+        <div class=" floating-chat hidden ">
             <div class="new-message hidden">
                 <i class="fa-solid fa-1"></i>
             </div>
@@ -97,6 +99,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
     </div>
     <script>
         
+
         var clientId = $.cookie('clientId');
         var newMessage = $(".new-message");
         
@@ -134,6 +137,8 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         conn.onopen = function() {
             console.log('WebSocket connection opened');
             $(".floating-chat").removeClass("hidden");
+            const elementBounce = document.querySelector('.fa-comments');
+            elementBounce.classList.add('animate__animated', 'animate__tada', "animate__delay-3s", "animate__infinite");
         };
         
         conn.onmessage = function(e) {
