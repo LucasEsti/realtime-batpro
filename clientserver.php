@@ -22,7 +22,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
 
     <link rel="stylesheet" href="<?php echo $source; ?>style/chatbox.css">
     <style>
-/*        input[type="file"] {
+        input[type="file"] {
             display: none;
           }
 
@@ -31,7 +31,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             display: inline-block;
             padding: 6px 12px;
             cursor: pointer;
-          }*/
+          }
     </style>
 </head>
 <body>
@@ -55,27 +55,27 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 <div class=" footer">
                     <div class="container">
                         <div class="row ">
-                            <div id="response" class="col-12 hidden">
+                            <div id="response" class="col-8 hidden">
                                 <input type="text" id="responseInput" placeholder="Entrez votre réponse" class="form-control text-box " />
                             </div>
                             
-                            <div id="simpleMessage" class="col-12 hidden">
+                            <div id="simpleMessage" class="col-8 hidden">
                                 <input type="text" id="simpleMessageInput" placeholder="Entrez un message" class=" form-control text-box " />
                             </div>
                             
                             
-                            <div id="fileInput" class="col-9 hidden mt-2 ">
-<!--                                <label for="fileInputValue" class="custom-file-upload">
-                                        <i class="fa-regular fa-file"></i> Ajouter fichier
-                                </label>-->
-                                <input type="file" id="fileInputValue" class="form-control  " title=" "/>
+                            <div id="fileInput" class="col-2 hidden ">
+                                <label for="fileInputValue" class="custom-file-upload">
+                                        <i class="fa-regular fa-file"></i>
+                                </label>
+                                <input type="file" id="fileInputValue" class="form-control" title=" "/>
                             </div>
                             
                             
-                            <div id="sendButton" class="col-2 mt-2 hidden ">
+                            <div id="sendButton" class="col-2 hidden ">
                                 <button type="button" onclick="sendResponse()" class=" btn btn-primary "><i class="fa-regular fa-paper-plane"></i></button>
                             </div>
-                            <div id="sendSimpleMessageButton" class="col-2 mt-2 hidden">
+                            <div id="sendSimpleMessageButton" class="col-2 hidden">
                                 <button type="button" onclick="sendMessage()" class=" btn btn-primary "><i class="fa-regular fa-paper-plane"></i></button>
                             </div>
                             
