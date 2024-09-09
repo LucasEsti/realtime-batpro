@@ -21,7 +21,18 @@ $source = $scheme . '://' . $host . $scriptName . '/';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <link rel="stylesheet" href="<?php echo $source; ?>style/chatbox.css">
-    
+    <style>
+/*        input[type="file"] {
+            display: none;
+          }
+
+          .custom-file-upload {
+            border: 1px solid #ccc;
+            display: inline-block;
+            padding: 6px 12px;
+            cursor: pointer;
+          }*/
+    </style>
 </head>
 <body>
         
@@ -54,15 +65,18 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                             
                             
                             <div id="fileInput" class="col-9 hidden mt-2 ">
+<!--                                <label for="fileInputValue" class="custom-file-upload">
+                                        <i class="fa-regular fa-file"></i> Ajouter fichier
+                                </label>-->
                                 <input type="file" id="fileInputValue" class="form-control  " title=" "/>
                             </div>
                             
                             
                             <div id="sendButton" class="col-2 mt-2 hidden ">
-                                <button type="button" onclick="sendResponse()" class=" btn btn-primary ">Send</button>
+                                <button type="button" onclick="sendResponse()" class=" btn btn-primary "><i class="fa-regular fa-paper-plane"></i></button>
                             </div>
                             <div id="sendSimpleMessageButton" class="col-2 mt-2 hidden">
-                                <button type="button" onclick="sendMessage()" class=" btn btn-primary ">Send</button>
+                                <button type="button" onclick="sendMessage()" class=" btn btn-primary "><i class="fa-regular fa-paper-plane"></i></button>
                             </div>
                             
                         </div>
@@ -256,7 +270,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                         var button = document.createElement('button');
                         button.innerHTML = data.choices[choice];
                         button.setAttribute('type', 'button');
-                        button.classList.add('btn', 'btn-outline-primary', 'me-1', 'mb-1', 'mt-1');
+                        button.classList.add('btn', 'btn-outline-primary', 'ml-1', 'mr-1', 'mb-1', 'mt-1');
                         button.onclick = (function(choice) {
                             return function() {
                                 sendChoice(choice);
