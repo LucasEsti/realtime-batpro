@@ -98,8 +98,13 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         <!--<button id="sendFileButton" onclick="sendFile()" class="hidden">Envoyer Fichier</button>-->
     </div>
     <script>
-        
+        function playNotificationSound() {
+//            audio.play(); // Joue le son
+        }
 
+        // Appelez la fonction lorsque la notification est déclenchée
+        const audio = new Audio('https://batpro-madagascar.com/wp-content/uploads/2024/09/livechat-129007.mp3'); 
+        audio.load();
         var clientId = $.cookie('clientId');
         var newMessage = $(".new-message");
         
@@ -142,6 +147,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         };
         
         conn.onmessage = function(e) {
+            
             var data = JSON.parse(e.data);
             
 //            var chatBox = document.getElementById('chatBox');
@@ -246,6 +252,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 li.className = 'self';
                 li.textContent = data.reponseQuestion;
                 chat.appendChild(li);
+                
             }
             
             let self = "other";
@@ -309,6 +316,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                     
 //                    sendFileButton.classList.add('hidden');
                 }
+                playNotificationSound();
             } else if (data.message) {
                 console.log("message");
                 console.log(data.message);
@@ -366,6 +374,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 } else {
                     newMessage.removeClass("hidden");
                 }
+                playNotificationSound();
                 
             }
             

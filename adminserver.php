@@ -19,8 +19,44 @@ $source = $scheme . '://' . $host . $scriptName . '/';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
 <link rel="stylesheet" href="<?php echo $source; ?>direct-messaging/dist/style.css">
     <style>
-        
-        
+        /* Styles pour le modal */
+.modal {
+    display: none; /* Masquer le modal par défaut */
+    position: fixed; /* Reste en place même lors du défilement */
+    z-index: 1; /* Au-dessus des autres éléments */
+    left: 0;
+    top: 0;
+    width: 100%; /* Largeur pleine */
+    height: 100%; /* Hauteur pleine */
+    overflow: auto; /* Activer le défilement si nécessaire */
+    background-color: rgb(0,0,0); /* Couleur de fond noire */
+    background-color: rgba(0,0,0,0.4); /* Fond légèrement transparent */
+}
+
+/* Styles pour le contenu du modal */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* Centrer le modal */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Largeur du modal */
+}
+
+/* Style pour le bouton de fermeture */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
     </style>
 </head>
 <body>
@@ -44,11 +80,65 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             </div>
         </div>
     </div>
+    <audio id="notification-sound" class="hidden" src="https://batpro-madagascar.com/wp-content/uploads/2024/09/livechat-129007.mp3" preload="auto"></audio>
+    
+    <div id="permissionModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>Nous avons besoin de votre permission pour lire l'audio. Voulez-vous continuer ?</p>
+            <button id="confirmButton">Oui</button>
+            <!--<button id="cancelButton">Non</button>-->
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    
     <script>
-       
+        document.addEventListener('DOMContentLoaded', function() {
+            var modal = document.getElementById('permissionModal');
+            var close = document.getElementsByClassName('close')[0];
+            var confirmButton = document.getElementById('confirmButton');
+//            var cancelButton = document.getElementById('cancelButton');
+
+            modal.style.display = 'block';
+            // Fermer le modal lorsque l'utilisateur clique sur "X"
+            close.onclick = function() {
+                modal.style.display = 'none';
+            }
+
+            // Fermer le modal et lire l'audio lorsque l'utilisateur clique sur "Oui"
+            confirmButton.onclick = function() {
+                modal.style.display = 'none';
+                var audio = new Audio('path/to/your/audiofile.mp3');
+                audio.play().catch(function(error) {
+//                    alert('Voulez-vous activer les notifications sonores?');
+                });
+            }
+
+            // Fermer le modal lorsque l'utilisateur clique sur "Non"
+//            cancelButton.onclick = function() {
+//                modal.style.display = 'none';
+//            }
+
+            // Fermer le modal lorsque l'utilisateur clique en dehors du modal
+            window.onclick = function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            }
+        });
+
+    </script>
+    <script>
+        
+       function playNotificationSound() {
+            var sound = document.getElementById('notification-sound');
+            sound.play();
+             
+        }
+
+        
         var adminId = $.cookie('adminId');
         let connex = "";
         if (adminId !== undefined) {
@@ -100,11 +190,12 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 spanPerson.textContent = name;
 
                 liPersonne.appendChild(spanPerson);
-
+                
                 people.appendChild(liPersonne);
                 updateFriends();
                     <!--list client-->
-                
+                                
+                  playNotificationSound();              
                 
                   clientDiv = document.createElement('div');
                   clientDiv.id = 'messages-' + from;
@@ -169,11 +260,9 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                         document.getElementById('client-' + from).classList.add('active');
                         document.getElementById('messages-' + from).classList.add('active-chat');
                     }
-                    
                 }
                 
             }
-            
             
         }
         
@@ -337,11 +426,12 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                         messageDiv.classList.add('bubble', 'me');
                         messageDisplay.appendChild(messageDiv);
                         messageContainer.scrollTop = messageContainer.scrollHeight;
+                        
                     }
                     
 
                 } 
-                
+                playNotificationSound();
                 //                    mettre en top dernier message non lu 
                 $("#client-" + data.from).prependTo('#listPeople');
                 $("#client-" + data.from).addClass('non-lu');
