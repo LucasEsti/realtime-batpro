@@ -19,6 +19,11 @@ $source = $scheme . '://' . $host . $scriptName . '/';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
 <link rel="stylesheet" href="<?php echo $source; ?>direct-messaging/dist/style.css">
     <style>
+        .listPeople {
+            overflow-x: scroll;
+            height: 75%;
+            position: relative;
+        }
         /* Styles pour le modal */
 .modal {
     display: none; /* Masquer le modal par défaut */
