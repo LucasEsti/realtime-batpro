@@ -2,7 +2,7 @@
   "questions": {
     "1": {
       "id": 1,
-      "question": "Bienvenu, Quelle est votre langue préférée?",
+      "question": "Bienvenue, Quelle est votre langue préférée?",
       "choices": {
         "1": "Français",
         "2": "Malagasy"
