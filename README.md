@@ -40,7 +40,7 @@ sudo nginx -t
 sudo systemctl reload nginx
 sudo systemctl restart nginx
 
-location /wp-content/themes/theme-batpro/realtime-batpro/server {
+location /home/xnrafbmy/public_html/batpro/wp-content/themes/theme-batpro/realtime-batpro/server {
         proxy_pass http://127.0.0.1:8080; # Le port où votre serveur Ratchet écoute
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
