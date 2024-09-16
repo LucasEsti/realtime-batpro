@@ -50,9 +50,9 @@ location /home/xnrafbmy/public_html/batpro/wp-content/themes/theme-batpro/realti
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
 
-         proxy_read_timeout 3600s; # Ajustez le temps selon vos besoins
-    proxy_send_timeout 3600s; # Ajustez le temps selon vos besoins
-    proxy_connect_timeout 3600s; # Ajustez le temps selon vos besoins
+         proxy_read_timeout 43000s; # Ajustez le temps selon vos besoins
+    proxy_send_timeout 43000s; # Ajustez le temps selon vos besoins
+    proxy_connect_timeout 43000s; # Ajustez le temps selon vos besoins
     }
 
 cd /home/xnrafbmy/public_html/somalaval-ai/wp-content/themes/realtime-batpro/server/
