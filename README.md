@@ -35,12 +35,12 @@ Page du client, appeler les shortcode
 [websocket_client_script] 
 
 
-nano /etc/nginx/conf.d/users/xnrafbmy/somalaval-ai.xnr.afb.mybluehost.me/somalaval-ai.custom.conf
+nano /etc/nginx/conf.d/users/xnrafbmy/batpro-madagascar.xnr.afb.mybluehost.me
 sudo nginx -t
 sudo systemctl reload nginx
 sudo systemctl restart nginx
 
-location /home/xnrafbmy/public_html/batpro/wp-content/themes/theme-batpro/realtime-batpro/server {
+location /wp-content/themes/theme-batpro/realtime-batpro/server {
         proxy_pass http://127.0.0.1:8080; # Le port où votre serveur Ratchet écoute
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
@@ -51,11 +51,11 @@ location /home/xnrafbmy/public_html/batpro/wp-content/themes/theme-batpro/realti
         proxy_set_header X-Forwarded-Proto $scheme;
 
          proxy_read_timeout 43000s; # Ajustez le temps selon vos besoins
-    proxy_send_timeout 43000s; # Ajustez le temps selon vos besoins
-    proxy_connect_timeout 43000s; # Ajustez le temps selon vos besoins
+        proxy_send_timeout 43000s; # Ajustez le temps selon vos besoins
+        proxy_connect_timeout 43000s; # Ajustez le temps selon vos besoins
     }
 
-cd /home/xnrafbmy/public_html/somalaval-ai/wp-content/themes/realtime-batpro/server/
+cd /home/xnrafbmy/public_html/batpro/wp-content/themes/theme-batpro/realtime-batpro/server/
 sudo lsof -i :8080
 
 rm -rf vendor/

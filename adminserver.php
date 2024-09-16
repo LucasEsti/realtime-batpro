@@ -24,6 +24,11 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             height: 75%;
             position: relative;
         }
+        
+        .dateEnvoie {
+           font-size: 11px;
+        }
+        
         /* Styles pour le modal */
 .modal {
     display: none; /* Masquer le modal par défaut */
@@ -135,6 +140,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         });
 
     </script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script>
         
        function playNotificationSound() {
@@ -161,6 +167,10 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         
         ws.onopen = function() {
             console.log('WebSocket connection opened');
+            setInterval(function() {
+                console.log('Envoi du ping au serveur');
+                ws.send(JSON.stringify({ type: 'ping' }));
+            }, 3600000);
         };
         
         ws.onclose = function() {
@@ -272,12 +282,17 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         }
         
         ws.onmessage = function(event) {
+            
             var data = JSON.parse(event.data);
             console.log(data);
             
             if (data.type === 'id') {
                 $.cookie('adminId', data.id, { expires: 7, path: '/' });
             } 
+            
+            if (data.type === 'pong') {
+                console.log('Pong reçu du serveur');
+            }
             
             if (data.type === 'listMessages') {
                 messages = data.message;
@@ -296,6 +311,11 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                                          textAdmin = 'you';
                                     }
                                     var messageDisplay = document.getElementById('content-' + message.idClient);
+                                    
+                                    messageDate = document.createElement('div');
+                                    messageDate.innerHTML = message.date_envoie;
+                                    messageDate.classList.add('d-flex', 'justify-content-end', 'mt-2', "dateEnvoie");
+                                    
                                     if (message.filePath) {
                                           if (imageTypes.includes(message.fileType)) {
                                                 messageDiv = document.createElement('div');
@@ -304,7 +324,10 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                                                 let img = document.createElement('img');
                                                 img.src = uploadsUrl + message.filePath;
                                                 img.classList.add('img-fluid');
+                                                
+                                                
                                                 messageDiv.appendChild(img);
+                                                messageDiv.appendChild(messageDate);
 
                                                 messageDisplay.appendChild(messageDiv);
                                                 messageContainer.scrollTop = messageContainer.scrollHeight;
@@ -316,18 +339,25 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                                                 divA.href = uploadsUrl + message.filePath;
                                                 divA.textContent = message.filePath;
                                                 messageDiv.appendChild(divA);
-
+                                                messageDiv.appendChild(messageDate);
                                                 messageDisplay.appendChild(messageDiv);
+                                                
                                                 messageContainer.scrollTop = messageContainer.scrollHeight;
                                           }
                                       } 
                                       if (message.message) {
                                           console.log("message simple");
                                           messageDiv = document.createElement('div');
-                                          messageDiv.innerHTML = message.message;
                                           messageDiv.classList.add('bubble', textAdmin);
+                                          
+                                          messageContenu = document.createElement('div');
+                                          messageContenu.innerHTML = message.message;
+                                          
+                                          messageDiv.appendChild(messageContenu);
+                                          messageDiv.appendChild(messageDate);
 
                                           messageDisplay.appendChild(messageDiv);
+                                          
                                           messageContainer.scrollTop = messageContainer.scrollHeight;
                                       }
                                       statusMessage = message.isReadAdmin;
@@ -371,6 +401,8 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 var messageDisplay = document.getElementById('content-' + data.from);
                 var messageDiv = document.createElement('div');
                 
+                let now = moment().format('YYYY-MM-DD HH:mm:ss');
+                
                 if (data.questionOld) {
                     if (data.questionOld.id == 102 || data.questionOld.id == 202) {
                         $("#client-" + data.from + " span" ).text(data.reponseQuestion);
@@ -378,6 +410,10 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                     messageDiv = document.createElement('div');
                     messageDiv.classList.add('bubble', 'you');
                     messageDiv.textContent = data.questionOld.question;
+                    messageDate = document.createElement('div');
+                    messageDate.innerHTML = now;
+                    messageDate.classList.add('d-flex', 'justify-content-end', 'mt-2', "dateEnvoie");
+                    messageDiv.appendChild(messageDate);
                     messageDisplay.appendChild(messageDiv);
                     
                     if (Object.keys(data.choicesOld).length > 0) {
@@ -385,12 +421,20 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                             messageDiv = document.createElement('div');
                             messageDiv.textContent = data.choicesOld[choice];
                             messageDiv.classList.add('bubble', 'you');
+                            messageDate = document.createElement('div');
+                            messageDate.innerHTML = now;
+                            messageDate.classList.add('d-flex', 'justify-content-end', 'mt-2', "dateEnvoie");
+                            messageDiv.appendChild(messageDate);
                             messageDisplay.appendChild(messageDiv);
                         }
                     } 
                     messageDiv = document.createElement('div');
                     messageDiv.classList.add('bubble', 'me');
                     messageDiv.textContent = data.reponseQuestion;
+                    messageDate = document.createElement('div');
+                    messageDate.innerHTML = now;
+                    messageDate.classList.add('d-flex', 'justify-content-end', 'mt-2', "dateEnvoie");
+                    messageDiv.appendChild(messageDate);
                     messageDisplay.appendChild(messageDiv);
                 } else if (data.message) {
                     console.log("data.message");
@@ -410,6 +454,8 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                             img.classList.add("img-fluid");
                             messageDiv.appendChild(img);
                             
+                            messageDiv.appendChild(messageDate);
+                            
                             messageDisplay.appendChild(messageDiv);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
                         } else {
@@ -421,14 +467,23 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                             divA.textContent = data.message["file-name"];
                             messageDiv.appendChild(divA);
                             
+                            messageDiv.appendChild(messageDate);
+                            
                             messageDisplay.appendChild(messageDiv);
+                            
                             messageContainer.scrollTop = messageContainer.scrollHeight;
                         }
                     } else {
                         console.log("message simple");
                         messageDiv = document.createElement('div');
-                        messageDiv.textContent = data.message;
                         messageDiv.classList.add('bubble', 'me');
+                        
+                        messageContent = document.createElement('div');
+                        messageContent.textContent = data.message;
+
+                        messageDiv.appendChild(messageContent);
+                        messageDiv.appendChild(messageDate);
+                        
                         messageDisplay.appendChild(messageDiv);
                         messageContainer.scrollTop = messageContainer.scrollHeight;
                         
@@ -451,22 +506,34 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             var fileInput = document.getElementById('file-' + clientId);
             var file = fileInput.files[0];
             var message = messageInput.value;
+            
+            let now = moment().format('YYYY-MM-DD HH:mm:ss');
             if (message && clientId) {
-                ws.send(JSON.stringify({ type: 'admin', message: message, clientId: clientId }));
+                ws.send(JSON.stringify({ type: 'admin', message: message, "date": now, clientId: clientId }));
 
                 var messageDisplay = document.getElementById('content-' + clientId);
                 var adminMessageDiv = document.createElement('div');
                 adminMessageDiv.classList.add('bubble', 'you', 'adminMessage');
-                adminMessageDiv.textContent = message;
+                
+                messageContent = document.createElement('div');
+                messageContent.textContent = message;
+                
+                messageDate = document.createElement('div');
+                messageDate.innerHTML = now;
+                messageDate.classList.add('d-flex', 'justify-content-end', 'mt-2', "dateEnvoie");
+                
+                adminMessageDiv.appendChild(messageContent);
+                adminMessageDiv.appendChild(messageDate);
+                
                 messageDisplay.appendChild(adminMessageDiv);
-
+                
                 messageInput.value = '';
             } 
             if (file && clientId) {
                 var reader = new FileReader();
                 reader.onload = function(e) {
                     var base64File = e.target.result.split(',')[1];
-                    ws.send(JSON.stringify({ type: 'admin', clientId: clientId, file: { name: file.name, data: base64File } }));
+                    ws.send(JSON.stringify({ type: 'admin', "date": now, clientId: clientId, file: { name: file.name, data: base64File } }));
                 };
                 reader.readAsDataURL(file);
                 fileInput.value = ''; // Clear the file input

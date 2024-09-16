@@ -110,12 +110,15 @@ class ChatServer implements MessageComponentInterface {
         $this->ensureConnection();
         $userId = null;
         
+        
+        
         if ($this->clients->contains($from)) {
             $clientData = $this->clients[$from];
             $userId = $clientData['userId'];
         }
         
         $data = json_decode($msg, true);
+        
         
         
         $dataFile = null;
@@ -129,6 +132,9 @@ class ChatServer implements MessageComponentInterface {
         }
         
         if (isset($data['type'])) {
+            if ($data['type'] === 'ping') {
+                $from->send(json_encode(['type' => 'pong']));
+            }
             if ($data['type'] === 'admin') {
                 // Si le message vient de l'admin, envoyez-le au client spécifié
                 if (isset($data['clientId'])) {
@@ -370,6 +376,7 @@ class ChatServer implements MessageComponentInterface {
                 c.message,
                 c.filePath,
                 c.fileType,
+                c.date_envoie,
                 m.dateEnvoi,
                 c.isAdmin,
                 m.isReadAdmin,

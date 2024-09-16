@@ -144,12 +144,18 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             $(".floating-chat").removeClass("hidden");
             const elementBounce = document.querySelector('.fa-comments');
             elementBounce.classList.add('animate__animated', 'animate__tada', "animate__delay-3s", "animate__infinite");
+            setInterval(function() {
+                console.log('Envoi du ping au serveur');
+                conn.send(JSON.stringify({ type: 'ping' }));
+            }, 3600000);
         };
         
         conn.onmessage = function(e) {
             
             var data = JSON.parse(e.data);
-            
+            if (data.type === 'pong') {
+                console.log('Pong reçu du serveur');
+            }
 //            var chatBox = document.getElementById('chatBox');
             if (data.type === 'id') {
                 $.cookie('clientId', data.id, { expires: 7, path: '/' });
