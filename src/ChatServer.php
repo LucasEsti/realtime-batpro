@@ -359,10 +359,15 @@ class ChatServer implements MessageComponentInterface {
     protected function connectToDatabase() {
         try {
             $bdd = json_decode(file_get_contents(dirname(__DIR__) . '/src/config.json'), true);
-            $dsn = 'mysql:host=localhost;dbname=' . $bdd ["database"] . ';charset=utf8';
+            $dsn = 'mysql:host=localhost;dbname=' . $bdd ["database"] . ';charset=utf8mb4';
             $username = $bdd ["username"];
             $password = $bdd ["password"];
-            return new \PDO($dsn, $username, $password);
+            $options = [
+                \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION, // Activer les exceptions pour les erreurs PDO
+                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,       // Mode de récupération par défaut (tableau associatif)
+                \PDO::ATTR_EMULATE_PREPARES   => false,                   // Désactiver l'émulation des requêtes préparées
+            ];
+            return new \PDO($dsn, $username, $password, $options);
         } catch (PDOException $e) {
             error_log("Initial DB connection failed: " . $e->getMessage());
             throw $e;

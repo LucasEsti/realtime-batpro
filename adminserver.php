@@ -501,11 +501,13 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         };
 
         function sendMessage(clientId) {
+         
             var messageInput = document.getElementById('input-' + clientId);
+            
             var fileInput = document.getElementById('file-' + clientId);
             var file = fileInput.files[0];
             var message = messageInput.value;
-            
+            console.log(message);
             let now = moment().format('YYYY-MM-DD HH:mm:ss');
             if (message && clientId) {
                 ws.send(JSON.stringify({ type: 'admin', message: message, "date": now, clientId: clientId }));
