@@ -147,7 +147,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             setInterval(function() {
                 console.log('Envoi du ping au serveur');
                 conn.send(JSON.stringify({ type: 'ping' }));
-            }, 600000);
+            }, 120000);
         };
         
         conn.onmessage = function(e) {
