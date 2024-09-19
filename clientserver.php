@@ -98,6 +98,9 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         <!--<button id="sendFileButton" onclick="sendFile()" class="hidden">Envoyer Fichier</button>-->
     </div>
     <script>
+        
+        $(document).ready(function() {
+        
         function playNotificationSound() {
 //            audio.play(); // Joue le son
         }
@@ -553,6 +556,8 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 sendNewMessage();
             }
         }
+        
+        });
     </script>
 </body>
 </html>

@@ -141,6 +141,8 @@ $source = $scheme . '://' . $host . $scriptName . '/';
     </script>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script>
+        $(document).ready(function() {
+            
         
        function playNotificationSound() {
             var sound = document.getElementById('notification-sound');
@@ -591,6 +593,8 @@ $source = $scheme . '://' . $host . $scriptName . '/';
               }
 
           }
+          
+          });
     </script>
     
     <script  src="<?php echo $source; ?>direct-messaging/dist/script.js"></script>
