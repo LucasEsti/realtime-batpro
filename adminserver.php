@@ -5,7 +5,6 @@ $host = $_SERVER['HTTP_HOST'];
 
 // Déterminez le chemin de base de votre application
 $scriptName = dirname($_SERVER['SCRIPT_NAME']);
-
 // Définir l'URL de base
 $uploadsUrl = $scheme . '://' . $host . $scriptName . '/uploads/';
 $source = $scheme . '://' . $host . $scriptName . '/';
@@ -170,7 +169,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             setInterval(function() {
                 console.log('Envoi du ping au serveur');
                 ws.send(JSON.stringify({ type: 'ping' }));
-            }, 3600000);
+            }, 600000);
         };
         
         ws.onclose = function() {
