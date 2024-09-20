@@ -125,7 +125,7 @@
                         "1063": {
                           "id": 1063,
                           "libelle": "lien",
-                          "question": "Veuillez envoyer le lien ou la photo du produit",
+                          "question": "Veuillez envoyer le lien du produit",
                           "choices": {},
                           "next_question": {
                             "1": 10631
@@ -180,7 +180,7 @@
                 "107": {
                   "id": 107,
                   "libelle": "lien",
-                  "question": "Veuillez envoyer le lien ou la photo du produit",
+                  "question": "Veuillez envoyer le lien du produit",
                   "choices": {},
                   "next_question": {
                     "1": 108,
@@ -377,7 +377,7 @@
                 "207": {
                   "id": 207,
                   "libelle": "lien",
-                  "question": "Veuillez envoyer le lien ou la photo du produit",
+                  "question": "Veuillez envoyer le lien du produit",
                   "choices": {},
                   "next_question": {
                     "1": 208,

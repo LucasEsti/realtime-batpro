@@ -244,11 +244,9 @@ class ChatServer implements MessageComponentInterface {
 
     public function onClose(ConnectionInterface $conn) {
         // Déconnecter le client
+        echo "Connection {$conn->resourceId} has disconnected \n";
         $this->clients->detach($conn);
         $this->admins->detach($conn);
-        echo "Connection {$conn->resourceId} has disconnected \n";
-        
-        
     }
    
     public function onError(ConnectionInterface $conn, \Exception $e) {

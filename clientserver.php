@@ -127,6 +127,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         
         conn.onclose = function() {
                 console.log('WebSocket is closed now.');
+                conn = new WebSocket(connex);
             };
         conn.onerror = function(error) {
             console.log('WebSocket error: ' + error.message);
