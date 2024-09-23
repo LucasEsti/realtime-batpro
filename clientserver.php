@@ -38,7 +38,6 @@ $source = $scheme . '://' . $host . $scriptName . '/';
 <body>
         <h1 class="my-element">An animated element</h1>
 
-        
         <div class=" floating-chat hidden ">
             <div class="new-message hidden">
                 <i class="fa-solid fa-1"></i>
@@ -99,8 +98,6 @@ $source = $scheme . '://' . $host . $scriptName . '/';
     </div>
     <script>
         
-        $(document).ready(function() {
-        
         function playNotificationSound() {
 //            audio.play(); // Joue le son
         }
@@ -111,11 +108,13 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         var clientId = $.cookie('clientId');
         var newMessage = $(".new-message");
         
-        let connex = "";
+        let connex;
+        let reconnection = 0;
+        let linkServer = 'ws://localhost:8080';
         if (clientId !== undefined) {
-            connex = 'ws://localhost:8080?type=client&userId=' + clientId;
+            connex = linkServer + '?type=client&userId=' + clientId;
         } else {
-            connex = 'ws://localhost:8080?type=client';
+            connex = linkServer + '?type=client';
         }
         var conn = new WebSocket(connex);
         
@@ -125,13 +124,6 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             return value !== null && typeof value === 'object' && value.constructor === Object;
         }
         
-        conn.onclose = function() {
-                console.log('WebSocket is closed now.');
-                conn = new WebSocket(connex);
-            };
-        conn.onerror = function(error) {
-            console.log('WebSocket error: ' + error.message);
-        };
         
         var chat = document.getElementById('chat');
         var responseInput = document.getElementById('response');
@@ -143,19 +135,9 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         var currentQuestionId = null;
         const imageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         
-        conn.onopen = function() {
-            console.log('WebSocket connection opened');
-            $(".floating-chat").removeClass("hidden");
-            const elementBounce = document.querySelector('.fa-comments');
-            elementBounce.classList.add('animate__animated', 'animate__tada', "animate__delay-3s", "animate__infinite");
-            setInterval(function() {
-                console.log('Envoi du ping au serveur');
-                conn.send(JSON.stringify({ type: 'ping' }));
-            }, 120000);
-        };
         
-        conn.onmessage = function(e) {
-            
+        
+         function onMessageWebscocket(e) {
             var data = JSON.parse(e.data);
             if (data.type === 'pong') {
                 console.log('Pong reçu du serveur');
@@ -164,8 +146,8 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             if (data.type === 'id') {
                 $.cookie('clientId', data.id, { expires: 7, path: '/' });
             } 
-            
-            if (data.type === 'listMessages') {
+            console.log('not pong');
+            if (data.type === 'listMessages' && reconnection == 0) {
                 console.log("listMessages");
                 if (data.messageClient) {
                     console.log(data);
@@ -394,9 +376,63 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             container.animate({
                 scrollTop: target.offset().top - container.offset().top + container.scrollTop()
             }, 'slow');
-            
-            
+        }
+
+        
+        function reconnectionOnClose() {
+            if (conn && (conn.readyState === WebSocket.OPEN || conn.readyState === WebSocket.CONNECTING)) {
+                console.log("Déjà connecté ou en cours de connexion, reconnexion non nécessaire.");
+                return;
+            }
+            if (clientId !== undefined) {
+                conn = linkServer + '?type=client&userId=' + clientId;
+
+            } else {
+                conn = linkServer + '?type=client';
+            }
+            conn = new WebSocket(connex);
+            reconnection = 1;
+            conn.onmessage = function(e) {
+                onMessageWebscocket(e);
+            };
+
+            conn.onerror = function(error) {
+                console.log('WebSocket error: ' + error.message);
+            };
+
+            conn.onclose = function() {
+                reconnectionOnClose();
+            };
+        }
+        
+        conn.onopen = function() {
+            console.log('WebSocket connection opened');
+            $(".floating-chat").removeClass("hidden");
+            const elementBounce = document.querySelector('.fa-comments');
+            elementBounce.classList.add('animate__animated', 'animate__tada', "animate__delay-3s", "animate__infinite");
+            setInterval(function() {
+                console.log('Envoi du ping au serveur');
+                conn.send(JSON.stringify({ type: 'ping' }));
+            }, 120000);
         };
+        
+        conn.onclose = function() {
+            console.log('WebSocket is closed now.');
+            reconnectionOnClose();
+        };
+        conn.onerror = function(error) {
+            console.log('WebSocket error: ' + error.message);
+        };
+        
+        conn.onmessage = function(e) {
+            onMessageWebscocket(e);
+        };
+        
+       
+        setInterval(function() {
+            reconnectionOnClose(); // Réessaie de te reconnecter
+        }, 5000);
+        
 
         
         function sendResponse() {
@@ -558,7 +594,6 @@ $source = $scheme . '://' . $host . $scriptName . '/';
             }
         }
         
-        });
     </script>
 </body>
 </html>
