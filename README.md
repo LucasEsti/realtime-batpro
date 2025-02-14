@@ -53,6 +53,7 @@ location /wp-content/themes/theme-batpro/realtime-batpro/server {
          proxy_read_timeout 43000s; # Ajustez le temps selon vos besoins
         proxy_send_timeout 43000s; # Ajustez le temps selon vos besoins
         proxy_connect_timeout 43000s; # Ajustez le temps selon vos besoins
+proxy_set_header Connection keep-alive;
     }
 
 cd /home/xnrafbmy/public_html/batpro/wp-content/themes/theme-batpro/realtime-batpro/server/
@@ -87,6 +88,26 @@ stderr_logfile=/var/log/supervisor/ratchet.err.log
 stdout_logfile=/var/log/supervisor/ratchet.out.log
 stdout_logfile_maxbytes = 1MB
 stderr_logfile_maxbytes = 1MB
+
+[program:ratchet]
+command=/usr/local/bin/php /home/xnrafbmy/public_html/batpro/wp-content/themes/theme-batpro/realtime-batpro/server/server.php
+process_name=Ratchet
+numprocs=1
+autostart=true
+autorestart=true
+startsecs=10
+startretries=5
+exitcodes=0,2
+stopsignal=KILL
+stopasgroup=true
+killasgroup=true
+stderr_logfile=/var/log/supervisor/ratchet.err.log
+stdout_logfile=/var/log/supervisor/ratchet.out.log
+stdout_logfile_maxbytes=1MB
+stderr_logfile_maxbytes=1MB
+
+
+
 
 admin_9wmjaorl
 xfSe44e%VB@JF824

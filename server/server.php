@@ -1,6 +1,7 @@
 <?php
     require dirname(__DIR__) . '/vendor/autoload.php';
-
+    ini_set('display_errors', 1);
+    error_reporting(E_ALL);
     //Utilisation de Ratchet   
     use Ratchet\Server\IoServer;
     use Ratchet\Http\HttpServer;
