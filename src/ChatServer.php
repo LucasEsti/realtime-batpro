@@ -251,19 +251,29 @@ class ChatServer implements MessageComponentInterface {
    
     public function onError(ConnectionInterface $conn, \Exception $e) {
         echo "An error has occurred 2: {$e->getMessage()} and {$e->getCode()} \n";
-        if ($e->getCode() == "HY000") {
-            // Handle MySQL server has gone away
-            try {
-                // Attempt to reconnect
-                $this->pdo = $this->connectToDatabase();
-            } catch (PDOException $reconnectException) {
-                $conn->close();
+
+        static $retryCount = 0; // Garde une trace des tentatives de reconnexion
+
+        if ($e->getCode() == 2006 || $e->getCode() == "HY000") {
+            if ($retryCount < 3) { // Limite à 3 tentatives
+                $retryCount++;
+                echo "Tentative de reconnexion MySQL ($retryCount)...\n";
+                sleep(2); // Pause avant nouvelle tentative
+
+                try {
+                    $this->pdo = $this->connectToDatabase(); // Tente de se reconnecter
+                    echo "Reconnexion réussie !\n";
+                    return; // Si réussite, on ne ferme pas la connexion WebSocket
+                } catch (PDOException $reconnectException) {
+                    echo "Échec de reconnexion MySQL: {$reconnectException->getMessage()} \n";
+                }
             }
-        } else {
-            // Handle other types of exceptions
-            $conn->close();
         }
+
+        // Si on dépasse 3 tentatives ou une autre erreur survient, fermer la connexion
+        $conn->close();
     }
+
     
     protected function getConnectionInClientList($userId) {
         foreach ($this->clients as $conn) {

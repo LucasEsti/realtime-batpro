@@ -66,6 +66,8 @@ rm -rf vendor/
 
 wscat -c wss://batpro-madagascar.com/wp-content/themes/theme-batpro/realtime-batpro/server
 
+sudo find /var -name "mysql*.log"
+
 
 launch with supervisord
 the file configuration is in /etc/supervisord.conf
@@ -95,8 +97,8 @@ process_name=Ratchet
 numprocs=1
 autostart=true
 autorestart=true
-startsecs=10
-startretries=5
+startsecs=15
+startretries=2
 exitcodes=0,2
 stopsignal=KILL
 stopasgroup=true
