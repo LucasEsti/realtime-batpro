@@ -60,8 +60,9 @@ cd /home/xnrafbmy/public_html/batpro/wp-content/themes/theme-batpro/realtime-bat
 sudo lsof -i :8080
 
 rm -rf vendor/
-
-
+sudo systemctl restart mysqld
+systemctl status mysqld.service
+ rm -rf *
 
 
 wscat -c wss://batpro-madagascar.com/wp-content/themes/theme-batpro/realtime-batpro/server

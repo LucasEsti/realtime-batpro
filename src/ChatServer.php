@@ -367,7 +367,7 @@ class ChatServer implements MessageComponentInterface {
     protected function connectToDatabase() {
         try {
             $bdd = json_decode(file_get_contents(dirname(__DIR__) . '/src/config.json'), true);
-            $dsn = 'mysql:host=localhost;dbname=' . $bdd ["database"] . ';charset=utf8mb4';
+            $dsn = 'mysql:host=127.0.0.1;dbname=' . $bdd ["database"] . ';charset=utf8mb4';
             $username = $bdd ["username"];
             $password = $bdd ["password"];
             $options = [
