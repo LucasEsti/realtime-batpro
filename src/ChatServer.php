@@ -17,7 +17,8 @@ class ChatServer implements MessageComponentInterface {
     protected $questions;
     protected $userData;
     protected $userStates;
-    protected $pdo;
+    protected $pdo = null;
+    protected $retryCount;
 
     public function __construct() {
         $this->clients = new \SplObjectStorage;
@@ -250,29 +251,44 @@ class ChatServer implements MessageComponentInterface {
     }
    
     public function onError(ConnectionInterface $conn, \Exception $e) {
-        echo "An error has occurred 2: {$e->getMessage()} and {$e->getCode()} \n";
+        $currentDateTime = date('Y-m-d H:i:s');  // Formate la date et l'heure actuelle
 
-        static $retryCount = 0; // Garde une trace des tentatives de reconnexion
+        echo "[$currentDateTime] An error has occurred 2: {$e->getMessage()} and {$e->getCode()} \n";
+
+        // Réinitialiser le compteur de tentatives si la connexion a changé
+        if (!isset($this->retryCount)) {
+            $this->retryCount = 0;
+        }
 
         if ($e->getCode() == 2006 || $e->getCode() == "HY000") {
-            if ($retryCount < 3) { // Limite à 3 tentatives
-                $retryCount++;
-                echo "Tentative de reconnexion MySQL ($retryCount)...\n";
+            if ($this->retryCount < 3) { // Limite à 3 tentatives
+                $this->retryCount++;
+                echo "[$currentDateTime] Tentative de reconnexion MySQL ($this->retryCount)...\n";
                 sleep(2); // Pause avant nouvelle tentative
 
                 try {
                     $this->pdo = $this->connectToDatabase(); // Tente de se reconnecter
-                    echo "Reconnexion réussie !\n";
+                    echo "[$currentDateTime] Reconnexion réussie !\n";
                     return; // Si réussite, on ne ferme pas la connexion WebSocket
                 } catch (PDOException $reconnectException) {
-                    echo "Échec de reconnexion MySQL: {$reconnectException->getMessage()} \n";
+                    echo "[$currentDateTime] Échec de reconnexion MySQL: {$reconnectException->getMessage()} \n";
+                    error_log("MySQL reconnect failed on attempt {$this->retryCount} at {$currentDateTime}: {$reconnectException->getMessage()}");
                 }
+            } else {
+                // Après 3 tentatives échouées, journaliser l'erreur et fermer la connexion
+                echo "[$currentDateTime] Impossible de se reconnecter après 3 tentatives. Fermeture de la connexion WebSocket.\n";
+                error_log("MySQL reconnect failed after 3 attempts at {$currentDateTime}. Closing WebSocket connection.");
             }
+        } else {
+            // Autres erreurs : journaliser et fermer la connexion
+            error_log("[$currentDateTime] Unexpected error occurred: {$e->getMessage()}");
         }
 
-        // Si on dépasse 3 tentatives ou une autre erreur survient, fermer la connexion
+        // Fermer la connexion WebSocket, quelle que soit l'erreur
         $conn->close();
     }
+
+
 
     
     protected function getConnectionInClientList($userId) {
@@ -365,21 +381,25 @@ class ChatServer implements MessageComponentInterface {
     }
     
     protected function connectToDatabase() {
-        try {
-            $bdd = json_decode(file_get_contents(dirname(__DIR__) . '/src/config.json'), true);
-            $dsn = 'mysql:host=127.0.0.1;dbname=' . $bdd ["database"] . ';charset=utf8mb4';
-            $username = $bdd ["username"];
-            $password = $bdd ["password"];
-            $options = [
-                \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION, // Activer les exceptions pour les erreurs PDO
-                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,       // Mode de récupération par défaut (tableau associatif)
-                \PDO::ATTR_EMULATE_PREPARES   => false,                   // Désactiver l'émulation des requêtes préparées
-            ];
-            return new \PDO($dsn, $username, $password, $options);
-        } catch (PDOException $e) {
-            error_log("Initial DB connection failed: " . $e->getMessage());
-            throw $e;
+        if ($this->pdo === null) {
+            try {
+                $bdd = json_decode(file_get_contents(dirname(__DIR__) . '/src/config.json'), true);
+                $dsn = 'mysql:host=127.0.0.1;dbname=' . $bdd["database"] . ';charset=utf8mb4';
+                $username = $bdd["username"];
+                $password = $bdd["password"];
+                $options = [
+                    \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
+                    \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+                    \PDO::ATTR_EMULATE_PREPARES   => false,
+                ];
+                $this->pdo = new \PDO($dsn, $username, $password, $options);
+                echo "cconnexion MySQL ...\n";
+            } catch (PDOException $e) {
+                error_log("Initial DB connection failed: " . $e->getMessage());
+                throw $e;
+            }
         }
+        return $this->pdo;
     }
     
     protected function getListMessagesClients() {
@@ -523,27 +543,19 @@ class ChatServer implements MessageComponentInterface {
     }
     
     private function ensureConnection() {
-        if ($this->pdo === null) {
-            try {
-                $this->pdo = $this->connectToDatabase();
-            } catch (PDOException $reconnectException) {
-                throw $reconnectException;
-            }
-        }
-        
         try {
-            // Check if the connection is alive
-            $this->pdo->query('SELECT 1');
-        } catch (PDOException $e) {
-            if ($e->getCode() == 2006) {
-                // Attempt to reconnect if the connection has gone away
-                try {
-                    $this->pdo = $this->connectToDatabase();
-                } catch (PDOException $reconnectException) {
-                    throw $reconnectException;  // Re-throw the exception to handle it appropriately
-                }
+            if ($this->pdo === null) {
+                $this->pdo = $this->connectToDatabase();
             } else {
-                // Handle other exceptions
+                // Tester la connexion
+                $this->pdo->query('SELECT 1');
+            }
+        } catch (PDOException $e) {
+            if ($e->getCode() == 2006 || $e->getCode() == "HY000") {
+                // Reconnexion forcée
+                echo "Reconnexion MySQL...\n";
+                $this->pdo = $this->connectToDatabase();
+            } else {
                 throw $e;
             }
         }

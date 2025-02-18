@@ -69,6 +69,9 @@ wscat -c wss://batpro-madagascar.com/wp-content/themes/theme-batpro/realtime-bat
 
 sudo find /var -name "mysql*.log"
 
+root mysql
+5,{cK?@;@X5c
+
 
 launch with supervisord
 the file configuration is in /etc/supervisord.conf
