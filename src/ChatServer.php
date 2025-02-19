@@ -31,12 +31,12 @@ class ChatServer implements MessageComponentInterface {
         $this->userData = [];
         $this->userStates = [];
         $this->ensureConnection();
-        
+        /*
         $this->loop = Factory::create();
          $this->loop->addPeriodicTimer(600, function (TimerInterface $timer) {
             $this->keepConnectionAlive(); // Cette méthode va maintenir la connexion MySQL active
         });
-         $this->loop->run();
+         $this->loop->run();*/
     }
     
     public function onOpen(ConnectionInterface $conn) {
