@@ -9,6 +9,9 @@ error_reporting(E_ALL & ~E_DEPRECATED);
 
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
+use React\EventLoop\Factory;
+use React\EventLoop\LoopInterface;
+use React\EventLoop\TimerInterface;
 
 class ChatServer implements MessageComponentInterface {
     protected $clients;
@@ -19,6 +22,7 @@ class ChatServer implements MessageComponentInterface {
     protected $userStates;
     protected $pdo = null;
     protected $retryCount;
+    private $loop;
 
     public function __construct() {
         $this->clients = new \SplObjectStorage;
@@ -28,7 +32,11 @@ class ChatServer implements MessageComponentInterface {
         $this->userStates = [];
         $this->ensureConnection();
         
-        
+        $this->loop = Factory::create();
+         $this->loop->addPeriodicTimer(600, function (TimerInterface $timer) {
+            $this->keepConnectionAlive(); // Cette méthode va maintenir la connexion MySQL active
+        });
+         $this->loop->run();
     }
     
     public function onOpen(ConnectionInterface $conn) {
@@ -242,6 +250,16 @@ class ChatServer implements MessageComponentInterface {
         } 
         
     }
+    
+    // Exemple de méthode pour garder la connexion active
+        private function keepConnectionAlive() {
+            try {
+                $this->pdo->query('SELECT 1'); // Simple requête pour garder la connexion active
+            } catch (PDOException $e) {
+                echo "Erreur lors du ping MySQL: {$e->getMessage()}\n";
+            }
+        }
+
 
     public function onClose(ConnectionInterface $conn) {
         // Déconnecter le client
@@ -528,6 +546,7 @@ class ChatServer implements MessageComponentInterface {
                 $this->pdo = $this->connectToDatabase();
             } else {
                 // Tester la connexion
+                echo "test MySQL connection";
                 $this->pdo->query('SELECT 1');
             }
         } catch (PDOException $e) {
