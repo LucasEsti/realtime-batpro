@@ -536,6 +536,8 @@ class ChatServer implements MessageComponentInterface {
                 echo "Reconnexion MySQL...\n";
                 $this->pdo = $this->connectToDatabase();
             } else {
+                echo "MySQL connection lost. Closing and reconnecting...\n";
+                $this->pdo = null; // Libérer la connexion
                 throw $e;
             }
         }
