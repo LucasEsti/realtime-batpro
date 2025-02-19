@@ -251,40 +251,12 @@ class ChatServer implements MessageComponentInterface {
     }
    
     public function onError(ConnectionInterface $conn, \Exception $e) {
-        $currentDateTime = date('Y-m-d H:i:s');  // Formate la date et l'heure actuelle
-
-        echo "[$currentDateTime] An error has occurred 2: {$e->getMessage()} and {$e->getCode()} \n";
-
-        // Réinitialiser le compteur de tentatives si la connexion a changé
-        if (!isset($this->retryCount)) {
-            $this->retryCount = 0;
+        echo "Error: " . $e->getMessage() . "\n";
+        
+        if ($e instanceof PDOException && $e->getCode() == 2006) { // MySQL server has gone away
+            echo "Attempting to reconnect to the database...\n";
+            $this->connectToDatabase();
         }
-
-        if ($e->getCode() == 2006 || $e->getCode() == "HY000") {
-            if ($this->retryCount < 3) { // Limite à 3 tentatives
-                $this->retryCount++;
-                echo "[$currentDateTime] Tentative de reconnexion MySQL ($this->retryCount)...\n";
-                sleep(2); // Pause avant nouvelle tentative
-
-                try {
-                    $this->pdo = $this->connectToDatabase(); // Tente de se reconnecter
-                    echo "[$currentDateTime] Reconnexion réussie !\n";
-                    return; // Si réussite, on ne ferme pas la connexion WebSocket
-                } catch (PDOException $reconnectException) {
-                    echo "[$currentDateTime] Échec de reconnexion MySQL: {$reconnectException->getMessage()} \n";
-                    error_log("MySQL reconnect failed on attempt {$this->retryCount} at {$currentDateTime}: {$reconnectException->getMessage()}");
-                }
-            } else {
-                // Après 3 tentatives échouées, journaliser l'erreur et fermer la connexion
-                echo "[$currentDateTime] Impossible de se reconnecter après 3 tentatives. Fermeture de la connexion WebSocket.\n";
-                error_log("MySQL reconnect failed after 3 attempts at {$currentDateTime}. Closing WebSocket connection.");
-            }
-        } else {
-            // Autres erreurs : journaliser et fermer la connexion
-            error_log("[$currentDateTime] Unexpected error occurred: {$e->getMessage()}");
-        }
-
-        // Fermer la connexion WebSocket, quelle que soit l'erreur
         $conn->close();
     }
 
@@ -391,15 +363,23 @@ class ChatServer implements MessageComponentInterface {
                     \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
                     \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
                     \PDO::ATTR_EMULATE_PREPARES   => false,
+                    \PDO::ATTR_PERSISTENT => true, // Connexion persistante
                 ];
                 $this->pdo = new \PDO($dsn, $username, $password, $options);
-                echo "cconnexion MySQL ...\n";
+                echo "connexion MySQL ...\n";
             } catch (PDOException $e) {
-                error_log("Initial DB connection failed: " . $e->getMessage());
-                throw $e;
+                echo "Database Connection Failed: " . $e->getMessage() . "\n";
+                $this->retryDatabaseConnection();
             }
         }
         return $this->pdo;
+    }
+    
+    private function retryDatabaseConnection() {
+        Loop::addTimer(5, function () {
+            echo "Retrying database connection...\n";
+            $this->connectToDatabase();
+        });
     }
     
     protected function getListMessagesClients() {

@@ -72,6 +72,9 @@ sudo find /var -name "mysql*.log"
 root mysql
 5,{cK?@;@X5c
 
+/home/xnrafbmy/public_html/batpro/supervisor/
+mv * /home/xnrafbmy/public_html/batpro/supervisor/
+
 
 launch with supervisord
 the file configuration is in /etc/supervisord.conf
