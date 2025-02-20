@@ -383,8 +383,9 @@ class ChatServer implements MessageComponentInterface {
                     \PDO::ATTR_EMULATE_PREPARES   => false,
                     \PDO::ATTR_PERSISTENT => true, // Connexion persistante
                 ];
-                $this->pdo = new \PDO($dsn, $username, $password, $options);
                 echo "connexion MySQL ...\n";
+                $this->pdo = new \PDO($dsn, $username, $password, $options);
+                
             } catch (PDOException $e) {
                 echo "Database Connection Failed: " . $e->getMessage() . "\n";
                 $this->retryDatabaseConnection();
@@ -546,7 +547,6 @@ class ChatServer implements MessageComponentInterface {
                 $this->pdo = $this->connectToDatabase();
             } else {
                 // Tester la connexion
-                echo "test MySQL connection";
                 $this->pdo->query('SELECT 1');
             }
         } catch (PDOException $e) {
