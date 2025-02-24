@@ -263,17 +263,21 @@ class ChatServer implements MessageComponentInterface {
 
     public function onClose(ConnectionInterface $conn) {
         // Déconnecter le client
-        echo "Connection {$conn->resourceId} has disconnected \n";
+        //echo "Connection {$conn->resourceId} has disconnected \n";
         $this->clients->detach($conn);
         $this->admins->detach($conn);
     }
    
     public function onError(ConnectionInterface $conn, \Exception $e) {
-        echo "Error: " . $e->getMessage() . "\n";
+        echo "Error: " . $e->getMessage() . " code :" . $e->getCode() . "\n";
         
-        if ($e instanceof PDOException && $e->getCode() == 2006) { // MySQL server has gone away
-            echo "Attempting to reconnect to the database...\n";
-            $this->connectToDatabase();
+        if ($e instanceof PDOException) { // MySQL server has gone away
+            echo "exeption \n";
+            if ($e->getCode() === 2006) {
+                echo "Attempting to reconnect to the database...\n";
+                $this->connectToDatabase();
+            }
+            
         }
         $conn->close();
     }
