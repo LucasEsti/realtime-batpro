@@ -269,16 +269,17 @@ class ChatServer implements MessageComponentInterface {
     }
    
     public function onError(ConnectionInterface $conn, \Exception $e) {
-        echo "Error: " . $e->getMessage() . " code :" . $e->getCode() . "\n";
+        echo "Error: " . $e->getMessage() . " code :" . $e->getCode() . "Type de l'exception : " . get_class($e) . "\n";
         
-        if ($e instanceof PDOException) { // MySQL server has gone away
+        //if ($e instanceof PDOException) { // MySQL server has gone away
             echo "exeption \n";
             if ($e->getCode() === 2006) {
                 echo "Attempting to reconnect to the database...\n";
                 $this->connectToDatabase();
             }
             
-        }
+        //}
+         echo "Error close: ";
         $conn->close();
     }
 
@@ -385,7 +386,7 @@ class ChatServer implements MessageComponentInterface {
                     \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
                     \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
                     \PDO::ATTR_EMULATE_PREPARES   => false,
-                    \PDO::ATTR_PERSISTENT => true, // Connexion persistante
+                    \PDO::ATTR_PERSISTENT => true,
                 ];
                 echo "connexion MySQL ...\n";
                 $this->pdo = new \PDO($dsn, $username, $password, $options);
