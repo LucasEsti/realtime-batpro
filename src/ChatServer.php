@@ -269,11 +269,11 @@ class ChatServer implements MessageComponentInterface {
     }
    
     public function onError(ConnectionInterface $conn, \Exception $e) {
-        echo "Error: " . $e->getMessage() . " code :" . $e->getCode() . "Type de l'exception : " . get_class($e) . "\n";
+        echo "Error: " . $e->getMessage() . " code : " . $e->getCode() . " Type de l'exception : " . get_class($e) . "\n";
         
         //if ($e instanceof PDOException) { // MySQL server has gone away
             echo "exeption \n";
-            if ($e->getCode() === 2006) {
+            if ($e->getCode() === 2006 || $e->getCode() == "HY000") {
                 echo "Attempting to reconnect to the database...\n";
                 $this->connectToDatabase();
             }
