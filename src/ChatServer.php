@@ -378,6 +378,7 @@ class ChatServer implements MessageComponentInterface {
     protected function connectToDatabase() {
         if ($this->pdo === null) {
             try {
+                echo 'try to connect';
                 $bdd = json_decode(file_get_contents(dirname(__DIR__) . '/src/config.json'), true);
                 $dsn = 'mysql:host=127.0.0.1;dbname=' . $bdd["database"] . ';charset=utf8mb4';
                 $username = $bdd["username"];
@@ -396,6 +397,7 @@ class ChatServer implements MessageComponentInterface {
                 $this->retryDatabaseConnection();
             }
         }
+        echo 'ato apres connexion';
         return $this->pdo;
     }
     
