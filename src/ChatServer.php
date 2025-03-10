@@ -376,9 +376,16 @@ class ChatServer implements MessageComponentInterface {
     }
     
     protected function connectToDatabase() {
-        if ($this->pdo === null) {
+        try {
+            if ($this->pdo instanceof \PDO) {
+                // Tester la connexion en exécutant une requête simple
+                $this->pdo->query('SELECT 1');
+            } else {
+                throw new \PDOException("Connection lost");
+            }
+        } catch (\PDOException $e) {
+            echo "Reconnecting to MySQL...\n";
             try {
-                echo 'try to connect';
                 $bdd = json_decode(file_get_contents(dirname(__DIR__) . '/src/config.json'), true);
                 $dsn = 'mysql:host=127.0.0.1;dbname=' . $bdd["database"] . ';charset=utf8mb4';
                 $username = $bdd["username"];
@@ -387,17 +394,14 @@ class ChatServer implements MessageComponentInterface {
                     \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
                     \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
                     \PDO::ATTR_EMULATE_PREPARES   => false,
-                    \PDO::ATTR_PERSISTENT => true,
+                    \PDO::ATTR_PERSISTENT         => false, // Désactiver les connexions persistantes
                 ];
-                echo "connexion MySQL ...\n";
                 $this->pdo = new \PDO($dsn, $username, $password, $options);
-                
-            } catch (PDOException $e) {
+                echo "Reconnection successful!\n";
+            } catch (\PDOException $e) {
                 echo "Database Connection Failed: " . $e->getMessage() . "\n";
-                $this->retryDatabaseConnection();
             }
         }
-        echo 'ato apres connexion';
         return $this->pdo;
     }
     
