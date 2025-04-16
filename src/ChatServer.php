@@ -431,7 +431,8 @@ class ChatServer implements MessageComponentInterface {
             JOIN 
                 Contenu c ON m.id = c.idMessage
             ORDER BY 
-                m.dateEnvoi DESC, c.id ASC;
+                m.dateEnvoi DESC, c.id ASC
+            LIMIT 10;
         ";
         
         $stmt = $this->pdo->prepare($sql);
