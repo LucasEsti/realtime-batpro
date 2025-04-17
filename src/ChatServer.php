@@ -56,7 +56,9 @@ class ChatServer implements MessageComponentInterface {
                     $conn->send(json_encode(['type' => 'id', 'id' => $adminId]));
                 }
                 
-                $conn->send(json_encode(['type' => 'listMessages', 'message' => $this->getListMessagesClients()]));
+                
+                
+                $conn->send(json_encode(['type' => 'listMessages', 'pagination' => 0, 'message' => $this->getListMessagesClients2(0, 10)]));
             } elseif ($params['type'] === 'client') {
                 //check if client exist before and send the last question if exist
                 if (isset($params['userId'])) {
@@ -145,6 +147,19 @@ class ChatServer implements MessageComponentInterface {
                 $from->send(json_encode(['type' => 'pong']));
             }
             if ($data['type'] === 'admin') {
+                $pagination = 0;
+                if (isset($data['pagination'])) {
+                    $pagination = intval($data['pagination']);
+                }
+                
+                $page = intval($pagination ?? 0);
+                $limit = intval($data['limit'] ?? 10);
+                $offset = $page * $limit;
+                
+                if (isset($data['action']) && $data['action'] == "getListMessages") {
+                    var_dump($offset . " " . $limit);
+                    $from->send(json_encode(['type' => 'listMessages', 'pagination' => $page, 'message' => $this->getListMessagesClients2($offset, $limit)]));
+                }
                 // Si le message vient de l'admin, envoyez-le au client spécifié
                 if (isset($data['clientId'])) {
                     $client = $this->getConnectionInClientList($data['clientId']);
@@ -412,7 +427,68 @@ class ChatServer implements MessageComponentInterface {
         });
     }
     
-    protected function getListMessagesClients() {
+    protected function getListMessagesClients2(int $offset = 0, int $limit = 10): array {
+    // Étape 1 : Récupérer les IDs des messages à afficher
+    $sqlIds = "
+        SELECT id
+        FROM Message
+        ORDER BY dateEnvoi DESC
+        LIMIT :limit OFFSET :offset
+    ";
+
+    $stmt = $this->pdo->prepare($sqlIds);
+    $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+    $stmt->execute();
+    $messageIds = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+
+    if (empty($messageIds)) {
+        return [];
+    }
+
+    // Étape 2 : Récupérer les contenus associés à ces messages
+    $inClause = implode(',', array_fill(0, count($messageIds), '?'));
+    $sql = "
+        SELECT 
+            m.idClient, 
+            m.id,
+            c.message,
+            c.filePath,
+            c.fileType,
+            c.date_envoie,
+            m.dateEnvoi,
+            c.isAdmin,
+            m.isReadAdmin,
+            m.isReadClient,
+            m.nom,
+            m.mail
+        FROM 
+            Message m
+        JOIN 
+            Contenu c ON m.id = c.idMessage
+        WHERE 
+            m.id IN ($inClause)
+        ORDER BY 
+            m.dateEnvoi DESC, c.id ASC
+    ";
+
+    $stmt = $this->pdo->prepare($sql);
+    foreach ($messageIds as $k => $id) {
+        $stmt->bindValue($k + 1, $id, \PDO::PARAM_INT);
+    }
+    $stmt->execute();
+    $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+    $listMessageClients = [];
+    foreach ($result as $row) {
+        $listMessageClients[$row['idClient']][] = $row;
+    }
+
+    return $listMessageClients;
+}
+
+    
+    protected function getListMessagesClients(int $offset = 0, int $limit = 10): array {
         $sql = "
             SELECT 
                 m.idClient, 
@@ -432,13 +508,14 @@ class ChatServer implements MessageComponentInterface {
                 Contenu c ON m.id = c.idMessage
             ORDER BY 
                 m.dateEnvoi DESC, c.id ASC
-            LIMIT 10;
+            LIMIT :limit OFFSET :offset
         ";
-        
+
         $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
         $stmt->execute();
 
-        // Récupérer les résultats
         $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         $listMessageClients = [];
         foreach ($result as $row) {
@@ -446,6 +523,7 @@ class ChatServer implements MessageComponentInterface {
         }
         return $listMessageClients;
     }
+
     
     protected function getMessageByClient($idClient) {
         $sql = "

@@ -79,6 +79,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 </div>
                 <ul id="listPeople" class="people">
                 </ul>
+                <button id="loadMoreBtn">Afficher plus</button>
             </div>
 
 
@@ -150,6 +151,10 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         let connex;
         let reconnection = 0;
         let linkServer = 'ws://localhost:8080';
+        
+        let pagination = 0;
+        const limit = 10; // Même limite que côté serveur
+        
         if (adminId !== undefined) {
             connex = linkServer + '?type=admin&adminId=' + adminId;
         } else {
@@ -359,10 +364,13 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                                 createInput(key);
                             }
 
-                      }
-                  
-                        document.getElementById('client-' + idFirstElement).classList.add('active');
-                        document.getElementById('messages-' + idFirstElement).classList.add('active-chat');
+                        }
+                        
+                        if (data.pagination === 0) {
+                           document.getElementById('client-' + idFirstElement).classList.add('active');
+                           document.getElementById('messages-' + idFirstElement).classList.add('active-chat');
+                        }
+                        
 
                         var container = $('#messageContainer');
                         var target = $('#input-' + document.getElementById('messageContainer').children[1].getAttribute("data-chat"));
@@ -524,6 +532,20 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 ws.send(JSON.stringify({ type: 'ping' }));
             }, 120000);
         };
+        
+        
+        
+        document.getElementById('loadMoreBtn').addEventListener('click', function () {
+            pagination++; // Incrémente la page
+            console.log(pagination);
+            ws.send(JSON.stringify({
+                type: 'admin',
+                
+                action: 'getListMessages',
+                pagination: pagination,
+                limit: limit
+            }));
+        });
         
         ws.onclose = function() {
             console.log('WebSocket is closed now.');
