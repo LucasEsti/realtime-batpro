@@ -31,6 +31,8 @@ class ChatServer implements MessageComponentInterface {
         $this->userData = [];
         $this->userStates = [];
         $this->ensureConnection();
+        date_default_timezone_set('Indian/Antananarivo');
+        
         /*
         $this->loop = Factory::create();
          $this->loop->addPeriodicTimer(600, function (TimerInterface $timer) {
@@ -585,6 +587,7 @@ class ChatServer implements MessageComponentInterface {
         $idMessage = 0;
 
 //        // If the idClient does not exist, perform the INSERT
+        $now = date('Y-m-d H:i:s');
         if ($exists == null) {
             $insertStmt = $this->pdo->prepare("INSERT INTO Message (idClient, isReadClient, isReadAdmin, nom) VALUES (?, ?, ?, ?)");
             $insertStmt->execute([$idClient, $isReadClient, $isReadAdmin, $idClient]);
@@ -599,8 +602,9 @@ class ChatServer implements MessageComponentInterface {
         
         
         // Insérer des informations dans la table Contenu
-        $stmt = $this->pdo->prepare("INSERT INTO Contenu (message, filePath, fileType, idMessage, isAdmin, lastQuestion) VALUES (?, ?, ?, ?,?, ?)");
-        $stmt->execute([$message, $file, $fileType, $idMessage, $isAdmin, $lastQuestion]);
+        
+        $stmt = $this->pdo->prepare("INSERT INTO Contenu (message, filePath, fileType, idMessage, isAdmin, lastQuestion, date_envoie) VALUES (?, ?, ?, ?,?, ?, ?)");
+        $stmt->execute([$message, $file, $fileType, $idMessage, $isAdmin, $lastQuestion, $now]);
         
     }
     
