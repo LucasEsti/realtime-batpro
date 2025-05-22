@@ -60,7 +60,7 @@ class ChatServer implements MessageComponentInterface {
                 
                 
                 
-                $conn->send(json_encode(['type' => 'listMessages', 'pagination' => 0, 'message' => $this->getListMessagesClients2(0, 10)]));
+                $conn->send(json_encode(['type' => 'listMessages', 'pagination' => 0, 'message' => $this->getListMessagesClients(0, 10)]));
             } elseif ($params['type'] === 'client') {
                 //check if client exist before and send the last question if exist
                 if (isset($params['userId'])) {
@@ -158,9 +158,15 @@ class ChatServer implements MessageComponentInterface {
                 $limit = intval($data['limit'] ?? 10);
                 $offset = $page * $limit;
                 
-                if (isset($data['action']) && $data['action'] == "getListMessages") {
-                    var_dump($offset . " " . $limit);
-                    $from->send(json_encode(['type' => 'listMessages', 'pagination' => $page, 'message' => $this->getListMessagesClients2($offset, $limit)]));
+                if (isset($data['action']) ) {
+                    if ($data['action'] == "getListMessages") {
+                        $from->send(json_encode(['type' => 'listMessages', 'pagination' => $page, 'message' => $this->getListMessagesClients($offset, $limit)]));
+                    } else if ($data['action'] == "searchByName") {
+                        $from->send(json_encode(['type' => 'searchByName', 'pagination' => $page, 'message' => $this->getListMessagesClients($offset, $limit, [
+                            'nom' => $data['search']
+                        ])]));
+                    }
+                    
                 }
                 // Si le message vient de l'admin, envoyez-le au client spécifié
                 if (isset($data['clientId'])) {
@@ -430,70 +436,30 @@ class ChatServer implements MessageComponentInterface {
     }
     
     protected function getListMessagesClients2(int $offset = 0, int $limit = 10): array {
-    // Étape 1 : Récupérer les IDs des messages à afficher
-    $sqlIds = "
+        // Étape 1 : Récupérer les IDs des messages à afficher
+        $sqlIds = "
         SELECT id
         FROM Message
         ORDER BY dateEnvoi DESC
-        LIMIT :limit OFFSET :offset
-    ";
+            LIMIT :limit OFFSET :offset
+        ";
 
-    $stmt = $this->pdo->prepare($sqlIds);
+        $stmt = $this->pdo->prepare($sqlIds);
     $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-    $stmt->execute();
-    $messageIds = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+        $stmt->execute();
+        $messageIds = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+        
+        if (empty($messageIds)) {
+            return [];
+        }
 
-    if (empty($messageIds)) {
-        return [];
-    }
-
-    // Étape 2 : Récupérer les contenus associés à ces messages
-    $inClause = implode(',', array_fill(0, count($messageIds), '?'));
-    $sql = "
-        SELECT 
-            m.idClient, 
-            m.id,
-            c.message,
-            c.filePath,
-            c.fileType,
-            c.date_envoie,
-            m.dateEnvoi,
-            c.isAdmin,
-            m.isReadAdmin,
-            m.isReadClient,
-            m.nom,
-            m.mail
-        FROM 
-            Message m
-        JOIN 
-            Contenu c ON m.id = c.idMessage
-        WHERE 
-            m.id IN ($inClause)
-        ORDER BY 
-            m.dateEnvoi DESC, c.id ASC
-    ";
-
-    $stmt = $this->pdo->prepare($sql);
-    foreach ($messageIds as $k => $id) {
-        $stmt->bindValue($k + 1, $id, \PDO::PARAM_INT);
-    }
-    $stmt->execute();
-    $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-    $listMessageClients = [];
-    foreach ($result as $row) {
-        $listMessageClients[$row['idClient']][] = $row;
-    }
-
-    return $listMessageClients;
-}
-
-    
-    protected function getListMessagesClients(int $offset = 0, int $limit = 10): array {
+        // Étape 2 : Récupérer les contenus associés à ces messages
+        $inClause = implode(',', array_fill(0, count($messageIds), '?'));
         $sql = "
             SELECT 
                 m.idClient, 
+                m.id,
                 c.message,
                 c.filePath,
                 c.fileType,
@@ -508,21 +474,109 @@ class ChatServer implements MessageComponentInterface {
                 Message m
             JOIN 
                 Contenu c ON m.id = c.idMessage
+            WHERE 
+                m.id IN ($inClause)
             ORDER BY 
                 m.dateEnvoi DESC, c.id ASC
-            LIMIT :limit OFFSET :offset
         ";
 
         $stmt = $this->pdo->prepare($sql);
-        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        foreach ($messageIds as $k => $id) {
+            $stmt->bindValue($k + 1, $id, \PDO::PARAM_INT);
+        }
         $stmt->execute();
-
         $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
         $listMessageClients = [];
         foreach ($result as $row) {
             $listMessageClients[$row['idClient']][] = $row;
         }
+        
+        return $listMessageClients;
+    }
+
+
+    
+    protected function getListMessagesClients(int $offset = 0, int $limit = 10, array $searchCriteria = []): array {
+        $params = [
+            ':limit' => $limit,
+            ':offset' => $offset,
+        ];
+
+        $allowedFields = ['nom', 'mail']; // Étendable si tu veux ajouter plus tard
+        $whereParts = [];
+
+        foreach ($searchCriteria as $field => $value) {
+            if (in_array($field, $allowedFields)) {
+                $paramKey = ':search_' . $field;
+                $whereParts[] = "m.$field LIKE $paramKey";
+                $params[$paramKey] = '%' . $value . '%';
+            }
+        }
+
+        $whereClause = count($whereParts) > 0 ? 'WHERE ' . implode(' AND ', $whereParts) : '';
+
+        // Étape 1 : Récupérer les IDs des messages à afficher
+        $sqlIds = "
+            SELECT m.id
+            FROM Message m
+            $whereClause
+            ORDER BY m.dateEnvoi DESC
+            LIMIT :limit OFFSET :offset
+        ";
+
+        $stmt = $this->pdo->prepare($sqlIds);
+        foreach ($params as $key => $value) {
+            $type = is_int($value) ? \PDO::PARAM_INT : \PDO::PARAM_STR;
+            $stmt->bindValue($key, $value, $type);
+        }
+        $stmt->execute();
+
+        $messageIds = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+
+        if (empty($messageIds)) {
+            return [];
+        }
+
+        // Étape 2 : Récupérer les contenus associés à ces messages
+        $inClause = implode(',', array_fill(0, count($messageIds), '?'));
+        $sql = "
+            SELECT 
+                m.idClient, 
+                m.id,
+                c.message,
+                c.filePath,
+                c.fileType,
+                c.date_envoie,
+                m.dateEnvoi,
+                c.isAdmin,
+                m.isReadAdmin,
+                m.isReadClient,
+                m.nom,
+                m.mail
+            FROM 
+                Message m
+            JOIN 
+                Contenu c ON m.id = c.idMessage
+            WHERE 
+                m.id IN ($inClause)
+            ORDER BY 
+                m.dateEnvoi DESC, c.id ASC
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($messageIds as $k => $id) {
+            $stmt->bindValue($k + 1, $id, \PDO::PARAM_INT);
+        }
+        $stmt->execute();
+
+        $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $listMessageClients = [];
+        foreach ($result as $row) {
+            $listMessageClients[$row['idClient']][] = $row;
+        }
+
         return $listMessageClients;
     }
 

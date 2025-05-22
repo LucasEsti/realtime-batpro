@@ -71,11 +71,15 @@ $source = $scheme . '://' . $host . $scriptName . '/';
 <body>
     <div></div>
     <div class="wrapper">
-        <div class="container">
+        <div class="container pt-2 pb-5 m-4">
+            <div class="mb-2">
+                <input type="text" id="searchInput" required placeholder="Rechercher...">
+                <button onclick="rechercher()">Rechercher</button>
+                <button id="reset" onclick="reinitialiser()" disabled>Reinitialiser le filtre</button>
+            </div>
             <div class="left">
-                <div class="top">
-    <!--                <input type="text" placeholder="Search" />
-                    <a href="javascript:;" class="search"></a>-->
+                <div class="top row">
+                     
                 </div>
                 <ul id="listPeople" class="people">
                 </ul>
@@ -141,6 +145,9 @@ $source = $scheme . '://' . $host . $scriptName . '/';
     </script>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script>
+        
+        let actionSearch = false;
+        let searchText = "";
        function playNotificationSound() {
             var sound = document.getElementById('notification-sound');
             sound.play();
@@ -272,7 +279,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         
         function onMessageWebscocket(e) {
             var data = JSON.parse(e.data);
-            console.log(data);
+            
             
             if (data.type === 'id') {
                 $.cookie('adminId', data.id, { expires: 7, path: '/' });
@@ -282,7 +289,13 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                 console.log('Pong reçu du serveur');
             }
             
-            if (data.type === 'listMessages' && reconnection == 0) {
+            
+            
+            if ((data.type === 'listMessages' || data.type === 'searchByName') && reconnection == 0) {
+                if (data.type === 'searchByName' && data.pagination == 0) {
+                    //reinitialiser
+                    document.querySelectorAll('.clientSection, .person').forEach(el => el.remove());
+                }
                 messages = data.message;
                 if (data.message.length != 0) {
                     var idFirstElement = "";
@@ -334,7 +347,6 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                                           }
                                       } 
                                       if (message.message) {
-                                          console.log("message simple");
                                           messageDiv = document.createElement('div');
                                           messageDiv.classList.add('bubble', textAdmin);
                                           
@@ -428,8 +440,6 @@ $source = $scheme . '://' . $host . $scriptName . '/';
                     messageDiv.appendChild(messageDate);
                     messageDisplay.appendChild(messageDiv);
                 } else if (data.message) {
-                    console.log("data.message");
-                    console.log(data.message);
                     if (isObject(data.message)) {
                         console.log(data.message["type"]);
                         let self = "me";
@@ -535,17 +545,7 @@ $source = $scheme . '://' . $host . $scriptName . '/';
         
         
         
-        document.getElementById('loadMoreBtn').addEventListener('click', function () {
-            pagination++; // Incrémente la page
-            console.log(pagination);
-            ws.send(JSON.stringify({
-                type: 'admin',
-                
-                action: 'getListMessages',
-                pagination: pagination,
-                limit: limit
-            }));
-        });
+        
         
         ws.onclose = function() {
             console.log('WebSocket is closed now.');
@@ -658,6 +658,61 @@ $source = $scheme . '://' . $host . $scriptName . '/';
               }
 
           }
+          
+         document.getElementById('loadMoreBtn').addEventListener('click', function () {
+            pagination++; // Incrémente la page
+            console.log(pagination);
+            if (actionSearch == false) {
+                ws.send(JSON.stringify({
+                    type: 'admin',
+                    action: 'getListMessages',
+                    pagination: pagination,
+                    limit: limit
+                }));
+            } else {
+                
+                if (document.getElementById('searchInput').value == searchText) {
+                    ws.send(JSON.stringify({
+                        type: 'admin',
+                        action: 'searchByName',
+                        pagination: pagination,
+                        limit: limit,
+                        search: searchText,
+                    }));
+                }
+                
+            }
+            
+        });
+          
+        function rechercher() {
+              const search = document.getElementById('searchInput').value;
+              pagination = 0;
+              if (search != "") {
+                    document.getElementById("reset").disabled = false;
+                    ws.send(JSON.stringify({ type: 'admin', 
+                        action: 'searchByName', 
+                        search: search,
+                    }));
+                    searchText = search;
+                    actionSearch = true;
+              }
+        }
+          
+        function reinitialiser() {
+            pagination = 0;
+            actionSearch = false;
+            document.querySelectorAll('.clientSection, .person').forEach(el => el.remove());
+            ws.send(JSON.stringify({
+                type: 'admin',
+                action: 'getListMessages',
+                pagination: 0,
+                limit: limit
+            }));
+            searchText = "";
+            document.getElementById("searchInput").value = "";
+            document.getElementById("reset").disabled = true;
+        }
           
     </script>
     
